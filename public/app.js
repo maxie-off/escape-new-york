@@ -41,14 +41,14 @@ function nextSub() {
 function join(code, onError) {
   let played = null;
   try { played = JSON.parse(localStorage.getItem('playedVariants') || 'null'); } catch (e) { /* ignore */ }
-  socket.emit('join_room', { code, clientId, played }, (res) => {
+  socket.emit('join_room', { code, clientId, played, lang: I18N.lang }, (res) => {
     if (res.ok) {
       roomCode = code.toUpperCase(); setupError = '';
       sessionStorage.setItem('roomCode', roomCode);
     } else {
       roomCode = null;
       sessionStorage.removeItem('roomCode');
-      onError?.(res.error);
+      onError?.(L(res.error));
       render();
     }
   });
@@ -57,7 +57,7 @@ socket.on('connect', () => {
   $('#conn').textContent = '';
   if (roomCode) join(roomCode); // 斷線重連自動回房間
 });
-socket.on('disconnect', () => { $('#conn').textContent = '連線中斷，重新連線中…'; });
+socket.on('disconnect', () => { $('#conn').textContent = tr('連線中斷，重新連線中…', 'Disconnected, reconnecting…'); });
 socket.on('state', (s) => { state = s; if (s.you) setMyRole(s.you); render(); });
 
 // iPad / Safari 需要點擊後才能發聲
@@ -84,12 +84,12 @@ function tryJoin() {
 $('#join-form').onsubmit = (e) => { e.preventDefault(); tryJoin(); };
 $('#code-input').oninput = (e) => { e.target.value = e.target.value.toUpperCase(); if (e.target.value.length === 6) tryJoin(); };
 $('#room-code').onclick = () => { if (state?.code) navigator.clipboard?.writeText(state.code); };
-$('#btn-start').onclick = () => socket.emit('start_game', {}, (res) => { if (!res?.ok) { setupError = res?.error || ''; render(); } });
+$('#btn-start').onclick = () => socket.emit('start_game', {}, (res) => { if (!res?.ok) { setupError = L(res?.error) || ''; render(); } });
 
 function pickRole(r) {
   setupError = '';
   if (!roomCode || !state) { setMyRole(r); return render(); }
-  socket.emit('choose_role', { role: r }, (res) => { if (!res.ok) { setupError = res.error; } render(); });
+  socket.emit('choose_role', { role: r }, (res) => { if (!res.ok) { setupError = L(res.error); } render(); });
 }
 
 function renderSetup() {
@@ -102,7 +102,7 @@ function renderSetup() {
     const btn = document.createElement('button');
     btn.className = 'role' + (sel === r ? ' mine' : '') + (taken ? ' taken' : '');
     btn.disabled = !!taken;
-    btn.innerHTML = `${Art.portrait(r, 150)}<b>${name}</b><small>${taken ? (state.slots[r].online ? '對方選了這隻' : '對方選了這隻（離線）') : sel === r ? '你選了這隻 ✓' : '點一下選我'}</small>`;
+    btn.innerHTML = `${Art.portrait(r, 150)}<b>${name}</b><small>${taken ? (state.slots[r].online ? tr('對方選了這隻', 'Your friend picked this one') : tr('對方選了這隻（離線）', 'Your friend picked this one (offline)')) : sel === r ? tr('你選了這隻 ✓', 'You picked this one ✓') : tr('點一下選我', 'Tap to pick me')}</small>`;
     btn.onclick = () => pickRole(r);
     box.appendChild(btn);
   }
@@ -110,16 +110,16 @@ function renderSetup() {
   codeEl.textContent = state?.code || '------';
   codeEl.classList.toggle('empty', !state?.code);
   const bothOnline = !!(state && state.slots.A.online && state.slots.B.online);
-  $('#room-status').textContent = setupError ? setupError : !state ? '' : state.peers >= 2 ? '已連線，對方在房間裡' : '等對方輸入這組房間碼…';
+  $('#room-status').textContent = setupError ? setupError : !state ? '' : state.peers >= 2 ? tr('已連線，對方在房間裡', 'Connected — your friend is here') : tr('等對方輸入這組房間碼…', 'Waiting for your friend to enter this code…');
   $('#room-status').style.color = setupError ? '#c0262c' : state && state.peers >= 2 ? '#1c7c3f' : 'var(--muted)';
   $('#btn-start').disabled = !bothOnline;
-  $('#setup-hint').textContent = bothOnline ? '' : !state ? '一個人按 Generate，另一個人輸入房間碼；兩邊各選一個角色' : state.peers < 2 ? '等對方加入房間…' : '兩邊都要選好不同的角色';
+  $('#setup-hint').textContent = bothOnline ? '' : !state ? tr('一個人按 Generate，另一個人輸入房間碼；兩邊各選一個角色', 'One player taps Generate, the other enters the code. Each of you picks a character.') : state.peers < 2 ? tr('等對方加入房間…', 'Waiting for your friend to join…') : tr('兩邊都要選好不同的角色', 'You each need to pick a different character');
 }
 // 加入房間後，把先前在本機選的角色送給伺服器
 function syncRole() {
   if (!state || state.phase !== 'lobby') return;
   if (state.you) { if (myRole !== state.you) setMyRole(state.you); return; }
-  if (myRole) socket.emit('choose_role', { role: myRole }, (res) => { if (!res.ok) { setupError = res.error + '，請換一隻'; setMyRole(null); render(); } });
+  if (myRole) socket.emit('choose_role', { role: myRole }, (res) => { if (!res.ok) { setupError = L(res.error) + tr('，請換一隻', ' — please pick the other one'); setMyRole(null); render(); } });
 }
 
 // ---------- 遊戲 ----------
@@ -129,7 +129,7 @@ $('#answer-form').onsubmit = (e) => {
   if (!answer.trim()) return;
   socket.emit('submit_answer', { answer }, (res) => {
     if (res?.correct) $('#answer-input').value = '';
-    else if (res?.correct === false) say('答案不對，再想想。', { now: true });
+    else if (res?.correct === false) say(tr('答案不對，再想想。', 'Not quite. Think again.'), { now: true });
   });
 };
 $('#btn-hint').onclick = () => {
@@ -138,7 +138,7 @@ $('#btn-hint').onclick = () => {
   // 下一層是「答案」時先確認一次，避免一不小心被劇透
   if (s.hintsLeft === 1 && Date.now() - (window.__hintArm || 0) > 5000) {
     window.__hintArm = Date.now();
-    say('下一個提示會直接告訴你答案。5 秒內再按一次提示就會顯示。', { ms: 5000, now: true });
+    say(tr('下一個提示會直接告訴你答案。5 秒內再按一次提示就會顯示。', 'The next hint gives away the answer. Tap the hint again within 5 seconds to see it.'), { ms: 5000, now: true });
     return;
   }
   window.__hintArm = 0;
@@ -160,7 +160,7 @@ function toast(text) {
 function closeDocs(silent) {
   const wasFresh = docsLayer.dataset.fresh === '1';
   docsLayer.hidden = true; docsLayer.innerHTML = ''; docsLayer.dataset.fresh = '';
-  if (wasFresh && silent !== true) toast('已收藏');
+  if (wasFresh && silent !== true) toast(tr('已收藏', 'Saved'));
 }
 function openDoc(id, fresh) {
   const d = (state?.docs || []).find((x) => x.id === id);
@@ -171,7 +171,7 @@ function openDoc(id, fresh) {
 }
 function openTray() {
   const docs = state?.docs || [];
-  docsLayer.innerHTML = `<div class="docs-card"><button class="x" data-close>✕</button><h3>收藏文件</h3><div class="tray">${docs.map((d) => `<button data-doc="${d.id}"><span>${d.icon}</span>${d.title}</button>`).join('')}</div></div>`;
+  docsLayer.innerHTML = `<div class="docs-card"><button class="x" data-close>✕</button><h3>${tr('收藏文件', 'Documents')}</h3><div class="tray">${docs.map((d) => `<button data-doc="${d.id}"><span>${d.icon}</span>${d.title}</button>`).join('')}</div></div>`;
   docsLayer.dataset.fresh = '';
   docsLayer.hidden = false;
 }
@@ -198,7 +198,7 @@ const sceneCtx = () => ({
     new Promise((resolve) =>
       socket.emit('scene_action', action, (res) => {
         if (res?.message) say(res.message, { now: true });
-        if (res?.correct === false) comicBurst(/吱/.test(res.message || '') ? '吱吱吱！' : Math.random() < 0.5 ? 'OOPS!' : '噗！', 'bad');
+        if (res?.correct === false) comicBurst(/吱|Bzz/.test(res.message || '') ? tr('吱吱吱！', 'BZZT!') : Math.random() < 0.5 ? 'OOPS!' : tr('噗！', 'PFFT!'), 'bad');
         resolve(res || {});
       })
     ),
@@ -218,15 +218,19 @@ function showHowto() {
   const el = document.createElement('div');
   el.className = 'howto';
   el.innerHTML = `<div class="howto-card">
-    <h2>你們看到的畫面不一樣！</h2>
+    <h2>${tr('你們看到的畫面不一樣！', 'You each see a different screen!')}</h2>
     <ul>
-      <li>你是 <b>${me}</b>。${other} 看得到你看不到的線索，你也一樣。</li>
+      ${tr(`<li>你是 <b>${me}</b>。${other} 看得到你看不到的線索，你也一樣。</li>
       <li>把你看到的形狀、顏色、文字<b>說給對方聽</b>，兩邊的線索合起來才解得開。</li>
       <li>有些東西只有你按得到，有些只有對方按得到。</li>
       <li>卡關時按右上角的提示：會從「方向」→「線索」→「答案」慢慢給。</li>
-      <li>拿到的文件會收在右上角的資料夾。</li>
+      <li>拿到的文件會收在右上角的資料夾。</li>`, `<li>You are <b>${me}</b>. ${other} can see clues you can’t, and the other way round.</li>
+      <li><b>Tell each other</b> the shapes, colors and words you see. You need both sides’ clues to solve each puzzle.</li>
+      <li>Some things only you can tap; some only your friend can.</li>
+      <li>Stuck? Tap the hint button at the top right. Hints go from Direction → Clue → Answer.</li>
+      <li>Documents you collect go into the folder at the top right.</li>`)}
     </ul>
-    <button class="primary big" data-howto="ok">開始！</button></div>`;
+    <button class="primary big" data-howto="ok">${tr('開始！', 'Let’s go!')}</button></div>`;
   el.onclick = (e) => { if (e.target.closest('[data-howto]')) el.remove(); };
   $('#game').appendChild(el);
 }
@@ -264,9 +268,9 @@ function comicBurst(word, t = 'good') {
   g.appendChild(el);
   setTimeout(() => el.remove(), 1500);
 }
-const GOOD_WORDS = ['叮！', 'BINGO!', 'YEAH!', 'OK!', '讚啦！'];
+const GOOD_WORDS = () => tr(['叮！', 'BINGO!', 'YEAH!', 'OK!', '讚啦！'], ['DING!', 'BINGO!', 'YEAH!', 'OK!', 'NICE!']);
 function celebrate() {
-  comicBurst(GOOD_WORDS[Math.floor(Math.random() * GOOD_WORDS.length)], 'good');
+  comicBurst((() => { const w = GOOD_WORDS(); return w[Math.floor(Math.random() * w.length)]; })(), 'good');
   if (window.Music && Music.ding) Music.ding();
 }
 
@@ -352,7 +356,7 @@ function render() {
     unmountActive(); closeDocs(true); show('ending');
     if (!endingShown) { endingShown = true; interludeKind = null; Music.stop(); Ending.mount($('#ending'), 'tbc', state.ending); }
     const again = $('#ending').querySelector('[data-again]');
-    if (again) again.onclick = () => socket.emit('play_again', {}, (res) => { if (!res?.ok) say(res?.error || '等對方也在線上', { now: true }); });
+    if (again) again.onclick = () => socket.emit('play_again', {}, (res) => { if (!res?.ok) say(L(res?.error) || tr('等對方也在線上', 'Wait until your friend is online too'), { now: true }); });
     return;
   }
   Ending.stop(); $('#ending').classList.remove('run'); interludeKind = null;
@@ -362,3 +366,12 @@ function render() {
 }
 socket.on('state', syncRole);
 render();
+
+// ---------- 語言切換（封面右上角）----------
+document.querySelectorAll('[data-lang]').forEach((b) => { b.onclick = () => I18N.set(b.dataset.lang); });
+I18N.onChange((lang) => {
+  socket.emit('set_lang', { lang }); // 伺服器會用新的語言重送畫面
+  if (window.Title && Title.refresh) Title.refresh();
+  lastDataJson = ''; // 讓目前的場景用新語言重畫
+  render();
+});

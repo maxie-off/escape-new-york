@@ -5,7 +5,9 @@ const [S0, S1, S2, S3] = scenes.map((s) => s.module);
 const json = (x) => JSON.stringify(x);
 // 和弦表不能和真實吉他和弦一樣（C 大和弦 x32010）
 assert.ok(!JSON.stringify(require('../scenes/scene1').view(require('../scenes/scene1').init(0), 'B').chart).includes('[null,3,2,0,1,0]'));
-const allHints = (sc, st) => sc.hints.flatMap((h) => h.tiers.map((t) => (typeof t === 'function' ? t(st) : t)));
+const { loc } = require('../i18n');
+// 每個提示都要有中文和英文兩種版本
+const allHints = (sc, st) => sc.hints.flatMap((h) => h.tiers.flatMap((t) => { const x = typeof t === 'function' ? t(st) : t; return [loc(x, 'zh'), loc(x, 'en')]; }));
 
 for (const sc of scenes) assert.ok(sc.module.VARIANTS >= 5, `${sc.id} 應該有至少 5 種變化`);
 
@@ -33,7 +35,7 @@ for (let v = 0; v < 5; v++) {
   assert.equal(d1.rows[d1.rows.length - 1].fb, `4${sol.tag[0]}0${sol.tag[1]}`);
   assert.ok(d1.rows.some((r) => r.fb[2] !== '0' && r.fb[0] === '0'), `bedroom v${v} 範例要有只有「位置不對」的一行`);
   assert.equal(d3.rows.length, 4); assert.equal(A1.deskPaper.rows.length, 3);
-  assert.ok(A1.deskPaper.date.includes('10 月 3 日'));
+  assert.ok(loc(A1.deskPaper.date, 'zh').includes('10 月 3 日') && loc(A1.deskPaper.date, 'en').includes('Oct 3'));
   assert.ok(!json(A1).includes(sol.demo.ans.toUpperCase()), 'A 不該看到 10/1 那局');
   sol.guesses.forEach((g) => assert.ok(!g.split('').every((ch, i) => ch === sol.password[i])));
   assert.equal(S1.act(st, 'A', { type: 'pc_password', value: 'zzzz' }).correct, false);
@@ -43,12 +45,12 @@ for (let v = 0; v < 5; v++) {
   S1.act(st, 'B', { type: 'drawer_code', drawer: wrong, code: '0000' });
   assert.ok(!st.hasKey);
   assert.ok(S1.act(st, 'B', { type: 'drawer_code', drawer: sol.drawer, code: sol.drawerCode }).correct && st.hasKey, `bedroom v${v} 鑰匙`);
-  assert.ok(/鑰匙/.test(S1.view(st, 'B').drawers[sol.drawer].contents));
+  assert.ok(/鑰匙/.test(loc(S1.view(st, 'B').drawers[sol.drawer].contents, 'zh')) && /key/.test(loc(S1.view(st, 'B').drawers[sol.drawer].contents, 'en')));
   // 吉他譜的琴格對照和弦表，要拼得出飛機箱的密碼
   const chart = S1.view(st, 'B').chart, sheets = S1.view(st, 'A').sheets;
   const decode = (sh) => sh.bars.map((fr) => chart.find((c) => json(c.frets) === json(fr)).name).join('');
   // 譜的順序：情書 → 不能說的秘密 → 飛機場的十點半；情書箱子開著、鎖上的字母＝《情書》的和弦
-  assert.deepEqual(sheets.map((x) => x.title), ['情書', '不能說的秘密', '飛機場的十點半']);
+  assert.deepEqual(sheets.map((x) => loc(x.title, 'zh')), ['情書', '不能說的秘密', '飛機場的十點半']);
   assert.equal(S1.view(st, 'B').cases.love.lock, decode(sheets[0]));
   assert.equal(decode(sheets[2]), sol.codes.plane);
   S1.act(st, 'A', { type: 'strum', chords: decode(sheets[2]) });
@@ -99,4 +101,5 @@ for (let v = 0; v < 5; v++) {
 // 每種變化的答案都不一樣
 const uniq = (f) => new Set([0, 1, 2, 3, 4].map(f)).size === 5;
 assert.ok(uniq((v) => S1.solution(v).tag.join('')) && uniq((v) => S1.solution(v).password) && uniq((v) => S1.solution(v).codes.plane) && uniq((v) => S2.solution(v).line) && uniq((v) => S3.solution(v).answer) && uniq((v) => json(S0.solution(v))));
+for (const sc of scenes) for (let v = 0; v < 5; v++) { const st = sc.module.init(v); for (const h of sc.hints) for (const t of h.tiers) { const x = typeof t === 'function' ? t(st) : t; assert.ok(!/[\u4e00-\u9fff]/.test(loc(x, 'en')), `英文提示裡有中文：${loc(x, 'en')}`); } }
 console.log('✅ variants test passed (4 scenes × 5 variants)');

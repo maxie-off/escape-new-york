@@ -66,7 +66,7 @@
         <rect x="14" y="434" width="206" height="150" rx="10" fill="#c9ced6" ${ST}/>
         <rect x="14" y="434" width="206" height="24" rx="10" fill="#dde1e8" opacity=".7"/>
         <rect x="34" y="574" width="166" height="10" rx="3" fill="#8a909b" ${ST2}/>
-        <ellipse cx="86" cy="526" rx="46" ry="26" fill="#3a8cff" ${ST2}/><text x="86" y="535" text-anchor="middle" font-size="22" fill="#fff" ${FONT}>台北</text>
+        <ellipse cx="86" cy="526" rx="46" ry="26" fill="#3a8cff" ${ST2}/><text x="86" y="535" text-anchor="middle" font-size="22" fill="#fff" ${FONT}>${tr('台北', 'TAIPEI')}</text>
         <path d="M80,502 l3,-14 l3,14Z" fill="#fff" opacity=".85"/><rect x="82" y="480" width="8" height="12" fill="#fff" opacity=".7"/>
         <circle cx="166" cy="490" r="14" fill="#ffd23f" ${ST2}/><path d="M158,490 h16 M166,482 v16" stroke="${INK}" stroke-width="2.5"/>
         <rect x="150" y="530" width="48" height="22" rx="5" fill="#e5382f" ${ST2} transform="rotate(-6 174 541)"/>
@@ -185,7 +185,7 @@
       const y = 240 + (n - 1) * 64;
       const d = data.drawers[n];
       const open = d.open;
-      const key = open && data.hasKey && /鑰匙/.test(d.contents || '');
+      const key = open && data.hasKey && /鑰匙|key/i.test(d.contents || '');
       return `<g class="hot" data-hot="drawer-${n}">
         <rect x="262" y="${y}" width="326" height="56" rx="4" fill="${open ? '#f3d9aa' : '#e8b568'}" ${ST}/>
         ${open
@@ -240,8 +240,8 @@
       <rect x="940" y="110" width="14" height="40" fill="#8b8e93" ${ST2}/><rect x="940" y="440" width="14" height="40" fill="#8b8e93" ${ST2}/>
       <g><path d="M830,98 L790,128 M830,98 L870,128" stroke="${INK}" stroke-width="3" fill="none"/><circle cx="830" cy="96" r="5" fill="#d9b44a" ${ST2}/>
         <g transform="rotate(-2 830 170)"><rect x="745" y="124" width="170" height="104" rx="6" fill="#fff" stroke="#c5262c" stroke-width="5"/><rect x="745" y="124" width="170" height="26" rx="4" fill="#c5262c"/>
-        <text x="830" y="144" text-anchor="middle" font-size="17" fill="#fff" ${FONT}>⚠ 注意</text>
-        <text x="830" y="176" text-anchor="middle" font-size="18" fill="${INK}" ${FONT}>出門後就不能</text><text x="830" y="198" text-anchor="middle" font-size="18" fill="${INK}" ${FONT}>再回來了喔！</text><text x="830" y="220" text-anchor="middle" font-size="19" fill="#c5262c" ${FONT}>護照記得拿</text></g></g>
+        <text x="830" y="144" text-anchor="middle" font-size="17" fill="#fff" ${FONT}>${tr('⚠ 注意', '⚠ NOTICE')}</text>
+        <text x="830" y="176" text-anchor="middle" font-size="18" fill="${INK}" ${FONT}>${tr('出門後就不能', 'Once you leave,')}</text><text x="830" y="198" text-anchor="middle" font-size="18" fill="${INK}" ${FONT}>${tr('再回來了喔！', 'no coming back!')}</text><text x="830" y="220" text-anchor="middle" font-size="19" fill="#c5262c" ${FONT}>${tr('護照記得拿', 'Take your passport')}</text></g></g>
       <g class="hot" data-hot="knob"><circle cx="738" cy="330" r="17" fill="#d9b44a" ${ST2}/><circle cx="738" cy="330" r="11" fill="#f2cf63" ${ST2}/><circle cx="734" cy="326" r="3" fill="#fff" opacity=".8"/>
         ${key && data.hasPassport ? `<circle class="pulse" cx="738" cy="330" r="30" fill="none" stroke="#ffd23f" stroke-width="6"/>` : ''}${hit(738, 330, 40)}</g>
     </g>`;
@@ -268,7 +268,7 @@
     const lines = Array.from({ length: 6 }, (_, i) => `<line x1="${LX}" y1="${TOP + i * GAP}" x2="${LX + BW * 4}" y2="${TOP + i * GAP}" stroke="#1b1b1f" stroke-width="1.6"/>`).join('');
     const bars = Array.from({ length: 5 }, (_, i) => `<line x1="${LX + i * BW}" y1="${TOP}" x2="${LX + i * BW}" y2="${TOP + 5 * GAP}" stroke="#1b1b1f" stroke-width="${i === 4 ? 3 : 1.8}"/>`).join('');
     const nums = sh.bars.map((fr, b) => [0.3, 0.72].map((pos) => fr.map((f, si) => (f === null ? '' : `<rect x="${LX + b * BW + BW * pos - 9}" y="${TOP + (5 - si) * GAP - 10}" width="18" height="20" fill="#fffdf3"/><text x="${LX + b * BW + BW * pos}" y="${TOP + (5 - si) * GAP + 6}" text-anchor="middle" font-size="18" font-weight="700" fill="#1b1b1f" font-family="'Courier New',monospace">${f}</text>`)).join('')).join('')).join('');
-    return `<svg viewBox="0 0 720 240" class="tab-svg"><text x="360" y="30" text-anchor="middle" font-size="26" font-weight="700" fill="#1b1b1f" ${FONT}>《${esc(sh.title)}》</text>
+    return `<svg viewBox="0 0 720 240" class="tab-svg"><text x="360" y="30" text-anchor="middle" font-size="26" font-weight="700" fill="#1b1b1f" ${FONT}>${tr(`《${esc(sh.title)}》`, `“${esc(sh.title)}”`)}</text>
       ${[0, 1, 2, 3, 4, 5].map((i) => `<text x="${LX - 12}" y="${TOP + i * GAP + 5}" text-anchor="middle" font-size="15" font-weight="700" fill="#c5262c" font-family="'Helvetica Neue',Arial,sans-serif">${i + 1}</text>`).join('')}
       ${lines}${bars}${nums}</svg>`;
   }
@@ -289,11 +289,11 @@
   }
   function chartSvg() {
     const per = 4, bw = 150;
-    return `<svg viewBox="0 0 720 390" class="tab-svg"><text x="360" y="30" text-anchor="middle" font-size="26" font-weight="700" fill="#1b1b1f" ${FONT}>和弦對照表</text>
+    return `<svg viewBox="0 0 720 390" class="tab-svg"><text x="360" y="30" text-anchor="middle" font-size="26" font-weight="700" fill="#1b1b1f" ${FONT}>${tr('和弦對照表', 'Chord chart')}</text>
       ${data.chart.map((c, i) => chordBox(70 + (i % per) * 170 + (i >= per ? 85 : 0), 124 + Math.floor(i / per) * 170, c.name, c.frets)).join('')}</svg>`;
   }
   function guitarHtml() {
-    const tabs = data.sheets.map((s) => [s.id, `《${s.title}》`]);
+    const tabs = data.sheets.map((s) => [s.id, tr(`《${s.title}》`, `“${s.title}”`)]);
     const cur = data.sheets.find((x) => x.id === ui.gt) || data.sheets[0];
     const body = tabSvg(cur);
     return `<div class="modal-card s1-guitar"><button class="x" data-act="close">✕</button>
@@ -303,14 +303,14 @@
 
   // 彈吉他：四個小節各選一個和弦（A~G），按「彈奏」
   function playHtml() {
-    const slots = ui.pw.map((d, i) => `<div class="wheel"><small>第 ${i + 1} 小節</small><button data-act="pup" data-i="${i}">▲</button><div class="digit">${LETTERS[d]}</div><button data-act="pdown" data-i="${i}">▼</button></div>`).join('');
+    const slots = ui.pw.map((d, i) => `<div class="wheel"><small>${tr(`第 ${i + 1} 小節`, `Bar ${i + 1}`)}</small><button data-act="pup" data-i="${i}">▲</button><div class="digit">${LETTERS[d]}</div><button data-act="pdown" data-i="${i}">▼</button></div>`).join('');
     return `<div class="modal-card s1-play${ui.strumming ? ' strum' : ''}"><button class="x" data-act="close">✕</button>
-      <h2>彈吉他</h2><p class="hint-s">選四個和弦，照順序彈一段。</p>
-      <div class="wheels">${slots}</div><div class="row center"><button class="primary big" data-act="strum" ${ui.strumming ? 'disabled' : ''}>彈奏 ▶</button></div></div>`;
+      <h2>${tr('彈吉他', 'Play the guitar')}</h2><p class="hint-s">${tr('選四個和弦，照順序彈一段。', 'Pick four chords and play them in order.')}</p>
+      <div class="wheels">${slots}</div><div class="row center"><button class="primary big" data-act="strum" ${ui.strumming ? 'disabled' : ''}>${tr('彈奏 ▶', 'Play ▶')}</button></div></div>`;
   }
 
   // ---------- 行李箱（字母鎖）與裡面的東西 ----------
-  const CASE_NAME = { plane: '咖啡色', secret: '粉紅色', love: '綠色' };
+  const CASE_NAME = () => ({ plane: tr('咖啡色行李箱', 'Brown suitcase'), secret: tr('粉紅色行李箱', 'Pink suitcase'), love: tr('綠色行李箱', 'Green suitcase') });
   function faceSvg(id, glow = false) {
     const x = 20, y = 24, w = 170, h = 120;
     return `<svg viewBox="0 0 210 170" class="s1-face">${suitcaseFace(id, x, y, w, h, glow)}</svg>`;
@@ -326,27 +326,27 @@
     return `<div class="s1-photo"><svg viewBox="0 0 220 150">${inner}</svg></div>`;
   }
   function passportHtml() {
-    return `<div class="passport"><div class="pp-top">PASSPORT · 護照</div><div class="pp-body"><div class="pp-pic">${A.portrait('A', 74)}</div>
+    return `<div class="passport"><div class="pp-top">${tr('PASSPORT · 護照', 'PASSPORT')}</div><div class="pp-body"><div class="pp-pic">${A.portrait('A', 74)}</div>
       <div class="pp-info"><small>NAME</small><b>RACCOONY</b><small>COUNTRY</small><b>TAIWAN</b><small>No.</small><b>3 1 4 1 5 9 2 6</b></div></div></div>`;
   }
   function caseHtml(id) {
     const c = data.cases[id];
-    const nm = CASE_NAME[id];
+    const nm = CASE_NAME()[id];
     if (!c.open) {
       const armed = ui.armed && ui.armed.id === id;
       const left = armed ? Math.max(0, Math.ceil((ui.armed.until - Date.now()) / 1000)) : 0;
       const wheels = ui.cw[id].map((d, i) => `<div class="wheel"><button data-act="cup" data-i="${i}" ${armed ? 'disabled' : ''}>▲</button><div class="digit">${LETTERS[d]}</div><button data-act="cdown" data-i="${i}" ${armed ? 'disabled' : ''}>▼</button></div>`).join('');
       return `<div class="modal-card s1-case${ui.shake ? ' shake' : ''}${armed ? ' armed' : ''}"><button class="x" data-act="close">✕</button>
-        <h2>${nm}行李箱</h2>${faceSvg(id, armed)}<p class="hint-s">4 個字母的鎖（A ~ G）</p>
+        <h2>${nm}</h2>${faceSvg(id, armed)}<p class="hint-s">${tr('4 個字母的鎖（A ~ G）', 'A 4-letter lock (A–G)')}</p>
         <div class="wheels">${wheels}</div>
-        <div class="row center">${armed ? `<div class="s1-count">${left > 0 ? `鎖在嗡嗡震動……<b>${left}</b>` : '……'}</div>` : '<button class="primary big" data-act="copen">準備</button>'}</div></div>`;
+        <div class="row center">${armed ? `<div class="s1-count">${left > 0 ? `${tr('鎖在嗡嗡震動……', 'The lock is humming…')}<b>${left}</b>` : '……'}</div>` : `<button class="primary big" data-act="copen">${tr('準備', 'Ready')}</button>`}</div></div>`;
     }
     const k = c.contents;
     let inner = '';
-    if (k.kind === 'passport') inner = `<p>找到了！護照已放進收藏文件。</p>${passportHtml()}`;
-    else if (k.kind === 'secret') inner = `<div class="s1-banner">哇，恭喜你看到有趣的東西，但這不是你要找的。</div><div class="s1-things">${photo('hug')}${photo('kiss')}</div>`;
-    else inner = `${c.lock ? `<div class="s1-lockshow"><span>鎖停在：</span>${[...c.lock].map((ch) => `<b>${ch}</b>`).join('')}</div>` : ''}<div class="s1-letters">${k.letters.map((t) => `<div class="paper lined letter">${esc(t).replace(/\n/g, '<br>')}</div>`).join('')}</div>`;
-    return `<div class="modal-card s1-case open"><button class="x" data-act="close">✕</button><h2>${nm}行李箱</h2>${inner}</div>`;
+    if (k.kind === 'passport') inner = `<p>${tr('找到了！護照已放進收藏文件。', 'Found it! The passport is now in your documents.')}</p>${passportHtml()}`;
+    else if (k.kind === 'secret') inner = `<div class="s1-banner">${tr('哇，恭喜你看到有趣的東西，但這不是你要找的。', 'Ooh, something fun! But it’s not what you’re looking for.')}</div><div class="s1-things">${photo('hug')}${photo('kiss')}</div>`;
+    else inner = `${c.lock ? `<div class="s1-lockshow"><span>${tr('鎖停在：', 'The lock reads:')}</span>${[...c.lock].map((ch) => `<b>${ch}</b>`).join('')}</div>` : ''}<div class="s1-letters">${k.letters.map((t) => `<div class="paper lined letter">${esc(t).replace(/\n/g, '<br>')}</div>`).join('')}</div>`;
+    return `<div class="modal-card s1-case open"><button class="x" data-act="close">✕</button><h2>${nm}</h2>${inner}</div>`;
   }
 
   // ---------- 1A2B 猜字紀錄（一天一欄）----------
@@ -371,7 +371,7 @@
       const line = (l) => esc(l).replace(/~(.)~/g, '<s>$1</s>');
       return `<div class="paper lined">${p.lines.map((l) => `<p>${line(l)}</p>`).join('')}</div>`;
     }
-    return `<div class="paper map"><h4>${esc(p.title)}</h4><p class="map-top">⬆ 上</p>${p.rows.map((r) => `<div class="map-row"><b>${r.n}</b><span>${esc(r.emoji)} ${esc(r.item)}</span></div>`).join('')}<p class="map-note">${esc(p.note)}</p></div>`;
+    return `<div class="paper map"><h4>${esc(p.title)}</h4><p class="map-top">${tr('⬆ 上', '⬆ Top')}</p>${p.rows.map((r) => `<div class="map-row"><b>${r.n}</b><span>${esc(r.emoji)} ${esc(r.item)}</span></div>`).join('')}<p class="map-note">${esc(p.note)}</p></div>`;
   }
 
   function blockHtml(b) {
@@ -390,28 +390,28 @@
       return `<div class="mon"><div class="login"><div class="avatar">🦝</div><div>Raccoony</div>
         ${ui.pwOpen
           ? `<div class="row"><input id="pw" type="password" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="12" placeholder="Password" autocomplete="off"/><button class="primary" data-act="pwsubmit">→</button></div>`
-          : `<div class="pw-fake" data-act="pwfocus">點擊這裡輸入 Password</div>`}
+          : `<div class="pw-fake" data-act="pwfocus">${tr('點擊這裡輸入 Password', 'Tap here to enter the password')}</div>`}
         <p class="err">${esc(ui.pwErr)}</p></div></div>`;
     }
     if (!ui.notionOpen) {
       return `<div class="mon"><div class="desktop">
         <div class="icon app" data-act="opennotion"><div class="glyph">📄</div>Notion</div>
-        <div class="icon"><div class="glyph">🖼️</div>照片</div>
-        <div class="icon"><div class="glyph">🗑️</div>垃圾桶</div></div></div>`;
+        <div class="icon"><div class="glyph">🖼️</div>${tr('照片', 'Photos')}</div>
+        <div class="icon"><div class="glyph">🗑️</div>${tr('垃圾桶', 'Trash')}</div></div></div>`;
     }
     const pages = data.notion.pages;
     const pg = pages[ui.page] || pages[0];
     return `<div class="mon"><div class="notion">
         <div class="n-side">${pages.map((p, i) => `<div class="n-item${i === ui.page ? ' on' : ''}" data-act="page" data-i="${i}">${p.icon} ${esc(p.title)}</div>`).join('')}</div>
         <div class="n-main"><div class="n-icon">${pg.icon}</div><h2>${esc(pg.title)}</h2>${pg.blocks.map(blockHtml).join('')}</div></div></div>
-        <div style="margin-top:10px"><button class="small" data-act="closenotion">← 回到桌面</button></div>`;
+        <div style="margin-top:10px"><button class="small" data-act="closenotion">${tr('← 回到桌面', '← Back to desktop')}</button></div>`;
   }
 
   function drawerHtml(n) {
     const wheels = ui.dw.map((d, i) => `<div class="wheel"><button data-act="dup" data-i="${i}">▲</button><div class="digit">${d}</div><button data-act="ddown" data-i="${i}">▼</button></div>`).join('');
-    return `<h2>第 ${n} 格抽屜</h2><p>抽屜上有一個 4 位數字的滾輪鎖。</p>
+    return `<h2>${tr(`第 ${n} 格抽屜`, `Drawer ${n}`)}</h2><p>${tr('抽屜上有一個 4 位數字的滾輪鎖。', 'The drawer has a 4-digit wheel lock.')}</p>
       <div class="wheels${ui.dShake ? ' shake' : ''}">${wheels}</div>
-      <div class="row center"><button class="primary big" data-act="dsubmit">打開</button></div>
+      <div class="row center"><button class="primary big" data-act="dsubmit">${tr('打開', 'Open')}</button></div>
       <p class="err">${esc(ui.dErr)}</p>`;
   }
 
@@ -473,7 +473,7 @@
     if (!value.trim()) return;
     const res = await ctx.send({ type: 'pc_password', value });
     if (res && res.correct === false) {
-      ui.pwErr = '密碼錯誤';
+      ui.pwErr = tr('密碼錯誤', 'Wrong password');
       renderModal();
       const i = document.getElementById('pw'); if (i) { i.value = ''; i.focus(); }
     } else ui.pwErr = '';
@@ -507,7 +507,7 @@
     const n = ui.modal.n;
     const res = await ctx.send({ type: 'drawer_code', drawer: n, code });
     if (res && res.correct === false) {
-      ui.dErr = '密碼錯誤'; ui.dShake = true; renderModal();
+      ui.dErr = tr('密碼錯誤', 'Wrong code'); ui.dShake = true; renderModal();
       setTimeout(() => { ui.dShake = false; if (ui.modal) renderModal(); }, 450);
     } else { ui.dErr = ''; ui.modal = null; renderModal(); }
   }
@@ -568,7 +568,7 @@
           if (!firstSeen || data.glow.n > 0) {
             ui.glowCase = data.glow.id;
             clearTimeout(ui.glowT); ui.glowT = setTimeout(() => { ui.glowCase = null; draw(); }, 2600);
-            if (ui.view !== 1) ctx.say('床那邊好像有什麼東西亮了一下……', { now: true });
+            if (ui.view !== 1) ctx.say(tr('床那邊好像有什麼東西亮了一下……', 'Something just lit up over by the bed…'), { now: true });
           }
         }
         // 準備：開始倒數；共鳴失敗：鎖喀一聲卡回去
@@ -577,7 +577,7 @@
         if (ui.failN === undefined) ui.failN = data.failN;
         else if (data.failN !== ui.failN) {
           ui.failN = data.failN;
-          if (window.comicBurst) comicBurst('喀！', 'bad');
+          if (window.comicBurst) comicBurst(tr('喀！', 'CLACK!'), 'bad');
           if (window.Music && Music.buzz) Music.buzz();
           if (ui.modal && ui.modal.type === 'case') { ui.shake = true; setTimeout(() => { ui.shake = false; if (ui.modal) renderModal(); }, 450); }
         }
@@ -586,7 +586,7 @@
         ui.resoN = data.resonate;
         ui.resoUntil = Date.now() + 10000;
         clearTimeout(ui.resoT); ui.resoT = setTimeout(() => { ui.resoUntil = 0; draw(); }, 10000);
-        ctx.say('吉他弦自己震了起來，好像在呼應什麼……', { now: true });
+        ctx.say(tr('吉他弦自己震了起來，好像在呼應什麼……', 'The guitar strings are vibrating on their own, as if answering something…'), { now: true });
       }
       box.onclick = onStageClick;
       const m = $modal();

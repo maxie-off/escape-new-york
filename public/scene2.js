@@ -134,8 +134,9 @@
     },
   };
 
+  const textW = (t) => [...String(t)].reduce((a, c) => a + (/[\u2E80-\u9FFF\uFF00-\uFFEF]/.test(c) ? 23 : 12), 0);
   function bubbleSvg(lines) {
-    const w = 300, lh = 30, h = lines.length * lh + 20, x = -48, y = -(262 + h);
+    const w = Math.max(300, Math.ceil(Math.max(...lines.map(textW)) + 34)), lh = 30, h = lines.length * lh + 20, x = -48, y = -(262 + h);
     return `<g class="bub" opacity="0" style="pointer-events:none">
       <path d="M${x + 54},${y + h - 2} L${x + 46},${y + h + 26} L${x + 84},${y + h - 2}Z" fill="#fff" ${ST2}/>
       <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="#fff" ${ST}/>
@@ -199,7 +200,7 @@
       ${data.people.map((p) => person(p.id, p.lines)).join('')}
       ${A.slothy(112, 690, 1.12)}
       ${navBtn('right')}
-      <g class="hot" data-hot="pick"><rect x="380" y="18" width="240" height="56" rx="28" fill="${data.allClear ? '#ffd23f' : '#c9ccd2'}" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>選擇路線</text>${pulse}</g>
+      <g class="hot" data-hot="pick"><rect x="380" y="18" width="240" height="56" rx="28" fill="${data.allClear ? '#ffd23f' : '#c9ccd2'}" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>${tr('選擇路線', 'Pick a line')}</text>${pulse}</g>
     </svg>`;
   }
 
@@ -284,10 +285,10 @@
 
   // ---------- 彈出層：選路線 / 地圖 ----------
   function modalHtml() {
-    if (ui.modal && ui.modal.type === 'map') return `<div class="modal-card s2-oldmap"><button class="x" data-act="close">✕</button><h2>柱子上的舊地圖</h2><div class="oldmap">${window.Docs.mapSvg(data.map)}</div></div>`;
+    if (ui.modal && ui.modal.type === 'map') return `<div class="modal-card s2-oldmap"><button class="x" data-act="close">✕</button><h2>${tr('柱子上的舊地圖', 'Old map on the pillar')}</h2><div class="oldmap">${window.Docs.mapSvg(data.map)}</div></div>`;
     const inner = !ui.sel
-      ? `<h2>要搭哪一線？</h2><div class="bullets">${data.lines.map((l) => `<button class="bullet" style="background:${COLORS[l]}" data-act="sel" data-l="${l}">${l}</button>`).join('')}</div>`
-      : `<h2>搭 <span class="bullet sm" style="background:${COLORS[ui.sel]}">${ui.sel}</span> 線嗎？</h2><div class="row center"><button class="primary big" data-act="board">搭乘</button><button class="big" data-act="back">重選</button></div>`;
+      ? `<h2>${tr('要搭哪一線？', 'Which line?')}</h2><div class="bullets">${data.lines.map((l) => `<button class="bullet" style="background:${COLORS[l]}" data-act="sel" data-l="${l}">${l}</button>`).join('')}</div>`
+      : `<h2>${tr('搭', 'Take the')} <span class="bullet sm" style="background:${COLORS[ui.sel]}">${ui.sel}</span> ${tr('線嗎？', 'line?')}</h2><div class="row center"><button class="primary big" data-act="board">${tr('搭乘', 'Board')}</button><button class="big" data-act="back">${tr('重選', 'Back')}</button></div>`;
     return `<div class="modal-card"><button class="x" data-act="close">✕</button>${inner}</div>`;
   }
   function renderModal() {
@@ -317,14 +318,14 @@
     if (!h) return;
     const k = h.dataset.hot;
     if (k === 'pick') {
-      if (!data.allClear) return ctx.say('看板還沒修好，先讓它全部亮起來吧。', { now: true });
+      if (!data.allClear) return ctx.say(tr('看板還沒修好，先讓它全部亮起來吧。', 'The board isn’t fixed yet. Light it all up first.'), { now: true });
       ui.seenBtn = true; ui.modal = { type: 'pick' }; ui.sel = null; draw(); return;
     }
     if (k === 'map') { ui.seen.map = true; ui.modal = { type: 'map' }; draw(); return; }
     if (k === 'nav-right' || k === 'nav-left') { ui.seen.nav = true; ui.view = k === 'nav-right' ? 1 : 0; ui.selWire = null; draw(); return; }
     if (k.startsWith('wire-')) {
       const l = k.slice(5), w = data.wires.find((x) => x.line === l);
-      if (w && w.powered) { ui.selWire = null; draw(); return ctx.say(`${l} 線已經接好了，牌子背面寫著 CH ${w.ch}。`, { now: true }); }
+      if (w && w.powered) { ui.selWire = null; draw(); return ctx.say(tr(`${l} 線已經接好了，牌子背面寫著 CH ${w.ch}。`, `The ${l} line is connected. The back of its tag says CH ${w.ch}.`), { now: true }); }
       ui.selWire = ui.selWire === l ? null : l; // 點牌子：翻到背面看頻道，同時選起這條線，再點一個接頭就接上
       draw(); return;
     }

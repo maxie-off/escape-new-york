@@ -16,6 +16,8 @@ Every puzzle has five versions (different colors and shapes, passwords, drawer, 
 
 Chinese text uses GenSeki Gothic (源石黑體, SIL Open Font License, see `public/fonts/OFL-GenSeki.txt`). The font files in `public/fonts/` only contain the characters the game uses. If you change any text, rerun `python3 tools/subset-fonts.py <path to a clone of github.com/ButTaiwan/genseki-font>`.
 
+The game is in Traditional Chinese or English. Pick a language with the buttons at the top right of the title screen. Each player chooses their own, so one player can play in Chinese and the other in English. All text the server sends (subtitles, hints, papers, the news, the boards) is written as `T('中文', 'English')` and translated per player; client-only text uses `tr('中文', 'English')` from `public/i18n.js`.
+
 ## Run it on your computer
 
 You need Node 18 or newer.

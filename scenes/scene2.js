@@ -12,6 +12,8 @@
 //       同一區另有一條會遲到；往別區的某一線時間剛好對上「別的機場」的車程（誤導）。
 // 祕密（正確路線、符號、頻道）只存在伺服器；前端只會收到「該角色此刻看得到」的內容。
 
+const { T } = require('../i18n');
+
 const LINES = ['B', 'C', 'E', '1', '2'];
 const SYMS = ['tri', 'circ', 'sq', 'star', 'dia'];
 
@@ -35,16 +37,16 @@ const VARIANTS = [
     rows: [['B', 'Manhattan', 20, 30], ['C', 'Queens', 8, 18], ['E', 'Brooklyn', 21, 31], ['1', 'Brooklyn', 14, 24], ['2', 'Queens', 3, 12]], answer: '1', lit: '2',
     sym: { B: 'star', C: 'sq', E: 'circ', 1: 'dia', 2: 'tri' }, ch: { B: 9, C: 4, E: 3, 1: 7, 2: 1 }, terms: ['tri', 'sq', 'star', 'dia', 'circ'] },
 ];
-const SYM_ZH = { tri: '三角形', circ: '圓形', sq: '方形', star: '星形', dia: '菱形' };
+const SYM_ZH = { tri: T('三角形', 'triangle'), circ: T('圓形', 'circle'), sq: T('方形', 'square'), star: T('星形', 'star'), dia: T('菱形', 'diamond') };
 
 const clock = (m) => { const h = Math.floor(m / 60), mm = String(m % 60).padStart(2, '0'); return `${((h + 11) % 12) + 1}:${mm} ${h < 12 ? 'AM' : 'PM'}`; };
 
 function peopleOf(vv) {
   return [
-    { id: 'banker', lines: ['要去 JFK 啊？', '從這裡搭過去', `大概要 ${vv.travel.JFK} 分鐘喔。`] },
-    { id: 'skater', lines: ['欸，你幾點要到機場？', '你知道嗎？'] },
-    { id: 'artist', lines: ['去 EWR 的話，', '從這裡過去', `大概 ${vv.travel.EWR} 分鐘喔。`] },
-    { id: 'rider', lines: ['LGA 喔？', '從這裡搭過去', `差不多 ${vv.travel.LGA} 分鐘。`] },
+    { id: 'banker', lines: [T('要去 JFK 啊？', 'Going to JFK?'), T('從這裡搭過去', 'From here it takes'), T(`大概要 ${vv.travel.JFK} 分鐘喔。`, `about ${vv.travel.JFK} minutes.`)] },
+    { id: 'skater', lines: [T('欸，你幾點要到機場？', 'Hey, what time do you'), T('你知道嗎？', 'need to be at the airport?')] },
+    { id: 'artist', lines: [T('去 EWR 的話，', 'To EWR,'), T('從這裡過去', 'from here it’s'), T(`大概 ${vv.travel.EWR} 分鐘喔。`, `about ${vv.travel.EWR} minutes.`)] },
+    { id: 'rider', lines: [T('LGA 喔？', 'LGA?'), T('從這裡搭過去', 'From here that’s'), T(`差不多 ${vv.travel.LGA} 分鐘。`, `around ${vv.travel.LGA} minutes.`)] },
   ];
 }
 
@@ -95,50 +97,50 @@ function act(state, role, a = {}) {
   switch (a.type) {
     case 'plug': {
       // Slothy 把某條電線接到某個接頭（可以改接；已經通電的線不能拔）
-      if (role !== 'B') return { ok: false, message: '電箱在 Slothy 那邊。' };
+      if (role !== 'B') return { ok: false, message: T('電箱在 Slothy 那邊。', 'The electric box is on Slothy’s side.') };
       if (!LINES.includes(line) || state.powered[line]) return { ok: false };
       const term = a.term === null ? null : String(a.term || '');
       if (term !== null && !SYMS.includes(term)) return { ok: false };
       if (term !== null) for (const l of LINES) if (state.conn[l] === term && !state.powered[l]) state.conn[l] = null;
-      if (term !== null && LINES.some((l) => state.conn[l] === term && state.powered[l])) return { ok: false, message: '這個接頭已經接好了。' };
+      if (term !== null && LINES.some((l) => state.conn[l] === term && state.powered[l])) return { ok: false, message: T('這個接頭已經接好了。', 'That socket is already connected.') };
       state.conn[line] = term;
       return { ok: true };
     }
     case 'gate': {
       // 打開某個接頭上方的閘門：接對了那列通電；接錯閘門跳回去、那列閃紅光
-      if (role !== 'B') return { ok: false, message: '電箱在 Slothy 那邊。' };
+      if (role !== 'B') return { ok: false, message: T('電箱在 Slothy 那邊。', 'The electric box is on Slothy’s side.') };
       const term = String(a.term || '');
       if (!SYMS.includes(term)) return { ok: false };
       const l = LINES.find((x) => state.conn[x] === term);
-      if (!l) return { ok: true, message: '這個閘門下面沒有接電線。' };
+      if (!l) return { ok: true, message: T('這個閘門下面沒有接電線。', 'There’s no wire under this switch.') };
       if (state.powered[l]) return { ok: true };
       if (vv.sym[l] !== term) {
         state.flashN += 1; state.flash = { line: l, n: state.flashN };
-        return { ok: true, correct: false, message: '啪！閘門跳回去了。', events: [{ text: `⚡ 啪！閘門跳了回去，看板上 ${l} 線那一列閃了一下紅光。` }] };
+        return { ok: true, correct: false, message: T('啪！閘門跳回去了。', 'Snap! The switch flipped back.'), events: [{ text: T(`⚡ 啪！閘門跳了回去，看板上 ${l} 線那一列閃了一下紅光。`, `⚡ Snap! The switch flipped back, and the ${l} line row flashed red on the board.`) }] };
       }
       state.powered[l] = true;
-      return finish(state, clear(state, l) ? `⚡ 喀噠！${l} 線那一列亮了起來，資訊很清楚！` : `⚡ 喀噠！${l} 線那一列亮了起來……可是畫面全是雜訊。`);
+      return finish(state, clear(state, l) ? T(`⚡ 喀噠！${l} 線那一列亮了起來，資訊很清楚！`, `⚡ Click! The ${l} line row lit up, and it’s clear!`) : T(`⚡ 喀噠！${l} 線那一列亮了起來……可是畫面全是雜訊。`, `⚡ Click! The ${l} line row lit up… but it’s all static.`));
     }
     case 'tune': {
       // Raccoony 轉看板右側的頻道旋鈕
-      if (role !== 'A') return { ok: false, message: '看板在 Raccoony 那邊。' };
+      if (role !== 'A') return { ok: false, message: T('看板在 Raccoony 那邊。', 'The board is on Raccoony’s side.') };
       const ch = Number(a.ch);
       if (!LINES.includes(line) || !Number.isInteger(ch) || ch < 1 || ch > 9) return { ok: false };
       if (line === vv.lit) return { ok: true };
       const was = clear(state, line);
       state.dial[line] = ch;
-      if (!was && clear(state, line)) return finish(state, `📺 ${line} 線的資訊清楚了！`);
+      if (!was && clear(state, line)) return finish(state, T(`📺 ${line} 線的資訊清楚了！`, `📺 The ${line} line info is clear now!`));
       return { ok: true };
     }
     case 'board': {
-      if (role !== 'B') return { ok: false, message: '選路線的按鈕在 Slothy 那邊。' };
+      if (role !== 'B') return { ok: false, message: T('選路線的按鈕在 Slothy 那邊。', 'The line picker is on Slothy’s side.') };
       if (!LINES.includes(line)) return { ok: false };
-      if (!state.allClear) return { ok: true, message: '看板還沒修好，先讓它全部亮起來吧。' };
+      if (!state.allClear) return { ok: true, message: T('看板還沒修好，先讓它全部亮起來吧。', 'The board isn’t fixed yet. Light it all up first.') };
       if (line === vv.answer) {
         state.solved = true;
-        return { ok: true, solved: true, events: [{ text: `🚇 ${line} 線進站了！兩人擠上了車！` }] };
+        return { ok: true, solved: true, events: [{ text: T(`🚇 ${line} 線進站了！兩人擠上了車！`, `🚇 The ${line} train pulls in! They squeeze aboard!`) }] };
       }
-      return { ok: true, correct: false, message: '🚇 這班車不對勁……回到月台了。', events: [{ text: `🚇 Slothy 搭上了 ${line} 線——不對勁，趕快回到月台！` }] };
+      return { ok: true, correct: false, message: T('🚇 這班車不對勁……回到月台了。', '🚇 Something’s off about this train… back to the platform.'), events: [{ text: T(`🚇 Slothy 搭上了 ${line} 線——不對勁，趕快回到月台！`, `🚇 Slothy got on the ${line} train — wrong one! Back to the platform!`) }] };
     }
     default:
       return { ok: false };
@@ -148,7 +150,7 @@ function act(state, role, a = {}) {
 // 某一列變清楚（或通電）之後，檢查是不是全部都亮了
 function finish(state, text) {
   const events = [{ text }];
-  if (!state.allClear && allClear(state)) { state.allClear = true; events.push({ text: '📺 叮！看板全部亮起來了！' }); }
+  if (!state.allClear && allClear(state)) { state.allClear = true; events.push({ text: T('📺 叮！看板全部亮起來了！', '📺 Ding! The whole board is lit up!') }); }
   return { ok: true, correct: true, events };
 }
 
@@ -158,11 +160,13 @@ function docPatch(v) { return { ticket: { airport: VARIANTS[v].airport, boarding
 function answers(state) {
   const vv = VARIANTS[state.v];
   const arrive = vv.boarding - 120, latest = arrive - vv.travel[vv.airport];
-  const fix = LINES.filter((l) => l !== vv.lit).map((l) => `${l} 線＝${SYM_ZH[vv.sym[l]]}、頻道 ${vv.ch[l]}`).join('；');
+  const ls = LINES.filter((l) => l !== vv.lit);
+  const fix = T(ls.map((l) => `${l} 線＝${SYM_ZH[vv.sym[l]].zh}、頻道 ${vv.ch[l]}`).join('；') + '。', ls.map((l) => `${l} line = ${SYM_ZH[vv.sym[l]].en}, channel ${vv.ch[l]}`).join('; ') + '.');
   return {
-    fix: `${fix}。`,
-    clue: `機票 ${clock(vv.boarding)} 從 ${vv.airport} 登機、機票上寫著要提前 2 小時到，所以 ${clock(arrive)} 前要到 ${vv.airport}；地圖上 ${vv.airport} 在 ${vv.map[vv.airport]}；路人說要 ${vv.travel[vv.airport]} 分鐘，所以 ${clock(latest)} 前要上車（${latest - vv.now} 分鐘內）。`,
-    line: `${vv.answer} 線：往 ${vv.map[vv.airport]}，${vv.rows.find((r) => r[0] === vv.answer)[2]} 分鐘後就進站。`,
+    fix,
+    clue: T(`機票 ${clock(vv.boarding)} 從 ${vv.airport} 登機、機票上寫著要提前 2 小時到，所以 ${clock(arrive)} 前要到 ${vv.airport}；地圖上 ${vv.airport} 在 ${vv.map[vv.airport]}；路人說要 ${vv.travel[vv.airport]} 分鐘，所以 ${clock(latest)} 前要上車（${latest - vv.now} 分鐘內）。`,
+      `Boarding is ${clock(vv.boarding)} at ${vv.airport}, and the ticket says to arrive 2 hours early, so be at ${vv.airport} by ${clock(arrive)}. The map puts ${vv.airport} in ${vv.map[vv.airport]}. It’s ${vv.travel[vv.airport]} minutes away, so board by ${clock(latest)} (within ${latest - vv.now} minutes).`),
+    line: T(`${vv.answer} 線：往 ${vv.map[vv.airport]}，${vv.rows.find((r) => r[0] === vv.answer)[2]} 分鐘後就進站。`, `The ${vv.answer} line: to ${vv.map[vv.airport]}, arriving in ${vv.rows.find((r) => r[0] === vv.answer)[2]} minutes.`),
   };
 }
 function solution(v) { const vv = VARIANTS[v]; return { line: vv.answer, lit: vv.lit, sym: vv.sym, ch: vv.ch }; }

@@ -13,6 +13,8 @@
 // Slothy 衣櫃上的紙左半邊是「10 月 1 日」一整局完整紀錄（最後寫出 answer），玩家從這局倒推代號的意思；
 // 右半邊「10 月 3 日」有今天的前四個猜測，Raccoony 書桌上的紙也寫著「10 月 3 日」、有後三個猜測。
 // （已用英文字典驗證：七條合起來只剩一個答案，任何一半單獨都不只一個。）
+const { T } = require('../i18n');
+
 const PW = [
   { ans: 'acid', guesses: ['bold', 'pony', 'able', 'dime', 'milk', 'east', 'cold'], tag: ['A', 'B'], demo: { ans: 'node', guesses: ['snow', 'nick', 'dove', 'done'] } },
   { ans: 'mint', guesses: ['glow', 'kind', 'horn', 'gift', 'swim', 'plum', 'beat'], tag: ['X', 'Z'], demo: { ans: 'cake', guesses: ['lime', 'peak', 'bark', 'acme'] } },
@@ -31,11 +33,11 @@ const row = (g, ans, tag) => ({ word: g.toUpperCase(), fb: feedback(g, ans, tag)
 
 // 衣櫃：抽屜由上往下的排列、鑰匙藏在哪一種衣物、每格密碼，每個變化都不同
 const ITEMS = {
-  tee: { item: 'T恤', emoji: '👕', plain: '👕 一疊整齊的 T 恤。', key: '👕 一疊 T 恤中間夾著一把鑰匙！', diary: '把它夾在一疊 T 恤中間' },
-  hoodie: { item: '帽T', emoji: '🧥', plain: '🧥 幾件帽 T，沒有鑰匙。', key: '🧥 帽 T 的口袋裡有一把鑰匙！', diary: '把它塞進帽 T 的口袋裡' },
-  jeans: { item: '牛仔褲', emoji: '👖', plain: '👖 牛仔褲口袋裡只有一張發票。', key: '👖 牛仔褲後口袋裡有一把鑰匙！', diary: '把它藏在牛仔褲的後口袋' },
-  socks: { item: '襪子&內衣', emoji: '🧦', plain: '🧦 一堆襪子，沒有鑰匙。', key: '🧦 一堆襪子……底下壓著一把鑰匙！', diary: '把它塞在一堆襪子底下' },
-  scarf: { item: '圍巾&毯子', emoji: '🧣', plain: '🧣 軟綿綿的圍巾和毯子。', key: '🧣 圍巾裡捲著一把鑰匙！', diary: '把它捲在圍巾裡' },
+  tee: { item: T('T恤', 'T-shirts'), emoji: '👕', plain: T('👕 一疊整齊的 T 恤。', '👕 A neat stack of T-shirts.'), key: T('👕 一疊 T 恤中間夾著一把鑰匙！', '👕 A key tucked between the T-shirts!'), diary: T('把它夾在一疊 T 恤中間', 'I slipped it between my T-shirts') },
+  hoodie: { item: T('帽T', 'Hoodies'), emoji: '🧥', plain: T('🧥 幾件帽 T，沒有鑰匙。', '🧥 A few hoodies. No key.'), key: T('🧥 帽 T 的口袋裡有一把鑰匙！', '🧥 A key in a hoodie pocket!'), diary: T('把它塞進帽 T 的口袋裡', 'I stuffed it into a hoodie pocket') },
+  jeans: { item: T('牛仔褲', 'Jeans'), emoji: '👖', plain: T('👖 牛仔褲口袋裡只有一張發票。', '👖 Just an old receipt in the jeans.'), key: T('👖 牛仔褲後口袋裡有一把鑰匙！', '👖 A key in the back pocket of the jeans!'), diary: T('把它藏在牛仔褲的後口袋', 'I hid it in the back pocket of my jeans') },
+  socks: { item: T('襪子&內衣', 'Socks & underwear'), emoji: '🧦', plain: T('🧦 一堆襪子，沒有鑰匙。', '🧦 A pile of socks. No key.'), key: T('🧦 一堆襪子……底下壓著一把鑰匙！', '🧦 Under a pile of socks… a key!'), diary: T('把它塞在一堆襪子底下', 'I buried it under a pile of socks') },
+  scarf: { item: T('圍巾&毯子', 'Scarves & blankets'), emoji: '🧣', plain: T('🧣 軟綿綿的圍巾和毯子。', '🧣 Soft scarves and blankets.'), key: T('🧣 圍巾裡捲著一把鑰匙！', '🧣 A key rolled up in a scarf!'), diary: T('把它捲在圍巾裡', 'I rolled it up in a scarf') },
 };
 const WARDROBE = [
   { order: ['tee', 'hoodie', 'jeans', 'socks', 'scarf'], key: 'socks', codes: ['2290', '6613', '0958', '4827', '3175'] },
@@ -54,7 +56,7 @@ const CASE_CODES = [
 ];
 const NV = PW.length;
 
-const NOTE2 = ['護照放在床底下的箱子裡'];
+const NOTE2 = [T('護照放在床底下的箱子裡', 'Passport is in a suitcase under the bed')];
 
 function build(v) {
   const pw = PW[v], wd = WARDROBE[v];
@@ -62,32 +64,32 @@ function build(v) {
   wd.order.forEach((id, i) => { drawers[i + 1] = { ...ITEMS[id], id, code: wd.codes[i], contents: id === wd.key ? ITEMS[id].key : ITEMS[id].plain }; });
   const keyDrawer = wd.order.indexOf(wd.key) + 1;
   const papers = [
-    { id: 'paper1', kind: 'log', note: '10/3 那局最後差點猜到 Slothy 的答案……就把它設成電腦密碼了。',
+    { id: 'paper1', kind: 'log', note: T('10/3 那局最後差點猜到 Slothy 的答案……就把它設成電腦密碼了。', 'On 10/3 I almost guessed Slothy’s word… so I made it my computer password.'),
       days: [
-        { date: '10 月 1 日', rows: [...pw.demo.guesses, pw.demo.ans].map((g) => row(g, pw.demo.ans, pw.tag)), answer: pw.demo.ans.toUpperCase() },
-        { date: '10 月 3 日', rows: pw.guesses.slice(0, 4).map((g) => row(g, pw.ans, pw.tag)), answer: '????' },
+        { date: T('10 月 1 日', 'Oct 1'), rows: [...pw.demo.guesses, pw.demo.ans].map((g) => row(g, pw.demo.ans, pw.tag)), answer: pw.demo.ans.toUpperCase() },
+        { date: T('10 月 3 日', 'Oct 3'), rows: pw.guesses.slice(0, 4).map((g) => row(g, pw.ans, pw.tag)), answer: '????' },
       ] },
-    { id: 'paper2', kind: 'map', title: '🗺️ 衣櫃地圖', note: '抽屜從上往下數！', rows: Object.entries(drawers).map(([n, d]) => ({ n: Number(n), emoji: d.emoji, item: d.item })) },
+    { id: 'paper2', kind: 'map', title: T('🗺️ 衣櫃地圖', '🗺️ Wardrobe map'), note: T('抽屜從上往下數！', 'Count the drawers from the top!'), rows: Object.entries(drawers).map(([n, d]) => ({ n: Number(n), emoji: d.emoji, item: d.item })) },
   ];
   const notion = {
     pages: [
-      { icon: '📓', title: '日記', blocks: [
-        { t: 'h', text: '10 月 24 日 · 星期五' },
-        { t: 'p', text: '終於訂好回台北的機票了！明天一早的飛機，行李也收好了。' },
-        { t: 'p', text: '出門前得先找到房門鑰匙——昨晚太累，我隨手把它藏起來了。' },
-        { t: 'p', text: `我記得……${ITEMS[wd.key].diary}，那樣最安全，Slothy 一定找不到 🦥` },
-        { t: 'h', text: '10 月 23 日' },
-        { t: 'p', text: '整理衣櫃，終於每個抽屜都分類好了！清單我印出來，放在衣櫃上面了。' },
-        { t: 'p', text: '為了不忘記，每個抽屜的鎖密碼都記在「密碼本」裡（只記抽屜編號）。' },
+      { icon: '📓', title: T('日記', 'Diary'), blocks: [
+        { t: 'h', text: T('10 月 24 日 · 星期五', 'Friday, Oct 24') },
+        { t: 'p', text: T('終於訂好回台北的機票了！明天一早的飛機，行李也收好了。', 'Finally booked my flight home to Taipei! It leaves tomorrow and my bags are packed.') },
+        { t: 'p', text: T('出門前得先找到房門鑰匙——昨晚太累，我隨手把它藏起來了。', 'I need to find the door key before I leave. I was so tired last night that I hid it somewhere.') },
+        { t: 'p', text: T(`我記得……${ITEMS[wd.key].diary.zh}，那樣最安全，Slothy 一定找不到 🦥`, `I think… ${ITEMS[wd.key].diary.en}. Safest spot. Slothy will never find it 🦥`) },
+        { t: 'h', text: T('10 月 23 日', 'Oct 23') },
+        { t: 'p', text: T('整理衣櫃，終於每個抽屜都分類好了！清單我印出來，放在衣櫃上面了。', 'Sorted my wardrobe, every drawer has its own thing now! I printed the list and left it on top of the wardrobe.') },
+        { t: 'p', text: T('為了不忘記，每個抽屜的鎖密碼都記在「密碼本」裡（只記抽屜編號）。', 'So I don’t forget, every drawer lock code is in my "Passwords" page (by drawer number only).') },
       ] },
-      { icon: '🔐', title: '密碼本', blocks: [{ t: 'table', head: ['東西', '密碼'], rows: [['🏋️ 健身房置物櫃', '3391'], ['📮 信箱', '1057'], ...Object.entries(drawers).map(([n, d]) => [`衣櫃 ${n}`, d.code])] }] },
-      { icon: '✅', title: '待辦', blocks: [
-        { t: 'todo', done: true, text: '訂機票 ✈️' }, { t: 'todo', done: true, text: '收行李' },
-        { t: 'todo', done: false, text: '找到房門鑰匙！！！' }, { t: 'todo', done: false, text: '出門，回台北 🇹🇼' },
+      { icon: '🔐', title: T('密碼本', 'Passwords'), blocks: [{ t: 'table', head: [T('東西', 'Item'), T('密碼', 'Code')], rows: [[T('🏋️ 健身房置物櫃', '🏋️ Gym locker'), '3391'], [T('📮 信箱', '📮 Mailbox'), '1057'], ...Object.entries(drawers).map(([n, d]) => [T(`衣櫃 ${n}`, `Wardrobe ${n}`), d.code])] }] },
+      { icon: '✅', title: T('待辦', 'To-do'), blocks: [
+        { t: 'todo', done: true, text: T('訂機票 ✈️', 'Book flight ✈️') }, { t: 'todo', done: true, text: T('收行李', 'Pack bags') },
+        { t: 'todo', done: false, text: T('找到房門鑰匙！！！', 'FIND THE DOOR KEY!!!') }, { t: 'todo', done: false, text: T('出門，回台北 🇹🇼', 'Head out, fly home to Taipei 🇹🇼') },
       ] },
     ],
   };
-  const deskPaper = { date: '10 月 3 日（續）', rows: pw.guesses.slice(4).map((g) => row(g, pw.ans, pw.tag)) };
+  const deskPaper = { date: T('10 月 3 日（續）', 'Oct 3 (cont.)'), rows: pw.guesses.slice(4).map((g) => row(g, pw.ans, pw.tag)) };
   return { password: pw.ans, tag: pw.tag, drawers, keyDrawer, papers, notion, deskPaper, codes: CASE_CODES[v] };
 }
 const BUILT = Array.from({ length: NV }, (_, v) => build(v));
@@ -100,13 +102,14 @@ const CASES = {
     contents: {
       kind: 'love',
       letters: [
-        '親愛的 Slothy：\n你今天又睡過頭了，可是我還是很喜歡看你打呼的樣子。\n——Raccoony\nP.S. 最近買了很酷的共鳴鎖，我把手提箱的密碼設成我們喜歡的歌的和弦了。',
-        'Raccoony：\n謝謝你每次都等我慢慢走。下次換我牽著你。\n——Slothy',
+        T('親愛的 Slothy：\n你今天又睡過頭了，可是我還是很喜歡看你打呼的樣子。\n——Raccoony\nP.S. 最近買了很酷的共鳴鎖，我把手提箱的密碼設成我們喜歡的歌的和弦了。',
+          'Dear Slothy,\nYou overslept again today, but I still love watching you snore.\n— Raccoony\nP.S. I just got some cool resonance locks. I set our suitcase codes to the chords of our favorite songs.'),
+        T('Raccoony：\n謝謝你每次都等我慢慢走。下次換我牽著你。\n——Slothy', 'Raccoony,\nThanks for always waiting for me to catch up. Next time I’ll hold your hand.\n— Slothy'),
       ],
     },
   },
 };
-const NOT_THIS = '哇，恭喜你看到有趣的東西，但這不是你要找的。';
+const NOT_THIS = T('哇，恭喜你看到有趣的東西，但這不是你要找的。', 'Ooh, something fun! But it’s not what you’re looking for.');
 
 // ---- 吉他譜：遊戲自創的「和弦」指法（故意不是真實和弦，懂吉他也不能直接看出來）----
 // 陣列由第 6 弦（最粗）到第 1 弦（最細）；null = 不彈，0 = 空弦，數字 = 按第幾格
@@ -123,13 +126,13 @@ const CHORDS = {
 //   - 綠色（情書）箱子一開始就是開的，鎖停在它的密碼上；信裡的 P.S. 說密碼是「我們喜歡的歌的和弦」→ 對照第一張譜《情書》
 //   - Raccoony 彈對某首歌，那個箱子的鎖會亮起來共鳴（教玩家：哪首歌對哪個箱子）
 //   - 要開鎖：Slothy 轉好四個字母、按「準備」，10 秒內 Raccoony 要彈出同樣的四個和弦；彈完才知道成不成功
-const CASE_COLOR = { plane: '咖啡色', secret: '粉紅色', love: '綠色' };
+const CASE_COLOR = { plane: T('咖啡色', 'brown'), secret: T('粉紅色', 'pink'), love: T('綠色', 'green') };
 const ARM_MS = 10000, ARM_GRACE = 3000; // 準備後 10 秒內要彈；彈奏本身約 2 秒，加上網路延遲的寬限
 // 前端只拿到「每個小節的琴格數字」，樂譜上不會出現和弦字母；和弦表（掛在 Slothy 床上方的牆上）才有字母。
 const SONGS = [
-  { id: 's3', title: '情書', box: 'love' },
-  { id: 's2', title: '不能說的秘密', box: 'secret' },
-  { id: 's1', title: '飛機場的十點半', box: 'plane' },
+  { id: 's3', title: T('情書', 'Love Letter'), box: 'love' },
+  { id: 's2', title: T('不能說的秘密', 'Secret'), box: 'secret' },
+  { id: 's1', title: T('飛機場的十點半', '10:30 at the Airport'), box: 'plane' },
 ];
 const sheetsOf = (v) => SONGS.map((s) => ({ id: s.id, title: s.title, bars: [...CASE_CODES[v][s.box]].map((c) => CHORDS[c]) }));
 const chart = Object.keys(CHORDS).sort().map((name) => ({ name, frets: CHORDS[name] }));
@@ -179,33 +182,33 @@ function act(state, role, a = {}) {
   const B = BUILT[state.v];
   switch (a.type) {
     case 'pc_password': {
-      if (role !== 'A') return { ok: false, message: '這台電腦只有 Raccoony 搆得著。' };
+      if (role !== 'A') return { ok: false, message: T('這台電腦只有 Raccoony 搆得著。', 'Only Raccoony can reach this computer.') };
       if (state.pcUnlocked) return { ok: true, correct: true };
       if (String(a.value || '').trim().toLowerCase() === B.password) {
         state.pcUnlocked = true;
-        return { ok: true, correct: true, events: [{ text: '💻 電腦解鎖了！' }] };
+        return { ok: true, correct: true, events: [{ text: T('💻 電腦解鎖了！', '💻 The computer is unlocked!') }] };
       }
-      return { ok: true, correct: false, message: '密碼錯誤', events: [{ text: '💻 電腦密碼輸入錯誤。' }] };
+      return { ok: true, correct: false, message: T('密碼錯誤', 'Wrong password'), events: [{ text: T('💻 電腦密碼輸入錯誤。', '💻 Wrong computer password.') }] };
     }
     case 'drawer_code': {
-      if (role !== 'B') return { ok: false, message: '這個衣櫃是 Slothy 那邊的。' };
+      if (role !== 'B') return { ok: false, message: T('這個衣櫃是 Slothy 那邊的。', 'The wardrobe is on Slothy’s side.') };
       const n = Number(a.drawer);
       const d = B.drawers[n];
       if (!d) return { ok: false };
       if (state.drawers[n]) return { ok: true, correct: true };
       if (String(a.code || '').trim() !== d.code) {
-        return { ok: true, correct: false, message: '密碼錯誤', events: [{ text: `🗄️ 第 ${n} 格抽屜的鎖沒有打開。` }] };
+        return { ok: true, correct: false, message: T('密碼錯誤', 'Wrong code'), events: [{ text: T(`🗄️ 第 ${n} 格抽屜的鎖沒有打開。`, `🗄️ Drawer ${n} won’t open.`) }] };
       }
       state.drawers[n] = true;
       if (n === B.keyDrawer) {
         state.hasKey = true;
-        return { ok: true, correct: true, message: '🔑 找到房門鑰匙了！', events: [{ text: `🔑 第 ${n} 格打開了——房門鑰匙在這裡！` }] };
+        return { ok: true, correct: true, message: T('🔑 找到房門鑰匙了！', '🔑 Found the door key!'), events: [{ text: T(`🔑 第 ${n} 格打開了——房門鑰匙在這裡！`, `🔑 Drawer ${n} is open — the door key is here!`) }] };
       }
-      return { ok: true, correct: true, message: d.contents, events: [{ text: `🗄️ 第 ${n} 格抽屜打開了，但這裡沒有鑰匙。` }] };
+      return { ok: true, correct: true, message: d.contents, events: [{ text: T(`🗄️ 第 ${n} 格抽屜打開了，但這裡沒有鑰匙。`, `🗄️ Drawer ${n} is open, but there’s no key.`) }] };
     }
     case 'strum': {
       // Raccoony 在吉他上彈 4 個和弦；彈對某首歌的和弦進行，那個箱子的鎖就會亮起來共鳴
-      if (role !== 'A') return { ok: false, message: '吉他在 Raccoony 那邊。' };
+      if (role !== 'A') return { ok: false, message: T('吉他在 Raccoony 那邊。', 'The guitar is on Raccoony’s side.') };
       const seq = String(a.chords || '').toUpperCase();
       if (!/^[A-G]{4}$/.test(seq)) return { ok: false };
       const hit = Object.keys(B.codes).find((k) => B.codes[k] === seq);
@@ -216,27 +219,27 @@ function act(state, role, a = {}) {
         const inTime = Date.now() - arm.t <= ARM_MS + ARM_GRACE;
         if (inTime && arm.code === B.codes[arm.case] && seq === arm.code) return openCase(state, arm.case);
         state.failN += 1;
-        return { ok: true, correct: false, message: '共鳴斷掉了……', events: [{ text: '🔒 喀！共鳴斷掉了，鎖又卡回去了。' }] };
+        return { ok: true, correct: false, message: T('共鳴斷掉了……', 'The resonance broke…'), events: [{ text: T('🔒 喀！共鳴斷掉了，鎖又卡回去了。', '🔒 Clack! The resonance broke and the lock snapped shut.') }] };
       }
-      if (!hit) return { ok: true, message: '彈了一段……好像什麼事都沒發生。' };
-      return { ok: true, events: [{ text: `🎸 Raccoony 彈完一段……床底下${CASE_COLOR[hit]}箱子的鎖亮了起來，好像聽得懂這首歌！` }] };
+      if (!hit) return { ok: true, message: T('彈了一段……好像什麼事都沒發生。', 'You played a tune… nothing seems to happen.') };
+      return { ok: true, events: [{ text: T(`🎸 Raccoony 彈完一段……床底下${CASE_COLOR[hit].zh}箱子的鎖亮了起來，好像聽得懂這首歌！`, `🎸 Raccoony finished a tune… the lock on the ${CASE_COLOR[hit].en} suitcase under the bed lit up, as if it knows this song!`) }] };
     }
     case 'case_ready': {
       // Slothy 轉好四個字母、按「準備」：鎖開始等聲音（轉錯也能按，要等彈完才知道）
-      if (role !== 'B') return { ok: false, message: '行李箱在 Slothy 那邊。' };
+      if (role !== 'B') return { ok: false, message: T('行李箱在 Slothy 那邊。', 'The suitcases are on Slothy’s side.') };
       if (!CASES[a.case] || state.cases[a.case]) return { ok: false };
       const code = String(a.code || '').trim().toUpperCase();
       if (!/^[A-G]{4}$/.test(code)) return { ok: false };
       state.armN += 1;
       state.armed = { case: a.case, code, t: Date.now(), n: state.armN };
-      return { ok: true, events: [{ text: '🔊 鎖在嗡嗡震動，好像在等某個聲音……' }] };
+      return { ok: true, events: [{ text: T('🔊 鎖在嗡嗡震動，好像在等某個聲音……', '🔊 The lock is humming, as if waiting for a sound…') }] };
     }
     case 'case_timeout': {
       // 10 秒到了還沒聽到聲音（由 Slothy 的畫面通知）
       if (!state.armed || Number(a.n) !== state.armed.n) return { ok: true };
       if (Date.now() - state.armed.t < ARM_MS) return { ok: true };
       state.armed = null; state.failN += 1;
-      return { ok: true, correct: false, events: [{ text: '🔒 喀！沒等到聲音，鎖又卡回去了。' }] };
+      return { ok: true, correct: false, events: [{ text: T('🔒 喀！沒等到聲音，鎖又卡回去了。', '🔒 Clack! No sound came, and the lock snapped shut.') }] };
     }
     case 'strike': {
       // 1A2B 筆記：點紙上的 a~z 劃掉／恢復一個字母；兩人的紙同步
@@ -251,11 +254,11 @@ function act(state, role, a = {}) {
       return { ok: true, docs: ['ticket'] };
     }
     case 'door_unlock': {
-      if (role !== 'B') return { ok: false, message: '門把在 Slothy 那邊。' };
-      if (!state.hasKey) return { ok: true, message: '🔒 門鎖著，需要鑰匙。' };
-      if (!state.hasPassport) return { ok: true, message: '🛂 門牌寫著：護照記得拿！' };
+      if (role !== 'B') return { ok: false, message: T('門把在 Slothy 那邊。', 'The door knob is on Slothy’s side.') };
+      if (!state.hasKey) return { ok: true, message: T('🔒 門鎖著，需要鑰匙。', '🔒 The door is locked. You need a key.') };
+      if (!state.hasPassport) return { ok: true, message: T('🛂 門牌寫著：護照記得拿！', '🛂 The sign on the door says: Don’t forget your passport!') };
       state.doorOpen = true;
-      return { ok: true, solved: true, events: [{ text: '🚪 喀噠！房門打開了！' }] };
+      return { ok: true, solved: true, events: [{ text: T('🚪 喀噠！房門打開了！', '🚪 Click! The door is open!') }] };
     }
     default:
       return { ok: false };
@@ -266,9 +269,9 @@ function openCase(state, id) {
   state.cases[id] = true;
   if (id === 'plane') {
     state.hasPassport = true;
-    return { ok: true, correct: true, docsTo: { B: ['passport'] }, events: [{ text: `🛂 共鳴成功！${CASE_COLOR.plane}箱子打開了——裡面是護照！` }] };
+    return { ok: true, correct: true, docsTo: { B: ['passport'] }, events: [{ text: T(`🛂 共鳴成功！${CASE_COLOR.plane.zh}箱子打開了——裡面是護照！`, `🛂 It resonated! The ${CASE_COLOR.plane.en} suitcase opened — the passport is inside!`) }] };
   }
-  return { ok: true, correct: true, events: [{ text: `🧳 共鳴成功！${CASE_COLOR[id]}箱子打開了。${NOT_THIS}` }] };
+  return { ok: true, correct: true, events: [{ text: T(`🧳 共鳴成功！${CASE_COLOR[id].zh}箱子打開了。${NOT_THIS.zh}`, `🧳 It resonated! The ${CASE_COLOR[id].en} suitcase opened. ${NOT_THIS.en}`) }] };
 }
 
 // 給提示用的答案文字
@@ -276,11 +279,13 @@ function answers(state) {
   const B = BUILT[state.v];
   const d = B.drawers[B.keyDrawer];
   return {
-    password: `電腦密碼是 ${B.password}。`,
-    tag: `看 10 月 1 日那局：最後的答案已經寫出來了，拿它倒推每一行。${B.tag[0]}＝字母對、位置也對；${B.tag[1]}＝字母對、位置不對。`,
+    password: T(`電腦密碼是 ${B.password}。`, `The computer password is ${B.password}.`),
+    tag: T(`看 10 月 1 日那局：最後的答案已經寫出來了，拿它倒推每一行。${B.tag[0]}＝字母對、位置也對；${B.tag[1]}＝字母對、位置不對。`,
+      `Look at the Oct 1 game: its answer is written at the bottom, so work backwards from it. ${B.tag[0]} = right letter in the right spot; ${B.tag[1]} = right letter in the wrong spot.`),
     keyItem: d.item,
-    drawer: `鑰匙在第 ${B.keyDrawer} 格（${d.item}），密碼 ${d.code}。`,
-    plane: `《飛機場的十點半》是 ${B.codes.plane}，彈它會讓${CASE_COLOR.plane}箱子的鎖亮。Slothy 把${CASE_COLOR.plane}箱子轉成 ${B.codes.plane}、按準備，Raccoony 在 10 秒內彈 ${B.codes.plane}。`,
+    drawer: T(`鑰匙在第 ${B.keyDrawer} 格（${d.item.zh}），密碼 ${d.code}。`, `The key is in drawer ${B.keyDrawer} (${d.item.en}), code ${d.code}.`),
+    plane: T(`《飛機場的十點半》是 ${B.codes.plane}，彈它會讓${CASE_COLOR.plane.zh}箱子的鎖亮。Slothy 把${CASE_COLOR.plane.zh}箱子轉成 ${B.codes.plane}、按準備，Raccoony 在 10 秒內彈 ${B.codes.plane}。`,
+      `"10:30 at the Airport" is ${B.codes.plane}; playing it lights the ${CASE_COLOR.plane.en} suitcase’s lock. Slothy sets the ${CASE_COLOR.plane.en} suitcase to ${B.codes.plane} and presses Ready, then Raccoony plays ${B.codes.plane} within 10 seconds.`),
   };
 }
 // 測試用：這個變化的完整解法

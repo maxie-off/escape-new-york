@@ -402,3 +402,8 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 .logo .amp { display: block; font-size: .5em; margin: .05em 0; }
 
 .ticket .t-note { margin: -2px 16px 8px; font-size: 12px; font-weight: 400; color: #9aa0a8; text-align: right; }
+
+/* 封面的語言選擇 */
+.lang-pick { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 14px); right: calc(env(safe-area-inset-right, 0px) + 14px); display: flex; gap: 8px; z-index: 3; }
+.lang-pick button { font: 700 16px var(--body); padding: .35em .9em; border: 3px solid var(--ink); border-radius: 999px; background: rgba(255,255,255,.85); color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+.lang-pick button.on { background: var(--yellow); }

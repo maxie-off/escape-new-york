@@ -12,6 +12,7 @@
   const HELV = `font-family="'Helvetica Neue',Helvetica,Arial,'GenSeki','PingFang TC','Noto Sans TC',sans-serif" font-weight="700"`;
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const PA_TEXT = '緊急狀況，機場收到炸彈客預警通知，機場收到炸彈客預警通知，請乘客不要慌張，警察還在調查中。';
+  const PA_EN = 'Attention please. The airport has received a bomb threat. Please stay calm. The police are investigating.';
   const INTRO_MS = 10500;
 
   const fresh = () => ({ modal: null, gate: '', view: 0, seen: {}, item: null });
@@ -72,7 +73,7 @@
     const sign = `<g><rect x="610" y="104" width="6" height="30" fill="#6c7385"/><rect x="884" y="104" width="6" height="30" fill="#6c7385"/>
       <rect x="560" y="132" width="400" height="86" rx="6" fill="#c99a24" ${ST}/><rect x="560" y="174" width="400" height="6" fill="${INK}"/>
       <text x="580" y="164" font-size="25" fill="${INK}" ${HELV}>← Check-in</text><text x="790" y="164" font-size="25" fill="${INK}" ${HELV}>All Gates ↑</text>
-      <rect x="560" y="180" width="400" height="38" fill="#1b1b1f"/><text x="580" y="208" font-size="22" fill="#c99a24" ${HELV}>Baggage Claim  ↘</text><text x="800" y="208" font-size="22" fill="#fff" ${HELV}>出境 Departures</text></g>`;
+      <rect x="560" y="180" width="400" height="38" fill="#1b1b1f"/><text x="580" y="208" font-size="22" fill="#c99a24" ${HELV}>Baggage Claim  ↘</text><text x="800" y="208" font-size="22" fill="#fff" ${HELV}>${tr('出境 Departures', 'Departures')}</text></g>`;
     return `${desks}${sign}${[120, 355, 590, 825].map((x) => kiosk(x + 30, 470, 0.7)).join('')}`;
   }
 
@@ -153,8 +154,12 @@
       <path d="M-14,-193 q14,-12 28,0" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>
     </g>`;
   }
+  // 文字寬度估算：中日文一字約 22，英文約 11.5（字級 22）
+  const textW = (t) => [...String(t)].reduce((a, c) => a + (/[\u2E80-\u9FFF\uFF00-\uFFEF]/.test(c) ? 22 : 11.5), 0);
   function bubble(x, y, w, lines, tailX, tailY) {
     const lh = 30, h = lines.length * lh + 22;
+    w = Math.max(w, Math.ceil(Math.max(...lines.map(textW)) + 34));
+    if (x + w > 990) x = Math.max(10, 990 - w);
     return `<g>
       <path d="M${tailX - 14},${y + h - 3} L${tailX},${tailY} L${tailX + 16},${y + h - 3}Z" fill="#fff" ${ST2}/>
       <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="#fff" ${ST}/>
@@ -232,7 +237,7 @@
         <text x="760" y="${y}" text-anchor="middle" font-size="19" fill="#5ad17a" ${HELV}>${f.gate}</text>`;
     }).join('');
     return `<rect x="176" y="96" width="648" height="414" rx="12" fill="#0d0f14" ${ST}/>
-      <text x="196" y="130" font-size="24" fill="#fff" ${HELV}>DEPARTURES 出境</text>
+      <text x="196" y="130" font-size="24" fill="#fff" ${HELV}>${tr('DEPARTURES 出境', 'DEPARTURES')}</text>
       <text x="804" y="130" text-anchor="end" font-size="22" fill="#ffd23f" ${HELV}>TODAY · ${esc(data.date.label)}</text>
       <text x="206" y="160" font-size="13" fill="#6d737c" ${HELV}>TIME</text><text x="290" y="160" font-size="13" fill="#6d737c" ${HELV}>FLIGHT</text>
       <text x="400" y="160" font-size="13" fill="#6d737c" ${HELV}>DESTINATION</text><text x="760" y="160" text-anchor="middle" font-size="13" fill="#6d737c" ${HELV}>GATE</text>
@@ -246,8 +251,8 @@
         <g class="hot" data-hot="news"><rect x="250" y="110" width="500" height="320" rx="14" fill="#1b1d24" ${ST}/><rect x="266" y="126" width="468" height="284" rx="6" fill="#f7f7f5"/>
           <rect x="266" y="126" width="468" height="34" fill="#e5382f"/><text x="282" y="150" font-size="18" fill="#fff" ${HELV}>NYC Travel Daily</text>
           <text x="282" y="190" font-size="24" fill="${INK}" ${FONT}>${esc(data.news.title)}</text>
-          ${data.news.list.slice(0, 6).map((n, i) => `<text x="282" y="${226 + i * 28}" font-size="16" fill="#3a3d46" ${FONT}>${n.rank}. ${esc(n.zh)}（${esc(n.country)}）</text>`).join('')}
-          <text x="282" y="398" font-size="14" fill="#7a808b" ${FONT}>……點一下看完整新聞</text>
+          ${data.news.list.slice(0, 6).map((n, i) => `<text x="282" y="${226 + i * 28}" font-size="16" fill="#3a3d46" ${FONT}>${n.rank}. ${esc(n.name)}${tr(`（${esc(n.country)}）`, ` (${esc(n.country)})`)}</text>`).join('')}
+          <text x="282" y="398" font-size="14" fill="#7a808b" ${FONT}>${tr('……點一下看完整新聞', '…tap to read the full article')}</text>
           ${ui.seen.news ? '' : `<rect class="pulse" x="240" y="100" width="520" height="340" rx="18" fill="none" stroke="#ffd23f" stroke-width="6"/>`}</g>
         <rect x="470" y="430" width="60" height="40" fill="#2b2b33" ${ST2}/>
         ${A.raccoony(160, 700, 0.5)}
@@ -286,7 +291,7 @@
       ${bubble(60, 120, 330, p1, 250, 300)}
       <g class="hot" data-hot="case">${openSuitcase(500, 590, 1)}${pulse}</g>
       ${A.slothy(110, 692, 0.95)}
-      <g class="hot" data-hot="pick"><rect x="360" y="18" width="280" height="56" rx="28" fill="#ffd23f" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>選擇登機口</text>${pulseBtn}</g>
+      <g class="hot" data-hot="pick"><rect x="360" y="18" width="280" height="56" rx="28" fill="#ffd23f" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>${tr('選擇登機口', 'Pick a gate')}</text>${pulseBtn}</g>
     </svg>`;
   }
 
@@ -307,12 +312,12 @@
   function newsHtml() {
     return `<div class="modal-card s3-news"><button class="x" data-act="close">✕</button>
       <div class="s3-news-head">${esc(data.news.source)}</div><h2>${esc(data.news.title)}</h2>
-      <ol>${data.news.list.map((n) => `<li><b>${esc(n.zh)}</b><small>${esc(n.country)}</small><p>${esc(n.text)}</p></li>`).join('')}</ol></div>`;
+      <ol>${data.news.list.map((n) => `<li><b>${esc(n.name)}</b><small>${esc(n.country)}</small><p>${esc(n.text)}</p></li>`).join('')}</ol></div>`;
   }
   function boardHtml() {
     return `<div class="modal-card s3-board"><button class="x" data-act="close">✕</button>
-      <div class="s3-board-head"><b>DEPARTURES 出境</b><span>TODAY · ${esc(data.date.label)}（${esc(data.date.zh)}）</span></div>
-      <table><thead><tr><th>時間</th><th>航班</th><th>目的地</th><th>登機口</th></tr></thead><tbody>
+      <div class="s3-board-head"><b>${tr('DEPARTURES 出境', 'DEPARTURES')}</b><span>TODAY · ${esc(data.date.label)}${tr(`（${esc(data.date.long)}）`, '')}</span></div>
+      <table><thead><tr><th>${tr('時間', 'Time')}</th><th>${tr('航班', 'Flight')}</th><th>${tr('目的地', 'Destination')}</th><th>${tr('登機口', 'Gate')}</th></tr></thead><tbody>
       ${data.flights.map((f) => `<tr><td>${esc(f.time)}</td><td>${esc(f.flight)}</td><td>${esc(f.dest)}<small>${esc(f.destZh)}</small></td><td>${f.gate}</td></tr>`).join('')}</tbody></table></div>`;
   }
   function gateHtml() {
@@ -321,9 +326,9 @@
     const ok = ui.gate !== '' && n >= 1 && n <= data.maxGate;
     return `<div class="modal-card s3-gate">
       <button class="x" data-act="close">✕</button>
-      <h2>要去幾號登機口？</h2>
+      <h2>${tr('要去幾號登機口？', 'Which gate?')}</h2>
       <div class="s3-display">${ui.gate === '' ? '<em>1 ~ ' + data.maxGate + '</em>' : 'GATE ' + esc(ui.gate)}</div>
-      <div class="s3-keys">${keys}<button data-act="del">⌫</button><button data-act="key" data-k="0">0</button><button class="go" data-act="go" ${ok ? '' : 'disabled'}>前往</button></div></div>`;
+      <div class="s3-keys">${keys}<button data-act="del">⌫</button><button data-act="key" data-k="0">0</button><button class="go" data-act="go" ${ok ? '' : 'disabled'}>${tr('前往', 'Go')}</button></div></div>`;
   }
   function renderModal() {
     const el = $modal();
@@ -374,11 +379,12 @@
     if (introStarted) return;
     introStarted = true;
     if (window.Music && Music.pa) Music.pa();
-    speakTimer = setTimeout(() => { if (window.Music && Music.speak) Music.speak(PA_TEXT); }, 1800);
-    if (ctx && ctx.say) ctx.say(PA_TEXT, { now: true, ms: INTRO_MS - 2500 });
+    const pa = tr(PA_TEXT, PA_EN);
+    speakTimer = setTimeout(() => { if (window.Music && Music.speak) Music.speak(pa, { lang: tr('zh-TW', 'en-US'), rate: tr(1.05, 1) }); }, 1800);
+    if (ctx && ctx.say) ctx.say(pa, { now: true, ms: INTRO_MS - 2500 });
     introTimer = setTimeout(() => {
       introDone = true; draw();
-      if (ctx.say) ctx.say(data.role === 'B' ? '警察圍著地上一個打開的行李箱……' : '大廳又恢復了人來人往。看看航班看板吧。', { now: true, ms: 5000 });
+      if (ctx.say) ctx.say(data.role === 'B' ? tr('警察圍著地上一個打開的行李箱……', 'The police are gathered around an open suitcase on the floor…') : tr('大廳又恢復了人來人往。看看航班看板吧。', 'The hall is busy again. Check the departures board.'), { now: true, ms: 5000 });
     }, INTRO_MS);
   }
 

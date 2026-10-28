@@ -6,6 +6,8 @@
 //   三個開關都要按成紙上對應的顏色，再把立燈插進紙上畫的那個形狀，才會通電。
 // 答案只存在伺服器；B 只會看到插座和開關，A 只會看到那張紙。
 
+const { T } = require('../i18n');
+
 const VARIANTS = [
   { paper: { trapezoid: 'red', inverted: 'green', square: 'blue' }, lamp: 'trapezoid', example: 'square', order: ['square', 'trapezoid', 'inverted'] },
   { paper: { trapezoid: 'blue', inverted: 'red', square: 'green' }, lamp: 'inverted', example: 'trapezoid', order: ['trapezoid', 'square', 'inverted'] },
@@ -14,8 +16,8 @@ const VARIANTS = [
   { paper: { trapezoid: 'blue', inverted: 'green', square: 'red' }, lamp: 'inverted', example: 'square', order: ['square', 'inverted', 'trapezoid'] },
 ];
 const CYCLE = ['red', 'blue', 'green'];
-const NAME = { trapezoid: '梯形', inverted: '倒梯形', square: '正方形' };
-const ZH = { red: '紅色', blue: '藍色', green: '綠色' };
+const NAME = { trapezoid: T('梯形', 'trapezoid'), inverted: T('倒梯形', 'upside-down trapezoid'), square: T('正方形', 'square') };
+const COLOR = { red: T('紅色', 'red'), blue: T('藍色', 'blue'), green: T('綠色', 'green') };
 
 function init(v = 0) { return { v, solved: false, sw: ['blue', 'blue', 'blue'] }; }
 const V = (state) => VARIANTS[state.v];
@@ -27,7 +29,7 @@ function view(state, role) {
 }
 
 function act(state, role, a = {}) {
-  if (role !== 'B') return { ok: false, message: '插座在 Slothy 那邊。' };
+  if (role !== 'B') return { ok: false, message: T('插座在 Slothy 那邊。', 'The power strip is on Slothy’s side.') };
   const vv = V(state);
   const i = Number(a.socket);
   if (!Number.isInteger(i) || i < 0 || i >= vv.order.length) return { ok: false };
@@ -38,17 +40,18 @@ function act(state, role, a = {}) {
   if (a.type !== 'plug') return { ok: false };
   const allRight = vv.order.every((s, k) => state.sw[k] === vv.paper[s]);
   if (vv.order[i] !== vv.lamp || !allRight) {
-    return { ok: true, correct: false, message: '⚡ 吱吱吱——沒通電，延長線掉下來了！', events: [{ text: '⚡ 吱吱吱！沒通電，延長線掉在地上。' }] };
+    return { ok: true, correct: false, message: T('⚡ 吱吱吱——沒通電，延長線掉下來了！', '⚡ Bzzzt! No power. The power strip fell over!'), events: [{ text: T('⚡ 吱吱吱！沒通電，延長線掉在地上。', '⚡ Bzzzt! No power. The power strip fell to the floor.') }] };
   }
   state.solved = true;
-  return { ok: true, correct: true, solved: true, events: [{ text: '💡 叮叮叮！立燈亮了！' }] };
+  return { ok: true, correct: true, solved: true, events: [{ text: T('💡 叮叮叮！立燈亮了！', '💡 Ding ding ding! The floor lamp is on!') }] };
 }
 
 // 給提示用的答案文字，以及測試用的解法
 function answers(state) {
   const vv = V(state);
-  const sw = Object.entries(vv.paper).map(([s, c]) => `${NAME[s]}${ZH[c]}`).join('、');
-  return { plug: `開關按成：${sw}，再把立燈插進${NAME[vv.lamp]}插孔。` };
+  const e = Object.entries(vv.paper);
+  return { plug: T(`開關按成：${e.map(([s, c]) => `${NAME[s].zh}${COLOR[c].zh}`).join('、')}，再把立燈插進${NAME[vv.lamp].zh}插孔。`,
+    `Set the switches: ${e.map(([s, c]) => `${NAME[s].en} ${COLOR[c].en}`).join(', ')}. Then plug the lamp into the ${NAME[vv.lamp].en} socket.`) };
 }
 function solution(v) {
   const vv = VARIANTS[v];

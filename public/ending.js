@@ -174,8 +174,8 @@
   // ---------------- To be continued ----------------
   function mountTbc(root, info) {
     const n = info && Number.isInteger(info.hintTotal) ? info.hintTotal : null;
-    const stat = n === null ? '' : `<em class="end-stat">${n === 0 ? '沒用任何提示就過關了！' : `這一路用了 ${n} 次提示`}</em>`;
-    root.innerHTML = `<div class="end-tbc"><span>To be continued</span><i>▶</i>${stat}<button class="end-again" data-again>再玩一次！<small>謎題會換新</small></button></div>`;
+    const stat = n === null ? '' : `<em class="end-stat">${n === 0 ? tr('沒用任何提示就過關了！', 'Finished without a single hint!') : tr(`這一路用了 ${n} 次提示`, `You used ${n} hint${n === 1 ? '' : 's'}`)}</em>`;
+    root.innerHTML = `<div class="end-tbc"><span>To be continued</span><i>▶</i>${stat}<button class="end-again" data-again>${tr('再玩一次！', 'Play again!')}<small>${tr('謎題會換新', 'New puzzles every time')}</small></button></div>`;
   }
 
   function mount(root, kind = 'train', info) {

@@ -39,6 +39,14 @@ const waitState = (s, pred) =>
     assert.equal((await emit(a, 'start_game', {})).ok, true);
     const [sa, sb] = await Promise.all([playingA, playingB]);
     // ---- 场景 0（黑暗開場）----
+    // 語言：每位玩家自己選；切成英文後，那位玩家收到的文字都是英文，對方不受影響
+    const enA = waitState(a, (s) => s.scene && /dark/.test(s.scene.intro));
+    await emit(a, 'set_lang', { lang: 'en' });
+    const ea = await enA;
+    assert.ok(!/[\u4e00-\u9fff]/.test(JSON.stringify(ea.scene)), 'A 的英文畫面不該有中文');
+    const zhA = waitState(a, (s) => s.scene && /好暗/.test(s.scene.intro));
+    await emit(a, 'set_lang', { lang: 'zh' });
+    await zhA;
     assert.equal(sa.scene.id, 'dark');
     // 分層提示：方向 → 線索 → 答案，用完就不能再要
     assert.equal(sa.scene.hintsLeft, 3);

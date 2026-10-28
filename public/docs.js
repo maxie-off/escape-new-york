@@ -35,7 +35,7 @@
   }
 
   function ticketHtml(d) {
-    const f = (k, zh, v) => `<div class="tf"><small>${zh} ${k}</small><b>${esc(v)}</b></div>`;
+    const f = (k, zh, v) => `<div class="tf"><small>${tr(`${zh} ${k}`, k)}</small><b>${esc(v)}</b></div>`;
     return `<div class="ticket"><div class="t-head">✈ ${esc(d.airline.toUpperCase())}</div>
       <div class="t-body">${f('FLIGHT', '航班', d.flight)}${f('AIRPORT', '機場', d.airport)}${f('TO', '目的地', d.to)}${f('BOARDING', '登機時間', d.boarding)}</div>${d.note ? `<div class="t-note">${esc(d.note)}</div>` : ''}
       <div class="t-bar">${Array.from({ length: 34 }, (_, i) => `<i style="width:${1 + ((i * 7) % 4)}px"></i>`).join('')}</div></div>`;
@@ -43,7 +43,7 @@
 
   function docHtml(d) {
     if (d.kind === 'map') return `<div class="doc-card"><h3>${esc(d.title)}</h3>${mapSvg()}</div>`;
-    if (d.kind === 'passport') return `<div class="doc-card"><h3>${esc(d.title)}</h3><div class="passport"><div class="pp-top">PASSPORT · 護照</div><div class="pp-body"><div class="pp-pic">${window.Art.portrait('A', 74)}</div><div class="pp-info"><small>NAME</small><b>${esc(d.name)}</b><small>COUNTRY</small><b>${esc(d.country)}</b><small>No.</small><b>3 1 4 1 5 9 2 6</b></div></div></div></div>`;
+    if (d.kind === 'passport') return `<div class="doc-card"><h3>${esc(d.title)}</h3><div class="passport"><div class="pp-top">${tr('PASSPORT · 護照', 'PASSPORT')}</div><div class="pp-body"><div class="pp-pic">${window.Art.portrait('A', 74)}</div><div class="pp-info"><small>NAME</small><b>${esc(d.name)}</b><small>COUNTRY</small><b>${esc(d.country)}</b><small>No.</small><b>3 1 4 1 5 9 2 6</b></div></div></div></div>`;
     if (d.kind === 'ticket') return `<div class="doc-card"><h3>${esc(d.title)}</h3>${ticketHtml(d)}</div>`;
     return '';
   }

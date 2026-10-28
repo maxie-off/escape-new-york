@@ -19,6 +19,7 @@
     <div class="title-ui">
       <h1 class="logo">Sherlock Raccoon<span class="amp">&amp;</span>Dr. Slothy<small>Escape New York</small></h1>
       <button id="btn-title-start" class="big-btn">Start</button>
+      <div class="lang-pick" role="group" aria-label="Language"><button data-lang="zh">繁體中文</button><button data-lang="en">English</button></div>
     </div>
   </section>
 
@@ -27,17 +28,17 @@
     <div class="bg" id="setup-bg"></div>
     <div class="setup-grid">
       <div class="panel" id="panel-role">
-        <h2>選擇角色</h2>
+        <h2 data-zh="選擇角色" data-en="Pick a character">選擇角色</h2>
         <div class="role-row" id="roles"></div>
       </div>
       <div class="panel" id="panel-room">
-        <h2>房間碼</h2>
+        <h2 data-zh="房間碼" data-en="Room code">房間碼</h2>
         <button id="btn-gen" class="primary big">Generate</button>
-        <div id="room-code" class="code empty" title="點一下複製">------</div>
-        <div class="or">或輸入對方給你的房間碼</div>
+        <div id="room-code" class="code empty" title="點一下複製" data-aria-zh="點一下複製" data-aria-en="Tap to copy">------</div>
+        <div class="or" data-zh="或輸入對方給你的房間碼" data-en="or enter the code your friend gives you">或輸入對方給你的房間碼</div>
         <form id="join-form" class="row">
-          <input id="code-input" maxlength="6" placeholder="例如 ABC123" autocomplete="off" autocapitalize="characters" />
-          <button class="primary">加入</button>
+          <input id="code-input" maxlength="6" placeholder="例如 ABC123" data-ph-zh="例如 ABC123" data-ph-en="e.g. ABC123" autocomplete="off" autocapitalize="characters" />
+          <button class="primary" data-zh="加入" data-en="Join">加入</button>
         </form>
         <p id="room-status"></p>
       </div>
@@ -56,22 +57,22 @@
     <!-- 文字謎題（場景 2、3 目前的佔位形式） -->
     <div id="legacy" hidden>
       <div class="card">
-        <h3>你看到的線索（<span id="you-role"></span>）</h3>
+        <h3><span data-zh="你看到的線索" data-en="Your clues">你看到的線索</span>（<span id="you-role"></span>）</h3>
         <ul id="clues"></ul>
         <form id="answer-form">
           <label id="prompt"></label>
           <div class="row">
             <input id="answer-input" autocomplete="off" />
-            <button class="primary">提交</button>
+            <button class="primary" data-zh="提交" data-en="Submit">提交</button>
           </div>
         </form>
       </div>
     </div>
 
     <div id="hud">
-      <button id="btn-docs" aria-label="收藏文件" hidden>📁<span class="badge"></span></button>
-      <button id="btn-hint" aria-label="提示">💡</button>
-      <button id="btn-mute" aria-label="音樂開關">🔊</button>
+      <button id="btn-docs" aria-label="收藏文件" data-aria-zh="收藏文件" data-aria-en="Documents" hidden>📁<span class="badge"></span></button>
+      <button id="btn-hint" aria-label="提示" data-aria-zh="提示" data-aria-en="Hint">💡</button>
+      <button id="btn-mute" aria-label="音樂開關" data-aria-zh="音樂開關" data-aria-en="Music on/off">🔊</button>
     </div>
   </section>
 
@@ -80,9 +81,10 @@
   <div id="docs-layer" hidden></div>
   <div id="toast" aria-live="polite"></div>
   <p id="conn" class="conn"></p>
-  <div id="rotate"><div>📱↻<br>請把 iPad 橫放來玩</div></div>
+  <div id="rotate"><div>📱↻<br><span data-zh="請把 iPad 橫放來玩" data-en="Turn your iPad sideways to play">請把 iPad 橫放來玩</span></div></div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="i18n.js"></script>
   <script src="art.js"></script>
   <script src="music.js"></script>
   <script src="scene0.js"></script>

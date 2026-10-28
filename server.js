@@ -7,6 +7,7 @@ const path = require('path');
 const { Server } = require('socket.io');
 const { roles, scenes, ending } = require('./scenes');
 const docsCatalog = require('./docs');
+const { T, loc, isT } = require('./i18n');
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +43,7 @@ function createRoom() {
     hintLevels: {}, // 當前場景：每個謎題已看到第幾層提示
     hintLog: [], // 當前場景已顯示的提示文字
     hintTotal: 0, // 整場遊戲用了幾次提示
+    lang: {}, // clientId -> 'zh' | 'en'（每位玩家自己選語言）
     docs: { A: [], B: [] }, // 各玩家的收藏文件（文件 id）
     interlude: null, // 過場動畫 { kind }，播放中不接受任何操作
     timer: null,
@@ -122,7 +124,7 @@ function advance(room) {
 }
 
 // ---------- 分層提示：每個謎題三層（方向 → 線索 → 答案），依目前卡住的謎題給 ----------
-const TIER_NAME = ['方向', '線索', '答案'];
+const TIER_NAME = [T('方向', 'Direction'), T('線索', 'Clue'), T('答案', 'Answer')];
 function currentStep(room) {
   const hs = scenes[room.sceneIndex].hints;
   const i = hs.findIndex((h) => !(h.done && room.sceneState && h.done(room.sceneState)));
@@ -134,6 +136,8 @@ function hintsLeft(room) {
 }
 
 // ---------- 每個玩家看到的畫面（只含自己角色的線索） ----------
+const langOf = (room, clientId) => (room && room.lang && room.lang[clientId]) || 'zh';
+
 function viewFor(room, clientId) {
   const you = roleOf(room, clientId);
   const view = {
@@ -167,7 +171,7 @@ function viewFor(room, clientId) {
       : { ...base, clues: s.clues[you] || [], prompt: s.prompt };
   }
   if (room.phase === 'ended') view.ending = { ...ending, hintTotal: room.hintTotal };
-  return view;
+  return loc(view, langOf(room, clientId)); // 所有雙語文字換成這位玩家選的語言
 }
 
 function broadcast(room) {
@@ -197,17 +201,18 @@ io.on('connection', (socket) => {
     cb?.({ ok: true, code: room.code });
   });
 
-  socket.on('join_room', ({ code, clientId, played } = {}, cb) => {
+  socket.on('join_room', ({ code, clientId, played, lang } = {}, cb) => {
     code = String(code || '').trim().toUpperCase();
     const room = rooms.get(code);
-    if (!room) return cb?.({ ok: false, error: '找不到這個識別碼' });
-    if (!clientId) return cb?.({ ok: false, error: '缺少 clientId' });
+    if (!room) return cb?.({ ok: false, error: T('找不到這個識別碼', 'Room code not found') });
+    if (!clientId) return cb?.({ ok: false, error: T('缺少 clientId', 'Missing clientId') });
 
     // 房間最多容納 2 個不同的人（重新連線的同一個 clientId 不算新人）
     if (!room.members.has(clientId) && room.members.size >= 2) {
-      return cb?.({ ok: false, error: '房間已滿（只能 2 人）' });
+      return cb?.({ ok: false, error: T('房間已滿（只能 2 人）', 'Room is full (2 players max)') });
     }
     room.members.add(clientId);
+    room.lang = room.lang || {}; room.lang[clientId] = lang === 'en' ? 'en' : 'zh';
     room.played = room.played || {};
     if (Array.isArray(played)) room.played[clientId] = played.slice(0, 10).map(Number);
     socket.data.code = code;
@@ -217,14 +222,24 @@ io.on('connection', (socket) => {
     broadcast(room);
   });
 
+  // 切換語言（標題畫面或遊戲中都可以）
+  socket.on('set_lang', ({ lang } = {}, cb) => {
+    const room = getRoom();
+    if (!room) return cb?.({ ok: true });
+    room.lang = room.lang || {};
+    room.lang[socket.data.clientId] = lang === 'en' ? 'en' : 'zh';
+    broadcast(room);
+    cb?.({ ok: true });
+  });
+
   socket.on('choose_role', ({ role } = {}, cb) => {
     const { room } = ctx();
-    if (!room) return cb?.({ ok: false, error: '尚未加入房間' });
-    if (room.phase !== 'lobby') return cb?.({ ok: false, error: '遊戲已開始' });
-    if (role !== 'A' && role !== 'B') return cb?.({ ok: false, error: '角色無效' });
+    if (!room) return cb?.({ ok: false, error: T('尚未加入房間', 'Not in a room yet') });
+    if (room.phase !== 'lobby') return cb?.({ ok: false, error: T('遊戲已開始', 'The game has already started') });
+    if (role !== 'A' && role !== 'B') return cb?.({ ok: false, error: T('角色無效', 'Invalid character') });
     const clientId = socket.data.clientId;
     const holder = room.players[role];
-    if (holder && holder.clientId !== clientId) return cb?.({ ok: false, error: '這個角色已被對方選走' });
+    if (holder && holder.clientId !== clientId) return cb?.({ ok: false, error: T('這個角色已被對方選走', 'The other player already picked this character') });
     const other = role === 'A' ? 'B' : 'A';
     if (room.players[other]?.clientId === clientId) {
       room.players[other] = null;
@@ -239,9 +254,9 @@ io.on('connection', (socket) => {
   // 兩邊都在線、角色都選好之後，任何一方按 Start 就同時進入第一個場景
   socket.on('start_game', (_p, cb) => {
     const { room, role } = ctx();
-    if (!room || !role) return cb?.({ ok: false, error: '請先選角色' });
+    if (!room || !role) return cb?.({ ok: false, error: T('請先選角色', 'Pick a character first') });
     if (room.phase !== 'lobby') return cb?.({ ok: false });
-    if (!isOnline(room, 'A') || !isOnline(room, 'B')) return cb?.({ ok: false, error: '對方還沒連上' });
+    if (!isOnline(room, 'A') || !isOnline(room, 'B')) return cb?.({ ok: false, error: T('對方還沒連上', 'The other player isn’t connected yet') });
     startGame(room);
     cb?.({ ok: true });
     broadcast(room);
@@ -251,7 +266,7 @@ io.on('connection', (socket) => {
   socket.on('play_again', (_p, cb) => {
     const { room, role } = ctx();
     if (!room || !role || room.phase !== 'ended') return cb?.({ ok: false });
-    if (!isOnline(room, 'A') || !isOnline(room, 'B')) return cb?.({ ok: false, error: '對方還沒連上' });
+    if (!isOnline(room, 'A') || !isOnline(room, 'B')) return cb?.({ ok: false, error: T('對方還沒連上', 'The other player isn’t connected yet') });
     startGame(room);
     cb?.({ ok: true });
     broadcast(room);
@@ -288,7 +303,7 @@ io.on('connection', (socket) => {
     if (res.solved) advance(room);
     broadcast(room);
     // events / solved 只在伺服器內部使用，回給操作者的只有結果和私人訊息
-    cb?.({ ok: res.ok, correct: res.correct, message: res.message });
+    cb?.({ ok: res.ok, correct: res.correct, message: loc(res.message, langOf(room, socket.data.clientId)) });
   });
 
   socket.on('request_hint', (_p, cb) => {
@@ -298,10 +313,12 @@ io.on('connection', (socket) => {
     const step = currentStep(room);
     const lv = room.hintLevels[step] || 0;
     const tiers = scene.hints[step].tiers;
-    if (lv >= tiers.length) return cb?.({ ok: false, error: '沒有更多提示了' });
+    if (lv >= tiers.length) return cb?.({ ok: false, error: T('沒有更多提示了', 'No more hints') });
     room.hintLevels[step] = lv + 1;
-    const tier = typeof tiers[lv] === 'function' ? tiers[lv](room.sceneState) : tiers[lv];
-    room.hintLog = [...room.hintLog, `${TIER_NAME[lv] || '提示'}：${tier}`];
+    const raw = typeof tiers[lv] === 'function' ? tiers[lv](room.sceneState) : tiers[lv];
+    const tier = isT(raw) ? raw : T(String(raw));
+    const tn = TIER_NAME[lv] || T('提示', 'Hint');
+    room.hintLog = [...room.hintLog, T(`${tn.zh}：${tier.zh}`, `${tn.en}: ${tier.en}`)];
     room.hintTotal += 1;
     broadcast(room);
     cb?.({ ok: true });
