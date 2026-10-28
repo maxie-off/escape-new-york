@@ -260,7 +260,8 @@
       const path = ti >= 0 ? `M${ax},${ay} C${ax},${ay - 120} ${WX(ti)},${420} ${WX(ti)},308` : `M${ax},${ay} C${ax},${ay - 60} ${ax + 26},${ay - 70} ${ax + 18},${ay - 104}`;
       const tip = ti >= 0 ? '' : `<circle cx="${ax + 18}" cy="${ay - 106}" r="5" fill="#d9822b" ${A.st(1.5)}/>`;
       const flip = ui.selWire === w.line;
-      const tag = `<g class="hot" data-hot="wire-${w.line}" transform="translate(${ax - 30},${ay - 78})"><rect width="44" height="30" rx="5" fill="${flip ? '#fff6cf' : '#fff'}" ${A.st(2)} transform="rotate(-6 22 15)"/>
+      const frame = w.powered ? '' : `<rect x="-5" y="-5" width="54" height="40" rx="8" fill="none" stroke="#ffd23f" stroke-width="4" transform="rotate(-6 22 15)"/>`; // 黃框：提示牌子可以點
+      const tag = `<g class="hot" data-hot="wire-${w.line}" transform="translate(${ax - 30},${ay - 78})">${frame}<rect width="44" height="30" rx="5" fill="${flip ? '#fff6cf' : '#fff'}" ${A.st(2)} transform="rotate(-6 22 15)"/>
           ${flip ? `<text x="22" y="21" text-anchor="middle" font-size="15" fill="${INK}" ${HELV}>CH ${w.ch}</text>` : bullet(22, 15, 11, w.line)}
           ${flip ? `<rect class="pulse" x="-4" y="-4" width="52" height="38" rx="7" fill="none" stroke="#ffd23f" stroke-width="4"/>` : ''}</g>`;
       return `<path d="${path}" fill="none" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="${path}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round"/>${tip}${tag}`;

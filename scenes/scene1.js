@@ -11,14 +11,14 @@
 // 電腦密碼：1A2B 猜字遊戲。每種變化用不同的兩個代號字母（A/B、X/Z、P/Q…），
 // 第一個代號＝字母對、位置也對；第二個代號＝字母對、位置不對。代號的意思不直接寫出來：
 // Slothy 衣櫃上的紙左半邊是「10 月 1 日」一整局完整紀錄（最後寫出 answer），玩家從這局倒推代號的意思；
-// 右半邊「10 月 3 日」有今天的前三個猜測，Raccoony 書桌上的紙也寫著「10 月 3 日」、有後三個猜測。
-// （已用英文字典驗證：六條合起來只剩一個答案，任何一半單獨都不只一個。）
+// 右半邊「10 月 3 日」有今天的前四個猜測，Raccoony 書桌上的紙也寫著「10 月 3 日」、有後三個猜測。
+// （已用英文字典驗證：七條合起來只剩一個答案，任何一半單獨都不只一個。）
 const PW = [
-  { ans: 'acid', guesses: ['bold', 'pony', 'able', 'milk', 'east', 'cold'], tag: ['A', 'B'], demo: { ans: 'node', guesses: ['snow', 'nick', 'dove', 'done'] } },
-  { ans: 'mint', guesses: ['glow', 'kind', 'horn', 'swim', 'plum', 'beat'], tag: ['X', 'Z'], demo: { ans: 'cake', guesses: ['lime', 'peak', 'bark', 'acme'] } },
-  { ans: 'frog', guesses: ['chip', 'fuel', 'fond', 'sock', 'page', 'word'], tag: ['P', 'Q'], demo: { ans: 'fish', guesses: ['wolf', 'shin', 'dish', 'fist'] } },
-  { ans: 'lamp', guesses: ['loud', 'grab', 'sail', 'town', 'beat', 'rope'], tag: ['K', 'M'], demo: { ans: 'road', guesses: ['dart', 'cord', 'read', 'load'] } },
-  { ans: 'wave', guesses: ['chip', 'slow', 'very', 'land', 'fast', 'path'], tag: ['S', 'T'], demo: { ans: 'bird', guesses: ['crab', 'grid', 'brim', 'bind'] } },
+  { ans: 'acid', guesses: ['bold', 'pony', 'able', 'dime', 'milk', 'east', 'cold'], tag: ['A', 'B'], demo: { ans: 'node', guesses: ['snow', 'nick', 'dove', 'done'] } },
+  { ans: 'mint', guesses: ['glow', 'kind', 'horn', 'gift', 'swim', 'plum', 'beat'], tag: ['X', 'Z'], demo: { ans: 'cake', guesses: ['lime', 'peak', 'bark', 'acme'] } },
+  { ans: 'frog', guesses: ['chip', 'fuel', 'fond', 'farm', 'sock', 'page', 'word'], tag: ['P', 'Q'], demo: { ans: 'fish', guesses: ['wolf', 'shin', 'dish', 'fist'] } },
+  { ans: 'lamp', guesses: ['loud', 'grab', 'sail', 'soap', 'town', 'beat', 'rope'], tag: ['K', 'M'], demo: { ans: 'road', guesses: ['dart', 'cord', 'read', 'load'] } },
+  { ans: 'wave', guesses: ['chip', 'slow', 'very', 'five', 'land', 'fast', 'path'], tag: ['S', 'T'], demo: { ans: 'bird', guesses: ['crab', 'grid', 'brim', 'bind'] } },
 ];
 // 回傳 [位置對, 字母對但位置不對]
 function counts(g, ans) {
@@ -67,7 +67,7 @@ function build(v) {
     { id: 'paper1', kind: 'log', note: '10/3 那局最後差點猜到 Slothy 的答案……就把它設成電腦密碼了。',
       days: [
         { date: '10 月 1 日', rows: [...pw.demo.guesses, pw.demo.ans].map((g) => row(g, pw.demo.ans, pw.tag)), answer: pw.demo.ans.toUpperCase() },
-        { date: '10 月 3 日', rows: pw.guesses.slice(0, 3).map((g) => row(g, pw.ans, pw.tag)), answer: '????' },
+        { date: '10 月 3 日', rows: pw.guesses.slice(0, 4).map((g) => row(g, pw.ans, pw.tag)), answer: '????' },
       ] },
     { id: 'paper2', kind: 'map', title: '🗺️ 衣櫃地圖', note: '抽屜從上往下數！', rows: Object.entries(drawers).map(([n, d]) => ({ n: Number(n), emoji: d.emoji, item: d.item })) },
   ];
@@ -89,7 +89,7 @@ function build(v) {
       ] },
     ],
   };
-  const deskPaper = { date: '10 月 3 日（續）', rows: pw.guesses.slice(3).map((g) => row(g, pw.ans, pw.tag)) };
+  const deskPaper = { date: '10 月 3 日（續）', rows: pw.guesses.slice(4).map((g) => row(g, pw.ans, pw.tag)) };
   return { password: pw.ans, tag: pw.tag, drawers, keyDrawer, papers, notion, deskPaper, codes: CASE_CODES[v] };
 }
 const BUILT = Array.from({ length: NV }, (_, v) => build(v));

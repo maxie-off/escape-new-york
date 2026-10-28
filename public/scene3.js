@@ -276,14 +276,14 @@
     </g>`;
   }
   function roomB() {
-    const [p1, p2, p3] = data.police;
+    const [p1, p2] = data.police;
     const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="500" cy="560" rx="200" ry="110" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
     const pulseBtn = ui.seen.case && !ui.seen.pick ? `<rect class="pulse" x="350" y="10" width="300" height="72" rx="36" fill="none" stroke="#ff5a5f" stroke-width="5"/>` : '';
     return `${SVG_OPEN('警察圍著打開的行李箱')}${lightsAndCeiling()}${floor()}
       ${crowd(8, 51, 470, 520)}
       ${dim()}
       ${cop(250, 560, 0.86)}${cop(760, 556, 0.86, '#232d63')}${cop(880, 640, 0.92)}
-      ${bubble(60, 120, 330, p1, 250, 300)}${bubble(600, 110, 330, p2, 760, 296)}${bubble(560, 252, 400, p3, 860, 380)}
+      ${bubble(60, 120, 330, p1, 250, 300)}${bubble(600, 110, 330, p2, 760, 296)}
       <g class="hot" data-hot="case">${openSuitcase(500, 590, 1)}${pulse}</g>
       ${A.slothy(110, 692, 0.95)}
       <g class="hot" data-hot="pick"><rect x="360" y="18" width="280" height="56" rx="28" fill="#ffd23f" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>選擇登機口</text>${pulseBtn}</g>

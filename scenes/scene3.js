@@ -59,7 +59,6 @@ const BOARDS = VARIANTS.map((_, v) => buildBoard(v));
 const POLICE = [
   ['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成他。'],
   ['行李裡裝的是主人的', '衣服和隨身物品。'],
-  ['從衣服看天氣、從東西看活動，', '就能推理他要飛去哪裡！'],
 ];
 
 function init(v = 0) { return { v, solved: false }; }

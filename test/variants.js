@@ -32,7 +32,7 @@ for (let v = 0; v < 5; v++) {
   assert.equal(d1.answer, sol.demo.ans.toUpperCase()); // 10/1 有完整答案，用來倒推代號
   assert.equal(d1.rows[d1.rows.length - 1].fb, `4${sol.tag[0]}0${sol.tag[1]}`);
   assert.ok(d1.rows.some((r) => r.fb[2] !== '0' && r.fb[0] === '0'), `bedroom v${v} 範例要有只有「位置不對」的一行`);
-  assert.equal(d3.rows.length, 3); assert.equal(A1.deskPaper.rows.length, 3);
+  assert.equal(d3.rows.length, 4); assert.equal(A1.deskPaper.rows.length, 3);
   assert.ok(A1.deskPaper.date.includes('10 月 3 日'));
   assert.ok(!json(A1).includes(sol.demo.ans.toUpperCase()), 'A 不該看到 10/1 那局');
   sol.guesses.forEach((g) => assert.ok(!g.split('').every((ch, i) => ch === sol.password[i])));
