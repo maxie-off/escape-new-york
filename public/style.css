@@ -400,3 +400,5 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 @keyframes s3-zoom-in { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
 
 .logo .amp { display: block; font-size: .5em; margin: .05em 0; }
+
+.ticket .t-note { margin: -2px 16px 8px; font-size: 12px; font-weight: 400; color: #9aa0a8; text-align: right; }

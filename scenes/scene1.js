@@ -54,8 +54,6 @@ const CASE_CODES = [
 ];
 const NV = PW.length;
 
-// 書桌牆上的便條紙（奇異筆字）
-const DESK_NOTE = '記得提前登機時間 2 小時到達機場';
 const NOTE2 = ['護照放在床底下的箱子裡'];
 
 function build(v) {
@@ -155,7 +153,7 @@ function init(v = 0) {
 function view(state, role) {
   const B = BUILT[state.v];
   if (role === 'A') {
-    return { role, pcUnlocked: state.pcUnlocked, notion: state.pcUnlocked ? B.notion : null, ticketTaken: state.ticketTaken, deskNote: DESK_NOTE, note2: NOTE2, deskPaper: B.deskPaper, sheets: sheetsOf(state.v),
+    return { role, pcUnlocked: state.pcUnlocked, notion: state.pcUnlocked ? B.notion : null, ticketTaken: state.ticketTaken, note2: NOTE2, deskPaper: B.deskPaper, sheets: sheetsOf(state.v),
       resonate: state.armed ? state.armed.n : null, // Slothy 按了準備：Raccoony 的吉他會自己震動
       struck: state.struck };
   }

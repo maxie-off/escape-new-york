@@ -13,7 +13,7 @@ const MAX_GATE = 60;
 
 // 十大旅遊勝地（新聞內容；A 看得到）
 const DESTS = [
-  { id: 'syd', zh: '雪梨', en: 'SYDNEY', country: '澳洲', news: '南半球，季節和紐約相反。12～2 月是盛夏，邦代海灘是衝浪天堂；6～8 月是冬天。' },
+  { id: 'syd', zh: '雪梨', en: 'SYDNEY', country: '澳洲', news: '南半球，天氣和季節都和紐約相反。邦代海灘是衝浪天堂，豔陽高照。' },
   { id: 'hok', zh: '北海道', en: 'SAPPORO', country: '日本', news: '12～3 月大雪紛飛，二世谷是世界知名的滑雪場；7 月薰衣草花田盛開。' },
   { id: 'zqn', zh: '皇后鎮', en: 'QUEENSTOWN', country: '紐西蘭', news: '南半球。6～9 月是滑雪季；12～2 月夏天最適合玩高空彈跳。' },
   { id: 'rek', zh: '雷克雅維克', en: 'REYKJAVIK', country: '冰島', news: '9～3 月夜晚很長，帶上腳架和相機追極光；夏天幾乎沒有黑夜。' },
@@ -58,7 +58,6 @@ const BOARDS = VARIANTS.map((_, v) => buildBoard(v));
 
 const POLICE = [
   ['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成他。'],
-  ['行李裡裝的是主人的', '衣服和隨身物品。'],
 ];
 
 function init(v = 0) { return { v, solved: false }; }

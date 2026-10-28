@@ -213,7 +213,7 @@ const waitState = (s, pred) =>
     // A：看板（日期 + 10 個航班）+ 新聞；B：打開的行李箱（衣物與物品）+ 警察的話
     assert.ok(s3a.scene.data.role === 'A' && s3a.scene.data.flights.length === 10 && s3a.scene.data.news.list.length === 10 && s3a.scene.data.date.m === 1);
     assert.ok(!s3a.scene.data.items, 'A 看不到行李內容');
-    assert.ok(s3b.scene.data.role === 'B' && s3b.scene.data.items.some((x) => x.id === 'wetsuit') && s3b.scene.data.police.length === 2);
+    assert.ok(s3b.scene.data.role === 'B' && s3b.scene.data.items.some((x) => x.id === 'wetsuit') && s3b.scene.data.police.length === 1);
     assert.ok(!s3b.scene.data.flights && !s3b.scene.data.news, 'B 看不到看板與新聞');
     const sydGate = s3a.scene.data.flights.find((f) => f.dest === 'SYDNEY').gate;
     const otherGate = s3a.scene.data.flights.find((f) => f.dest === 'LISBON').gate; // 夏天衝浪的誘答（紐約 1 月是冬天）

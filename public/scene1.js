@@ -10,7 +10,7 @@
   const FONT = A.FONT;
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-  const fresh = () => ({ view: 0, gt: null, pw: [0, 0, 0, 0], strumming: false, glowCase: null, armed: null, resoUntil: 0, cw: { plane: [0, 0, 0, 0], secret: [0, 0, 0, 0], love: [0, 0, 0, 0] }, cErr: '', shake: false, modal: null, awake: false, pwOpen: false, notionOpen: false, page: 0, seen: {}, pwErr: '', dErr: '' });
+  const fresh = () => ({ view: 0, gt: null, dw: [0, 0, 0, 0], dShake: false, pw: [0, 0, 0, 0], strumming: false, glowCase: null, armed: null, resoUntil: 0, cw: { plane: [0, 0, 0, 0], secret: [0, 0, 0, 0], love: [0, 0, 0, 0] }, cErr: '', shake: false, modal: null, awake: false, pwOpen: false, notionOpen: false, page: 0, seen: {}, pwErr: '', dErr: '' });
   let ui = fresh();
   let ctx = null; // { you, send(action) -> Promise, say(text, opts) }
   let data = null;
@@ -57,7 +57,6 @@
       <rect x="330" y="46" width="100" height="104" rx="16" fill="#d3dde4" ${ST}/><rect x="330" y="118" width="100" height="32" fill="#2a2a30" ${ST}/>
       <path d="M430,64 C484,70 478,128 430,134" fill="none" stroke="${INK}" stroke-width="14" stroke-linecap="round"/>
       ${books}
-      <g class="hot" data-hot="note"><g transform="rotate(-2 435 236)"><rect x="390" y="196" width="90" height="80" fill="#fff3a0" ${ST2}/><path d="M400,214 q12,-9 24,0 t24,0 t18,0 M402,230 q14,-9 28,0 t26,0 M402,246 q10,-9 20,0 t20,0 t22,0 M404,262 q12,-8 24,0 t20,0" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/></g>${ui.seen.note ? '' : `<rect class="pulse" x="380" y="188" width="110" height="96" rx="6" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}</g>
       <g class="hot" data-hot="note2"><g transform="rotate(3 600 218)"><rect x="556" y="176" width="90" height="80" fill="#ffe9a0" ${ST2}/><path d="M568,196 h62 M568,210 h58 M568,224 h64" stroke="${INK}" stroke-width="2.6" opacity=".6"/></g>${ui.seen.note2 ? '' : `<rect class="pulse" x="546" y="168" width="110" height="96" rx="6" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}</g>
       <rect x="-900" y="512" width="2800" height="198" fill="#c98a4c" ${ST}/>
       ${[120, 300, 520, 760, 900].map((x) => `<path d="M${x},530 q60,6 130,0 M${x + 30},640 q50,8 110,0" fill="none" stroke="#a96a2f" stroke-width="3" opacity=".6"/>`).join('')}
@@ -363,7 +362,6 @@
 
   // ---------- 彈出層內容 ----------
   function paperHtml(id) {
-    if (id === 'note') return `<div class="paper marker">${esc(data.deskNote)}</div>`;
     if (id === 'paper3') return `<div class="paper lined log">${logDay(data.deskPaper)}${alphabet()}</div>`;
     if (id === 'note2') return `<div class="paper marker">${data.note2.map(esc).join('<br>')}</div>`;
     const p = data.papers.find((x) => x.id === id);
@@ -410,8 +408,10 @@
   }
 
   function drawerHtml(n) {
-    return `<h2>第 ${n} 格抽屜</h2><p>抽屜上有一個 4 位數字鎖。</p>
-      <div class="row"><input id="dcode" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off"/><button class="primary" data-act="dsubmit">打開</button></div>
+    const wheels = ui.dw.map((d, i) => `<div class="wheel"><button data-act="dup" data-i="${i}">▲</button><div class="digit">${d}</div><button data-act="ddown" data-i="${i}">▼</button></div>`).join('');
+    return `<h2>第 ${n} 格抽屜</h2><p>抽屜上有一個 4 位數字的滾輪鎖。</p>
+      <div class="wheels${ui.dShake ? ' shake' : ''}">${wheels}</div>
+      <div class="row center"><button class="primary big" data-act="dsubmit">打開</button></div>
       <p class="err">${esc(ui.dErr)}</p>`;
   }
 
@@ -451,6 +451,8 @@
       case 'closenotion': ui.notionOpen = false; return renderModal();
       case 'page': ui.page = Number(t.dataset.i); return renderModal();
       case 'dsubmit': return submitDrawer();
+      case 'dup': { const i = Number(t.dataset.i); ui.dw[i] = (ui.dw[i] + 1) % 10; return renderModal(); }
+      case 'ddown': { const i = Number(t.dataset.i); ui.dw[i] = (ui.dw[i] + 9) % 10; return renderModal(); }
       case 'gt': ui.gt = t.dataset.id; return renderModal();
       case 'cup': { const a = ui.cw[ui.modal.id], i = Number(t.dataset.i); a[i] = (a[i] + 1) % 7; return renderModal(); }
       case 'cdown': { const a = ui.cw[ui.modal.id], i = Number(t.dataset.i); a[i] = (a[i] + 6) % 7; return renderModal(); }
@@ -501,14 +503,12 @@
   }
   function endArm() { clearInterval(ui.armTick); clearTimeout(ui.armEnd); ui.armed = null; }
   async function submitDrawer() {
-    const code = document.getElementById('dcode')?.value || '';
-    if (code.length !== 4) { ui.dErr = '請輸入 4 位數字'; return renderModal(); }
+    const code = ui.dw.join('');
     const n = ui.modal.n;
     const res = await ctx.send({ type: 'drawer_code', drawer: n, code });
     if (res && res.correct === false) {
-      ui.dErr = '密碼錯誤';
-      renderModal();
-      const i = document.getElementById('dcode'); if (i) { i.value = ''; i.focus(); }
+      ui.dErr = '密碼錯誤'; ui.dShake = true; renderModal();
+      setTimeout(() => { ui.dShake = false; if (ui.modal) renderModal(); }, 450);
     } else { ui.dErr = ''; ui.modal = null; renderModal(); }
   }
 
@@ -520,8 +520,6 @@
     if (h === 'pc') {
       ui.awake = true; ui.pwOpen = false; ui.pwErr = ''; ui.modal = { type: 'pc' };
       draw();
-    } else if (h === 'note') {
-      ui.seen.note = true; ui.modal = { type: 'paper', id: 'note' }; draw();
     } else if (h === 'nav-right' || h === 'nav-left') {
       ui.seen.nav = true; ui.view = h === 'nav-right' ? 1 : 0; ui.modal = null; draw();
     } else if (h === 'paper3') {
@@ -545,8 +543,7 @@
     } else if (h.startsWith('drawer-')) {
       const n = Number(h.slice(7));
       if (data.drawers[n].open) return ctx.say(data.drawers[n].contents, { now: true });
-      ui.dErr = ''; ui.modal = { type: 'drawer', n }; renderModal();
-      document.getElementById('dcode')?.focus();
+      ui.dErr = ''; ui.dw = [0, 0, 0, 0]; ui.modal = { type: 'drawer', n }; renderModal();
     } else if (h === 'knob') {
       ctx.send({ type: 'door_unlock' });
     }

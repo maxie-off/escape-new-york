@@ -37,7 +37,7 @@
   function ticketHtml(d) {
     const f = (k, zh, v) => `<div class="tf"><small>${zh} ${k}</small><b>${esc(v)}</b></div>`;
     return `<div class="ticket"><div class="t-head">✈ ${esc(d.airline.toUpperCase())}</div>
-      <div class="t-body">${f('FLIGHT', '航班', d.flight)}${f('AIRPORT', '機場', d.airport)}${f('TO', '目的地', d.to)}${f('BOARDING', '登機時間', d.boarding)}</div>
+      <div class="t-body">${f('FLIGHT', '航班', d.flight)}${f('AIRPORT', '機場', d.airport)}${f('TO', '目的地', d.to)}${f('BOARDING', '登機時間', d.boarding)}</div>${d.note ? `<div class="t-note">${esc(d.note)}</div>` : ''}
       <div class="t-bar">${Array.from({ length: 34 }, (_, i) => `<i style="width:${1 + ((i * 7) % 4)}px"></i>`).join('')}</div></div>`;
   }
 

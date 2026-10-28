@@ -8,7 +8,7 @@
 //      接錯：閘門跳回去、那列閃紅光。接對：那列亮起來，但滿是雜訊。
 //   2. Raccoony 把那列的旋鈕轉到電線牌背面的頻道（只有 Slothy 看得到），雜訊才消失、資訊完整顯示。
 //   3. 五列全亮，Slothy 才能選路線。
-// 解法：登機時間 − 2 小時（便條）＝最晚到機場；地圖看機場在哪一區；路人說的車程 → 最晚上車時間 → 往那一區、來得及的那一線。
+// 解法：登機時間 − 2 小時（機票上的小字）＝最晚到機場；地圖看機場在哪一區；路人說的車程 → 最晚上車時間 → 往那一區、來得及的那一線。
 //       同一區另有一條會遲到；往別區的某一線時間剛好對上「別的機場」的車程（誤導）。
 // 祕密（正確路線、符號、頻道）只存在伺服器；前端只會收到「該角色此刻看得到」的內容。
 
@@ -161,7 +161,7 @@ function answers(state) {
   const fix = LINES.filter((l) => l !== vv.lit).map((l) => `${l} 線＝${SYM_ZH[vv.sym[l]]}、頻道 ${vv.ch[l]}`).join('；');
   return {
     fix: `${fix}。`,
-    clue: `機票 ${clock(vv.boarding)} 從 ${vv.airport} 登機、便條說提前 2 小時，所以 ${clock(arrive)} 前要到 ${vv.airport}；地圖上 ${vv.airport} 在 ${vv.map[vv.airport]}；路人說要 ${vv.travel[vv.airport]} 分鐘，所以 ${clock(latest)} 前要上車（${latest - vv.now} 分鐘內）。`,
+    clue: `機票 ${clock(vv.boarding)} 從 ${vv.airport} 登機、機票上寫著要提前 2 小時到，所以 ${clock(arrive)} 前要到 ${vv.airport}；地圖上 ${vv.airport} 在 ${vv.map[vv.airport]}；路人說要 ${vv.travel[vv.airport]} 分鐘，所以 ${clock(latest)} 前要上車（${latest - vv.now} 分鐘內）。`,
     line: `${vv.answer} 線：往 ${vv.map[vv.airport]}，${vv.rows.find((r) => r[0] === vv.answer)[2]} 分鐘後就進站。`,
   };
 }
