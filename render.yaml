@@ -1,0 +1,9 @@
+# Render.com 一鍵部署（Blueprint）：推到 GitHub → Render「New +」→「Blueprint」→ 選這個 repo → 完成後得到 https://xxxx.onrender.com
+services:
+  - type: web
+    name: raccoony-slothy
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz

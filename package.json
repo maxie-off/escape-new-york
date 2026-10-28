@@ -1,0 +1,20 @@
+{
+  "name": "escape-nyc-taipei",
+  "version": "0.1.0",
+  "description": "\u4e24\u4eba\u7ebf\u4e0a\u5408\u4f5c\u5bc6\u5ba4\u9003\u8131\uff1a\u7ebd\u7ea6 \u2192 \u53f0\u5317",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/variants.js && node test/smoke.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.7.5"
+  }
+}

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#1b1b1f" />
+  <title>Raccoony & Slothy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Caveat:wght@600&family=Comic+Neue:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 封面 -->
+  <section id="title" class="screen" hidden>
+    <div class="bg" id="title-bg"></div>
+    <div class="title-ui">
+      <h1 class="logo">Raccoony and Slothy<small>Escape New York</small></h1>
+      <button id="btn-title-start" class="big-btn">Start</button>
+    </div>
+  </section>
+
+  <!-- 選角色 + 房間碼 -->
+  <section id="setup" class="screen" hidden>
+    <div class="bg" id="setup-bg"></div>
+    <div class="setup-grid">
+      <div class="panel" id="panel-role">
+        <h2>選擇角色</h2>
+        <div class="role-row" id="roles"></div>
+      </div>
+      <div class="panel" id="panel-room">
+        <h2>房間碼</h2>
+        <button id="btn-gen" class="primary big">Generate</button>
+        <div id="room-code" class="code empty" title="點一下複製">------</div>
+        <div class="or">或輸入對方給你的房間碼</div>
+        <form id="join-form" class="row">
+          <input id="code-input" maxlength="6" placeholder="例如 ABC123" autocomplete="off" autocapitalize="characters" />
+          <button class="primary">加入</button>
+        </form>
+        <p id="room-status"></p>
+      </div>
+    </div>
+    <button id="btn-start" class="huge" disabled>Start</button>
+    <p id="setup-hint" class="setup-hint"></p>
+  </section>
+
+  <!-- 結尾 -->
+  <section id="ending" hidden></section>
+
+  <!-- 遊戲：整個畫面只有場景本身 -->
+  <section id="game" hidden>
+    <div id="stage"></div>
+
+    <!-- 文字謎題（場景 2、3 目前的佔位形式） -->
+    <div id="legacy" hidden>
+      <div class="card">
+        <h3>你看到的線索（<span id="you-role"></span>）</h3>
+        <ul id="clues"></ul>
+        <form id="answer-form">
+          <label id="prompt"></label>
+          <div class="row">
+            <input id="answer-input" autocomplete="off" />
+            <button class="primary">提交</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="hud">
+      <button id="btn-docs" aria-label="收藏文件" hidden>📁<span class="badge"></span></button>
+      <button id="btn-hint" aria-label="提示">💡</button>
+      <button id="btn-mute" aria-label="音樂開關">🔊</button>
+    </div>
+  </section>
+
+  <div id="subtitle" aria-live="polite"></div>
+  <div id="modal" hidden></div>
+  <div id="docs-layer" hidden></div>
+  <div id="toast" aria-live="polite"></div>
+  <p id="conn" class="conn"></p>
+  <div id="rotate"><div>📱↻<br>請把 iPad 橫放來玩</div></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="art.js"></script>
+  <script src="music.js"></script>
+  <script src="scene0.js"></script>
+  <script src="scene1.js"></script>
+  <script src="scene2.js"></script>
+<script src="scene3.js"></script>
+  <script src="docs.js"></script>
+  <script src="title.js"></script>
+  <script src="ending.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
