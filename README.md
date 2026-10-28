@@ -14,7 +14,7 @@ The 💡 button gives hints in three steps for whichever puzzle you're stuck on:
 
 Every puzzle has five versions (different colors and shapes, passwords, drawer, suitcase codes, train times, library year, page codes and gate). Each game picks one version per scene at random and avoids the ones either player had last time, so answers from a previous run don't carry over. Press "再玩一次" on the ending screen to play again with new puzzles.
 
-Chinese text uses GenSeki Gothic (源石黑體, SIL Open Font License, see `public/fonts/OFL-GenSeki.txt`). The font files in `public/fonts/` only contain the characters the game uses. If you change any text, rerun `python3 tools/subset-fonts.py <path to a clone of github.com/ButTaiwan/genseki-font>`.
+Fonts are served from `public/fonts/` (all SIL Open Font License): Press Start 2P for the pixel-style title screen, Bebas Neue for headings, Nunito for body text, and GenSeki Gothic (源石黑體) for Chinese. The font files in `public/fonts/` only contain the characters the game uses. If you change any text, rerun `python3 tools/subset-fonts.py <path to a clone of github.com/ButTaiwan/genseki-font>`.
 
 The game is in Traditional Chinese or English. Pick a language with the buttons at the top right of the title screen. Each player chooses their own, so one player can play in Chinese and the other in English. All text the server sends (subtitles, hints, papers, the news, the boards) is written as `T('中文', 'English')` and translated per player; client-only text uses `tr('中文', 'English')` from `public/i18n.js`.
 

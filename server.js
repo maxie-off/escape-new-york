@@ -13,6 +13,12 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// 首頁：每次部署都在 js/css 網址後面加版本號，避免 iPad Safari 用到舊的快取檔案（新舊混用會整頁白掉）
+const fs = require('fs');
+const BUILD = Date.now().toString(36);
+const indexHtml = () => fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8')
+  .replace(/(src|href)="((?!\/socket\.io|https?:)[^"]+\.(?:js|css))"/g, `$1="$2?v=${BUILD}"`);
+app.get(['/', '/index.html'], (_req, res) => { res.set('Cache-Control', 'no-cache'); res.type('html').send(indexHtml()); });
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/healthz', (_req, res) => res.send('ok'));
 

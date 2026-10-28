@@ -18,7 +18,9 @@ let subQueue = [];
 let subShowing = false;
 let subTimer = null;
 // 字幕不放 emoji（伺服器的事件文字有些開頭帶圖示，這裡統一拿掉）
-const noEmoji = (t) => String(t).replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}]\uFE0F?/gu, '').replace(/\s{2,}/g, ' ').trim();
+// 注意：不用 \p{Extended_Pictographic}，舊版 iPad Safari 不支援，整支程式會無法執行（白畫面）
+const EMOJI_RE = /(?:[\u2300-\u23FF\u2460-\u27BF\u2900-\u297F\u2B00-\u2BFF\u3297\u3299]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF])\uFE0F?/g;
+const noEmoji = (t) => String(t).replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim();
 function say(text, { ms, now } = {}) {
   if (!text) return;
   text = noEmoji(text);

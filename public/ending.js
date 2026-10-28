@@ -158,7 +158,7 @@
   // ---------------- 黑幕：字幕打在正中間，跑完就進下一幕 ----------------
   function mountBlack(root, info) {
     const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    const text = String((info && info.text) || '').replace(/[\p{Extended_Pictographic}]\uFE0F?/gu, '').trim();
+    const text = String((info && info.text) || '').replace(/(?:[\u2300-\u23FF\u2460-\u27BF\u2900-\u297F\u2B00-\u2BFF\u3297\u3299]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF])\uFE0F?/g, '').trim(); // 不用 \p{…}，舊版 Safari 不支援
     root.innerHTML = `<div class="end-blackcard"><p>${esc(text)}</p></div>`;
   }
 

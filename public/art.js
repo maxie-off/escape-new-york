@@ -3,7 +3,7 @@
 window.Art = (function () {
   const INK = '#1b1b1f';
   const st = (w = 4) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
-  const FONT = `font-family="'Comic Neue','Comic Sans MS','GenSeki','PingFang TC','Noto Sans TC',sans-serif" font-weight="700"`;
+  const FONT = `font-family="'Nunito','GenSeki','PingFang TC','Noto Sans TC',sans-serif" font-weight="700"`;
 
   // 坐姿：屁股底部中心為 (0,0)，高約 170
   // 福爾摩斯獵鹿帽（正面）：深灰人字紋毛呢、前後帽簷、兩側耳罩往上綁、頂上一個黑色蝴蝶結

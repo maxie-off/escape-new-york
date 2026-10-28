@@ -1,3 +1,9 @@
+/* 英文字體（SIL OFL，放在 public/fonts/）：Press Start 2P（封面像素字）、Bebas Neue（標題）、Nunito（內文） */
+@font-face { font-family: 'Press Start 2P'; src: url('fonts/press-start-2p.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Bebas Neue'; src: url('fonts/bebas-neue.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Nunito'; src: url('fonts/nunito-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Nunito'; src: url('fonts/nunito-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Nunito'; src: url('fonts/nunito-800.woff2') format('woff2'); font-weight: 800 900; font-display: swap; }
 /* 中文字體：源石黑體 GenSeki Gothic 2 TW（SIL OFL，public/fonts/OFL-GenSeki.txt），只含遊戲用到的字（tools/subset-fonts.py） */
 @font-face { font-family: 'GenSeki'; src: url('fonts/genseki-R.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'GenSeki'; src: url('fonts/genseki-B.woff2') format('woff2'); font-weight: 700; font-display: swap; }
@@ -7,8 +13,8 @@
 :root {
   --ink: #1b1b1f; --paper: #fff7e0; --yellow: #ffd23f; --red: #ff5a5f; --blue: #3aa0ff; --muted: #5d5a52;
   --shadow: 4px 4px 0 var(--ink);
-  --display: 'Bangers', 'GenSekiH', 'GenSeki', 'PingFang TC', 'Noto Sans TC', sans-serif;
-  --body: 'Comic Neue', 'GenSeki', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif;
+  --display: 'Bebas Neue', 'GenSekiH', 'GenSeki', 'PingFang TC', 'Noto Sans TC', sans-serif;
+  --body: 'Nunito', 'GenSeki', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; margin: 0; overflow: hidden; }
@@ -85,13 +91,13 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 .err { color: #c0262c; min-height: 1.3em; margin: 6px 0 0; }
 
 .paper { padding: 18px 22px; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); background: #fff; }
-.paper.note { background: #ffe66d; transform: rotate(-1.2deg); font-family: 'Caveat', 'Comic Neue', 'GenSeki', 'PingFang TC', cursive; font-size: 23px; line-height: 1.5; }
+.paper.note { background: #ffe66d; transform: rotate(-1.2deg); font-family: 'Nunito', 'GenSeki', 'PingFang TC', cursive; font-size: 23px; line-height: 1.5; }
 .paper.note h4 { margin: 0 0 8px; font-size: 24px; } .paper.note p { margin: 4px 0; }
 .cal-head { background: var(--red); color: #fff; font: 400 28px var(--display); letter-spacing: .08em; padding: 4px 12px; margin: -18px -22px 10px; border-bottom: 3px solid var(--ink); }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
 .cal-grid .dow { color: var(--muted); font-size: 14px; } .cal-grid .d { padding: 5px 0; }
 .cal-grid .d.circ { border: 3px solid var(--red); border-radius: 50%; color: var(--red); transform: rotate(-6deg); }
-.cal-note { font-family: 'Caveat', 'Comic Neue', cursive; font-size: 24px; margin: 10px 0 0; color: #b0262c; }
+.cal-note { font-family: 'Nunito', 'GenSeki', sans-serif; font-size: 24px; margin: 10px 0 0; color: #b0262c; }
 
 /* 電腦畫面 */
 .mon { background: #1f2433; border: 4px solid var(--ink); border-radius: 12px; padding: 10px; }
@@ -166,7 +172,7 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 @keyframes tbc { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 /* 手寫紙（橫線筆記本）與衣櫃地圖 */
-.paper.lined { background: #fffef9 repeating-linear-gradient(transparent 0 43px, #9db9e6 43px 45px); transform: rotate(-.8deg); padding: 10px 26px 14px; font-family: 'Caveat', 'Comic Neue', 'GenSeki', 'PingFang TC', cursive; font-size: 29px; line-height: 45px; white-space: pre-wrap; }
+.paper.lined { background: #fffef9 repeating-linear-gradient(transparent 0 43px, #9db9e6 43px 45px); transform: rotate(-.8deg); padding: 10px 26px 14px; font-family: 'Nunito', 'GenSeki', 'PingFang TC', cursive; font-size: 29px; line-height: 45px; white-space: pre-wrap; }
 .paper.lined p { margin: 0; } .paper.lined s { text-decoration-thickness: 3px; }
 .paper.map { background: #dff0ff; max-width: 360px; margin: 0 auto; text-align: center; }
 .paper.map h4 { margin: 0 0 4px; font-size: 22px; } .map-top, .map-note { margin: 4px 0; color: var(--muted); }
@@ -387,7 +393,7 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 
 /* 1A2B 紙上的 a~z 筆記（點了劃掉，兩人同步） */
 .log-abc { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 10px; padding-top: 8px; border-top: 2px dashed #9db9e6; line-height: 1; }
-.log-abc button { width: 32px; height: 36px; min-width: 0; padding: 0; margin: 0; box-shadow: none !important; transform: none !important; border: 2px solid transparent; border-radius: 8px; background: transparent !important; font: 700 28px 'Caveat', 'Comic Neue', cursive; color: var(--ink); cursor: pointer; position: relative; }
+.log-abc button { width: 32px; height: 36px; min-width: 0; padding: 0; margin: 0; box-shadow: none !important; transform: none !important; border: 2px solid transparent; border-radius: 8px; background: transparent !important; font: 700 22px 'Nunito', sans-serif; color: var(--ink); cursor: pointer; position: relative; }
 .log-abc button:hover { border-color: #9db9e6; }
 .log-abc button.x-out { color: #b5b5b5; }
 .log-abc button.x-out::before { content: ''; position: absolute; left: 3px; right: 3px; top: 50%; height: 3px; background: #c5262c; transform: rotate(20deg); border-radius: 2px; }
@@ -407,3 +413,15 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 .lang-pick { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 14px); right: calc(env(safe-area-inset-right, 0px) + 14px); display: flex; gap: 8px; z-index: 3; }
 .lang-pick button { font: 700 16px var(--body); padding: .35em .9em; border: 3px solid var(--ink); border-radius: 999px; background: rgba(255,255,255,.85); color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
 .lang-pick button.on { background: var(--yellow); }
+
+/* 字體：封面用像素風復古遊戲字（Press Start 2P），遊戲內容用乾淨圓滑的現代字（Bebas Neue 標題、Nunito 內文） */
+:root { --pixel: 'Press Start 2P', 'GenSekiH', monospace; }
+.logo { font: 400 clamp(18px, 3.7vw, 46px)/1.45 var(--pixel); letter-spacing: 0; color: var(--yellow); -webkit-text-stroke: 0; paint-order: normal;
+  text-shadow: 3px 0 0 var(--ink), -3px 0 0 var(--ink), 0 3px 0 var(--ink), 0 -3px 0 var(--ink), 6px 6px 0 #c5262c, 9px 9px 0 var(--ink); image-rendering: pixelated; }
+.logo .amp { font-size: .6em; margin: .3em 0; }
+.logo small { font: 400 .42em/1.6 var(--pixel); margin-top: .9em; letter-spacing: .08em; -webkit-text-stroke: 0; text-shadow: 3px 3px 0 var(--ink); }
+.title-ui .big-btn, #btn-start { font: 400 clamp(16px, 2.6vw, 28px)/1 var(--pixel); letter-spacing: .04em; border-radius: 0; padding: .7em 1.4em; box-shadow: 6px 6px 0 var(--ink); }
+#btn-start:disabled { opacity: .45; }
+.paper.lined, .paper.note { letter-spacing: 0; }
+.paper.lined { font-size: 22px; } .paper.log { font-size: 20px; } .paper.log .log-note { font-size: 16px; }
+.comic-word { letter-spacing: .02em; }
