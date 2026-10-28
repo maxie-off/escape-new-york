@@ -194,8 +194,9 @@
 
   // ---------- 開場：兩人同畫面（走進大廳 → 廣播 → 警察衝進來）----------
   function roomIntro() {
-    const copsL = [0, 1, 2].map((i) => `<g class="s3-rush-l" style="animation-delay:${8.0 + i * 0.12}s">${cop(80 + i * 90, 660 - (i % 2) * 30, 0.72)}</g>`).join('');
-    const copsR = [0, 1, 2].map((i) => `<g class="s3-rush-r" style="animation-delay:${8.05 + i * 0.12}s">${cop(920 - i * 90, 664 - (i % 2) * 26, 0.72, '#232d63')}</g>`).join('');
+    // 警察衝進來後停在畫面中間偏右，不會擋到左下角的兩隻
+    const copsL = [0, 1, 2].map((i) => `<g class="s3-rush-l" style="animation-delay:${8.0 + i * 0.12}s">${cop(470 + i * 80, 600 - (i % 2) * 24, 0.62)}</g>`).join('');
+    const copsR = [0, 1, 2].map((i) => `<g class="s3-rush-r" style="animation-delay:${8.05 + i * 0.12}s">${cop(940 - i * 80, 612 - (i % 2) * 22, 0.66, '#232d63')}</g>`).join('');
     return `${SVG_OPEN('機場大廳')}${lightsAndCeiling()}${floor()}${counters()}
       ${crowd(12, 77, 540, 640)}
       ${dim()}
@@ -290,11 +291,18 @@
   }
 
   // ---------- 彈出層 ----------
+  // 點行李箱：把行李箱內部放大，東西稍微疊在一起（只有圖，沒有文字）
+  const SPOTS = [[-150, -20, -14, 2.9], [-40, -70, 10, 3.0], [80, -30, -8, 2.9], [190, -60, 16, 2.7], [-190, 90, 12, 2.8], [-20, 70, -12, 3.0], [150, 90, 8, 2.8]]; // 互相疊一點，像塞在行李箱裡
   function caseHtml() {
-    const cells = data.items.map((it) => `<button class="s3-item${ui.item === it.id ? ' on' : ''}" data-act="item" data-id="${it.id}"><svg viewBox="-40 -40 80 80">${itemIcon(it.id, 0, 0, 1)}</svg><span>${esc(it.name)}</span></button>`).join('');
-    return `<div class="modal-card s3-case"><button class="x" data-act="close">✕</button>
-      <h2>行李主人的東西</h2><p class="s3-note">衣服適合什麼天氣？這些東西是做什麼用的？</p>
-      <div class="s3-items">${cells}</div></div>`;
+    const items = data.items.map((it, i) => { const [x, y, r, s] = SPOTS[i % SPOTS.length]; return `<g transform="translate(${x},${y}) rotate(${r})">${itemIcon(it.id, 0, 0, s)}</g>`; }).join('');
+    return `<div class="s3-zoom"><button class="x" data-act="close">✕</button>
+      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="打開的行李箱內部">
+        <rect x="-320" y="-220" width="640" height="440" rx="30" fill="#5a4a3a" ${ST}/>
+        <rect x="-296" y="-196" width="592" height="392" rx="18" fill="#8a7a9a"/>
+        <path d="M-296,-120 q296,-30 592,0 M-296,40 q296,30 592,0" stroke="#7a6a8a" stroke-width="6" fill="none" opacity=".6"/>
+        <rect x="-296" y="-196" width="592" height="392" rx="18" fill="none" stroke="#3a2f24" stroke-width="6"/>
+        ${items}
+      </svg></div>`;
   }
   function newsHtml() {
     return `<div class="modal-card s3-news"><button class="x" data-act="close">✕</button>

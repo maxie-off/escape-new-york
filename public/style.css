@@ -122,7 +122,7 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 .screen > .bg { position: absolute; inset: 0; }
 #setup > .bg { filter: brightness(.55) saturate(.9); }
 .title-ui { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding-top: 9vh; text-align: center; }
-.logo { margin: 0; font: 400 clamp(40px, 9vw, 120px)/.95 var(--display); letter-spacing: .03em; color: var(--yellow);
+.logo { margin: 0; font: 400 clamp(30px, 6.75vw, 90px)/.95 var(--display); letter-spacing: .03em; color: var(--yellow);
   -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; text-shadow: 6px 6px 0 var(--ink), 0 0 40px rgba(255,210,63,.35); }
 .logo small { display: block; margin-top: .25em; font-size: .46em; color: #fff; letter-spacing: .12em; -webkit-text-stroke: 4px var(--ink); text-shadow: 4px 4px 0 var(--ink); }
 .title-ui .big-btn, #btn-start { position: absolute; bottom: 9vh; left: 50%; transform: translateX(-50%); }
@@ -384,3 +384,19 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 .s3-board table { width: 100%; border-collapse: collapse; font: 700 16px 'Helvetica Neue', Arial, 'GenSeki', sans-serif; }
 .s3-board th { color: #6d737c; font-size: 12px; text-align: left; padding: 4px 6px; } .s3-board td { padding: 5px 6px; border-top: 1px solid #222833; }
 .s3-board td:first-child { color: #ffd23f; } .s3-board td:last-child { color: #5ad17a; text-align: center; } .s3-board td small { color: #9aa0a8; margin-left: .5em; font-size: 13px; }
+
+/* 1A2B 紙上的 a~z 筆記（點了劃掉，兩人同步） */
+.log-abc { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 10px; padding-top: 8px; border-top: 2px dashed #9db9e6; line-height: 1; }
+.log-abc button { width: 32px; height: 36px; min-width: 0; padding: 0; margin: 0; box-shadow: none !important; transform: none !important; border: 2px solid transparent; border-radius: 8px; background: transparent !important; font: 700 28px 'Caveat', 'Comic Neue', cursive; color: var(--ink); cursor: pointer; position: relative; }
+.log-abc button:hover { border-color: #9db9e6; }
+.log-abc button.x-out { color: #b5b5b5; }
+.log-abc button.x-out::before { content: ''; position: absolute; left: 3px; right: 3px; top: 50%; height: 3px; background: #c5262c; transform: rotate(20deg); border-radius: 2px; }
+.log-abc button.x-out::after { content: ''; position: absolute; left: 3px; right: 3px; top: 50%; height: 3px; background: #c5262c; transform: rotate(-20deg); border-radius: 2px; }
+
+/* 機場：放大的行李箱內部（沒有文字框） */
+.s3-zoom { position: relative; width: min(92vw, 860px); }
+.s3-zoom-svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 10px 0 rgba(0,0,0,.35)); animation: s3-zoom-in .35s cubic-bezier(.2,1.3,.4,1); }
+.s3-zoom .x { position: absolute; top: -6px; right: -6px; z-index: 5; width: 44px; height: 44px; padding: 0; background: var(--red); color: #fff; }
+@keyframes s3-zoom-in { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.logo .amp { display: block; font-size: .5em; margin: .05em 0; }

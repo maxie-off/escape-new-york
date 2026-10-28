@@ -355,14 +355,20 @@
     return `<div class="log-day"><h5>${esc(d.date)}</h5>${d.rows.map((r) => `<p><b>${esc(r.word)}</b><span>${esc(r.fb)}</span></p>`).join('')}${d.answer ? `<p class="log-ans">answer: <b>${esc(d.answer)}</b></p>` : ''}</div>`;
   }
 
+  // a~z 筆記：點一下劃掉、再點一下恢復；兩人的紙同步
+  function alphabet() {
+    const st = new Set(data.struck || []);
+    return `<div class="log-abc">${'abcdefghijklmnopqrstuvwxyz'.split('').map((c) => `<button class="${st.has(c) ? 'x-out' : ''}" data-act="strike" data-l="${c}">${c}</button>`).join('')}</div>`;
+  }
+
   // ---------- 彈出層內容 ----------
   function paperHtml(id) {
     if (id === 'note') return `<div class="paper marker">${esc(data.deskNote)}</div>`;
-    if (id === 'paper3') return `<div class="paper lined log">${logDay(data.deskPaper)}</div>`;
+    if (id === 'paper3') return `<div class="paper lined log">${logDay(data.deskPaper)}${alphabet()}</div>`;
     if (id === 'note2') return `<div class="paper marker">${data.note2.map(esc).join('<br>')}</div>`;
     const p = data.papers.find((x) => x.id === id);
     if (!p) return '';
-    if (p.kind === 'log') return `<div class="paper lined log"><p class="log-note">${esc(p.note)}</p><div class="log-days">${p.days.map(logDay).join('')}</div></div>`;
+    if (p.kind === 'log') return `<div class="paper lined log"><p class="log-note">${esc(p.note)}</p><div class="log-days">${p.days.map(logDay).join('')}</div>${alphabet()}</div>`;
     if (p.kind === 'handwritten') {
       const line = (l) => esc(l).replace(/~(.)~/g, '<s>$1</s>');
       return `<div class="paper lined">${p.lines.map((l) => `<p>${line(l)}</p>`).join('')}</div>`;
@@ -452,6 +458,7 @@
       case 'pup': { const i = Number(t.dataset.i); ui.pw[i] = (ui.pw[i] + 1) % 7; return renderModal(); }
       case 'pdown': { const i = Number(t.dataset.i); ui.pw[i] = (ui.pw[i] + 6) % 7; return renderModal(); }
       case 'strum': return strum();
+      case 'strike': ctx.send({ type: 'strike', letter: t.dataset.l }); return;
     }
   }
   function onModalKey(e) {

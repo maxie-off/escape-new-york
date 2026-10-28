@@ -72,6 +72,14 @@ const waitState = (s, pred) =>
     Object.assign(sa, ra); Object.assign(sb, rb);
     assert.equal(sa.scene.data.role, 'A');
     assert.equal(sb.scene.data.role, 'B');
+    // 1A2B 筆記：任一方劃掉字母，兩邊同步；再點一次恢復
+    const struckB = waitState(b, (s) => s.scene && (s.scene.data.struck || []).includes('q'));
+    await emit(a, 'scene_action', { type: 'strike', letter: 'Q' });
+    await struckB;
+    const unstruckA = waitState(a, (s) => s.scene && !(s.scene.data.struck || []).includes('q'));
+    await emit(b, 'scene_action', { type: 'strike', letter: 'q' });
+    await unstruckA;
+    assert.equal((await emit(b, 'scene_action', { type: 'strike', letter: '1' })).ok, false);
     // 防剧透：开电脑前 A 看不到日记/密码；B 的画面里没有电脑密码和抽屉密码
     assert.equal(sa.scene.data.notion, null);
     for (const secret of ['acid', '4827']) assert.ok(!JSON.stringify(sb).includes(secret), 'B 不该看到 ' + secret);
@@ -154,7 +162,7 @@ const waitState = (s, pred) =>
     const s2a = await toScene2A, s2b = await toScene2;
     assert.ok(s2a.scene.interactive && s2a.scene.data.board && s2a.scene.data.role === 'A');
     // 防劇透：A 看不到路人的 110 分鐘；B 看不到看板分鐘數與答案
-    assert.ok(!JSON.stringify(s2a).includes('110'), 'A 不該看到 110');
+    assert.ok(!JSON.stringify(s2a.scene.data).includes('110'), 'A 不該看到 110'); // 只看場景資料（feed 的時間戳可能剛好含 110）
     {
       assert.ok(s2b.scene.data.people.length === 4 && !s2b.scene.data.board);
       assert.ok(!JSON.stringify(s2b).includes('"next"'), 'B 不該看到看板分鐘');

@@ -84,7 +84,7 @@
       <rect x="240" y="62" width="520" height="140" fill="url(#brickR)" ${ST}/>
       <rect x="254" y="76" width="492" height="112" fill="none" stroke="#f4efe4" stroke-width="5"/>
       <text x="500" y="156" text-anchor="middle" font-size="76" fill="#f7f2e6" ${HELV}>${esc(b.station)}</text>
-      <rect x="856" y="300" width="96" height="190" rx="10" fill="#2f323a" ${ST}/><text x="904" y="322" text-anchor="middle" font-size="13" fill="#9aa0a8" ${HELV}>CH</text>
+      <rect x="856" y="300" width="96" height="190" rx="10" fill="#2f323a" ${ST}/>
       <rect x="150" y="232" width="700" height="276" rx="16" fill="#0d0d10" ${ST}/>
       ${[[166, 248], [834, 248], [166, 492], [834, 492]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#555"/>`).join('')}
       <text x="182" y="272" font-size="20" fill="#9aa0a8" ${HELV}>NEXT TRAINS</text>

@@ -146,6 +146,7 @@ function init(v = 0) {
     cases: { plane: false, secret: false, love: true }, // 情書箱子一開始就是開的（教學用）
     armed: null, // Slothy 按了準備：{ case, code, t, n }
     armN: 0, glow: null, failN: 0,
+    struck: [], // 1A2B 紙上 a~z 被劃掉的字母（兩人共用、同步）
     doorOpen: false,
     ticketTaken: false, // 書桌上的機票是否已收進收藏文件
   };
@@ -155,11 +156,13 @@ function view(state, role) {
   const B = BUILT[state.v];
   if (role === 'A') {
     return { role, pcUnlocked: state.pcUnlocked, notion: state.pcUnlocked ? B.notion : null, ticketTaken: state.ticketTaken, deskNote: DESK_NOTE, note2: NOTE2, deskPaper: B.deskPaper, sheets: sheetsOf(state.v),
-      resonate: state.armed ? state.armed.n : null }; // Slothy 按了準備：Raccoony 的吉他會自己震動
+      resonate: state.armed ? state.armed.n : null, // Slothy 按了準備：Raccoony 的吉他會自己震動
+      struck: state.struck };
   }
   return {
     role,
     papers: B.papers,
+    struck: state.struck,
     hasKey: state.hasKey,
     hasPassport: state.hasPassport,
     chart,
@@ -236,6 +239,13 @@ function act(state, role, a = {}) {
       if (Date.now() - state.armed.t < ARM_MS) return { ok: true };
       state.armed = null; state.failN += 1;
       return { ok: true, correct: false, events: [{ text: '🔒 喀！沒等到聲音，鎖又卡回去了。' }] };
+    }
+    case 'strike': {
+      // 1A2B 筆記：點紙上的 a~z 劃掉／恢復一個字母；兩人的紙同步
+      const l = String(a.letter || '').toLowerCase();
+      if (!/^[a-z]$/.test(l)) return { ok: false };
+      state.struck = state.struck.includes(l) ? state.struck.filter((x) => x !== l) : [...state.struck, l].sort();
+      return { ok: true };
     }
     case 'take_ticket': {
       if (role !== 'A') return { ok: false };

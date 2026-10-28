@@ -1,4 +1,4 @@
-# Raccoony and Slothy: Escape New York
+# Sherlock Raccoon & Dr. Slothy: Escape New York
 
 A two-player co-op escape room game that runs in the browser. One person plays Raccoony, the other plays Slothy, and each of you sees a different half of every room. You have to talk to each other (phone, FaceTime, whatever) to get out. It's built for iPad in landscape, but any browser works.
 

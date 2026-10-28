@@ -39,6 +39,16 @@ window.Music = (function () {
       o.connect(og); og.connect(g); o.start(t); o.stop(t + dur + 0.05);
     });
   }
+  // 柔和的鈴聲：泛音少、再過低通濾波，不刺耳（場景 1 用）
+  function softBell(c, out, t, f, v = 0.03, dur = 2.4) {
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; lp.Q.value = 0.3; lp.connect(out);
+    const g = c.createGain(); g.connect(lp); env(g, t, v, 0.02, dur);
+    [[1, 1], [2, 0.18]].forEach(([r, gn]) => {
+      const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = f * r;
+      const og = c.createGain(); og.gain.setValueAtTime(gn, t); og.gain.exponentialRampToValueAtTime(0.001, t + dur / r);
+      o.connect(og); og.connect(g); o.start(t); o.stop(t + dur + 0.05);
+    });
+  }
   function bass(c, out, t, f, v = 0.24, dur = 0.7) {
     const o = c.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
     const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420;
@@ -143,8 +153,8 @@ window.Music = (function () {
           marimba(c, out, t + k * e, mtof(ch.t[pat[k]] + 12), k % 4 === 0 ? 0.17 : 0.11, 0.5);
         }
         tick(c, out, t + beat, 0.035); tick(c, out, t + beat * 3, 0.028, 900);
-        if (i % 2 === 1) for (const [s, idx] of [[1, 3], [3, 1], [6, 2]]) bell(c, out, t + s * e, mtof(ch.t[idx] + 24), 0.05, 2.0);
-        if (i % 4 === 3) { bell(c, out, t + beat * 3.5, mtof(73), 0.035, 2.4); bell(c, out, t + beat * 3.5, mtof(74), 0.035, 2.4); } // C#5 + D5 小二度
+        // 鈴聲：每 4 小節只出現一次、只有一個音，低一個八度、聲音柔和（原本太密、太尖）
+        if (i % 4 === 1) softBell(c, out, t + beat * (1 + (i % 8 === 1 ? 0 : 1.5)), mtof(ch.t[i % 8 === 1 ? 3 : 1] + 12), 0.028, 2.6);
       },
     };
   })();

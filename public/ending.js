@@ -30,14 +30,13 @@
     return { L, svg: cars };
   }
 
-  // 車窗裡的 Raccoony 和 Slothy：露出頭、揮揮手（最後一節車廂的第 3、4 扇窗）
+  // 車窗裡的 Raccoony 和 Slothy：露出頭（最後一節車廂的第 3、4 扇窗）
   const WIN = [[246, 'A'], [334, 'B']];
   function riders() {
     const A = window.Art;
     return WIN.map(([wx, who], i) => `<clipPath id="win${i}"><rect x="${wx}" y="58" width="70" height="86" rx="8"/></clipPath>
       <rect x="${wx}" y="58" width="70" height="86" rx="8" fill="#ffe9a8"/>
       <g clip-path="url(#win${i})">${who === 'A' ? A.raccoony(wx + 35, 152, 0.5) : A.slothy(wx + 35, 160, 0.5)}</g>
-      <g class="end-wave" style="transform-origin:${wx + 70}px 112px; animation-delay:${i * 0.18}s"><ellipse cx="${wx + 76}" cy="92" rx="9" ry="13" fill="${who === 'A' ? '#6e5d5a' : '#b4bfd0'}" stroke="${INK}" stroke-width="3"/></g>
       <rect x="${wx}" y="58" width="70" height="86" rx="8" fill="none" stroke="${INK}" stroke-width="4"/>`).join('');
   }
   function mountTrain(root) {
@@ -83,7 +82,9 @@
       ${Array.from({ length: 4 }, (_, r) => Array.from({ length: 5 }, (_, c) => `<line x1="${-22 + c * 10 + (r % 2) * 4}" y1="${-96 + r * 12}" x2="${-18 + c * 10 + (r % 2) * 4}" y2="${-96 + r * 12}" stroke="#41527f" stroke-width="2.5" stroke-linecap="round"/>`).join('')).join('')}
       <circle cx="-32" cy="-170" r="14" fill="${fur}" ${st(3)}/><circle cx="32" cy="-170" r="14" fill="${fur}" ${st(3)}/>
       <circle cx="0" cy="-134" r="44" fill="${fur}" ${st(3.5)}/>
-      <path d="M-14,-170 q14,-8 28,0 M-18,-156 q18,-8 36,0" fill="none" stroke="${dark}" stroke-width="5" stroke-linecap="round" opacity=".7"/>`;
+      <path d="M-14,-170 q14,-8 28,0 M-18,-156 q18,-8 36,0" fill="none" stroke="${dark}" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+      ${window.Art && Art.deerstalkerBack ? Art.deerstalkerBack(-134) : ''}
+      <circle cx="-38" cy="-202" r="12" fill="${fur}" ${st(3)}/><circle cx="38" cy="-202" r="12" fill="${fur}" ${st(3)}/>`;
   }
   function slothyBack() {
     const body = '#b4bfd0', dark = '#9aa6ba', claw = '#5a6070';
