@@ -438,6 +438,19 @@ window.Music = (function () {
     const bus = sfxBus(0.4), t = ctx.currentTime + 0.02;
     for (const [dt, f] of [[0, 784], [0.18, 988], [0.36, 1319]]) bell(ctx, bus, t + dt, f, 0.14, 1.4);
   }
+  function click() { // 咔噠——按下色塊按鈕的機械聲
+    if (!ctx || !g) return;
+    const bus = sfxBus(0.05), t = ctx.currentTime + 0.01;
+    // 第一聲：硬脆的衝擊（高頻爆破音）
+    { const n = ctx.createBufferSource(); n.buffer = noiseBuf(ctx);
+      const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3200;
+      const gn = ctx.createGain(); gn.gain.setValueAtTime(0.18, t); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.022);
+      n.connect(hp); hp.connect(gn); gn.connect(bus); n.start(t); n.stop(t + 0.03); }
+    // 第二聲：短促低頻（按鍵底部碰撞感）
+    { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(260, t); o.frequency.exponentialRampToValueAtTime(80, t + 0.03);
+      const gn = ctx.createGain(); gn.gain.setValueAtTime(0.14, t); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+      o.connect(gn); gn.connect(bus); o.start(t); o.stop(t + 0.05); }
+  }
 
   // 吉他：四個和弦各刷一下（每個和弦約 0.5 秒，由低到高快速撥弦）
   const ROOT = { A: 220, B: 246.94, C: 261.63, D: 293.66, E: 164.81, F: 174.61, G: 196 };
@@ -457,5 +470,5 @@ window.Music = (function () {
     });
   }
 
-  return { unlock, play, stop, pa, speak, hush, buzz, ding, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
+  return { unlock, play, stop, pa, speak, hush, buzz, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
 })();

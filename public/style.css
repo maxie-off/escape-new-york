@@ -1,3 +1,5 @@
+/* 英文字體（SIL OFL，放在 public/fonts/）：Press Start 2P（封面像素字）、Bebas Neue（標題）、Nunito（內文）、Caveat（手寫筆記） */
+@font-face { font-family: 'Caveat'; src: url('fonts/caveat-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
 /* 英文字體（SIL OFL，放在 public/fonts/）：Press Start 2P（封面像素字）、Bebas Neue（標題）、Nunito（內文） */
 @font-face { font-family: 'Press Start 2P'; src: url('fonts/press-start-2p.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Bebas Neue'; src: url('fonts/bebas-neue.woff2') format('woff2'); font-weight: 400; font-display: swap; }
@@ -15,6 +17,7 @@
   --shadow: 4px 4px 0 var(--ink);
   --display: 'Bebas Neue', 'GenSekiH', 'GenSeki', 'PingFang TC', 'Noto Sans TC', sans-serif;
   --body: 'Nunito', 'GenSeki', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif;
+  --handwriting: 'Caveat', 'Bradley Hand', 'Noteworthy', 'Segoe Script', cursive;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; margin: 0; overflow: hidden; }
@@ -92,6 +95,11 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 
 .paper { padding: 18px 22px; border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); background: #fff; }
 .paper.note { background: #ffe66d; transform: rotate(-1.2deg); font-family: 'Nunito', 'GenSeki', 'PingFang TC', cursive; font-size: 23px; line-height: 1.5; }
+/* 英文模式：便條、手寫紙、信件改用 Caveat 手寫字體 */
+html[lang="en"] .paper.lined,
+html[lang="en"] .paper.note,
+html[lang="en"] .paper.marker,
+html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 .paper.note h4 { margin: 0 0 8px; font-size: 24px; } .paper.note p { margin: 4px 0; }
 .cal-head { background: var(--red); color: #fff; font: 400 28px var(--display); letter-spacing: .08em; padding: 4px 12px; margin: -18px -22px 10px; border-bottom: 3px solid var(--ink); }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }

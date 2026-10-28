@@ -121,7 +121,7 @@
     const h = e.target.closest('[data-hot]');
     if (!h || data.role !== 'B' || busy) return;
     const k = h.dataset.hot;
-    if (k.startsWith('sw-')) { ctx.send({ type: 'switch', socket: Number(k.slice(3)) }); if (window.Music && Music.ding) { /* 無音效 */ } return; }
+    if (k.startsWith('sw-')) { if (window.Music && Music.click) Music.click(); ctx.send({ type: 'switch', socket: Number(k.slice(3)) }); return; }
     if (!k.startsWith('sock-')) return;
     const i = Number(k.slice(5));
     busy = true; ui.plugged = i; draw();
@@ -131,6 +131,7 @@
       ui.fallen = true; draw();
       timers.push(setTimeout(() => { ui.fallen = false; ui.plugged = -1; busy = false; draw(); }, 2200));
     } else if (res && res.solved) {
+      if (window.Music && Music.ding) Music.ding();
     } else { busy = false; }
   }
   function draw() { if (box) box.innerHTML = data.role === 'A' ? roomA() : roomB(); }
