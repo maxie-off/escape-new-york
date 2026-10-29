@@ -229,7 +229,6 @@
         <rect x="566" y="254" width="128" height="86" rx="3" fill="#8a5a2b" ${ST2}/><rect x="574" y="262" width="112" height="70" fill="#fffdf3" ${A.st(1.5)}/>
         ${[0, 1, 2, 3].map((i) => `<g transform="translate(${582 + i * 26},${i % 2 ? 300 : 272})"><rect width="16" height="20" fill="none" stroke="${INK}" stroke-width="1.1"/><line x1="0" y1="7" x2="16" y2="7" stroke="${INK}" stroke-width=".7"/><line x1="0" y1="14" x2="16" y2="14" stroke="${INK}" stroke-width=".7"/><circle cx="${4 + (i * 5) % 9}" cy="${4 + (i * 7) % 12}" r="2.2" fill="${INK}"/></g>`).join('')}
         ${pulse('chart', 560, 248, 140, 98)}</g>
-      <g transform="translate(500,398) scale(.34)"><ellipse cx="0" cy="-30" rx="46" ry="34" fill="#6e5d5a" ${st34()}/><circle cx="-30" cy="-72" r="22" fill="#6e5d5a" ${st34()}/><circle cx="14" cy="-50" r="30" fill="#6e5d5a" ${st34()}/></g>
     </g>`;
 
     // 房門（縮小）：門牌、門把

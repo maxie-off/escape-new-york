@@ -537,9 +537,11 @@ window.Music = (function () {
         const t = t0 + k * 0.5 + i * 0.022;
         const o = ctx.createOscillator(), e = ctx.createGain(), f = ctx.createBiquadFilter();
         o.type = 'sawtooth'; o.frequency.value = r * m;
-        f.type = 'lowpass'; f.frequency.setValueAtTime(3200, t); f.frequency.exponentialRampToValueAtTime(600, t + 0.45);
-        e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.16, t + 0.008); e.gain.exponentialRampToValueAtTime(0.0001, t + 0.48);
-        o.connect(f); f.connect(e); e.connect(bus); o.start(t); o.stop(t + 0.5);
+        // 長一點的餘音：先很快掉到一半，再慢慢消失（每個和弦約 2 秒，最後一個更長）
+        const last = k === String(chords).length - 1, rel = last ? 2.8 : 1.9;
+        f.type = 'lowpass'; f.frequency.setValueAtTime(3200, t); f.frequency.exponentialRampToValueAtTime(900, t + 0.35); f.frequency.exponentialRampToValueAtTime(420, t + rel);
+        e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.15, t + 0.008); e.gain.exponentialRampToValueAtTime(0.06, t + 0.3); e.gain.exponentialRampToValueAtTime(0.0001, t + rel);
+        o.connect(f); f.connect(e); e.connect(bus); o.start(t); o.stop(t + rel + 0.05);
       });
     });
   }

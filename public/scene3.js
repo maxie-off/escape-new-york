@@ -137,29 +137,42 @@
     </g>`;
   }
   // 警察（站姿；圓臉、藍帽）
+  // 紐約市警（參考 NYPD 制服）：深藍短袖襯衫、肩章、金色警徽、黑色勤務腰帶；八角帽（深藍帽頂、黑色亮面帽帶與帽簷、金色帽徽）、飛行員墨鏡。沒有嘴巴。
   function cop(x, y, s, shade) {
-    const body = shade || '#1a2150';
+    const shirt = shade || '#232a45', pants = '#181c2e', t2 = A.st(2);
+    const patch = (cx) => `<path d="M${cx - 8},-178 h16 v10 c0,6 -4,10 -8,12 c-4,-2 -8,-6 -8,-12Z" fill="#2a5bd0" stroke="#e2b53c" stroke-width="2"/><circle cx="${cx}" cy="-170" r="3" fill="#e2b53c"/>`;
     return `<g transform="translate(${x},${y}) scale(${s})">
       <ellipse cx="0" cy="4" rx="46" ry="9" fill="#000" opacity=".2"/>
-      <rect x="-26" y="-92" width="22" height="90" rx="10" fill="#12183c" ${ST2}/><rect x="4" y="-92" width="22" height="90" rx="10" fill="#12183c" ${ST2}/>
-      <ellipse cx="-16" cy="0" rx="19" ry="9" fill="#17181d" ${ST2}/><ellipse cx="16" cy="0" rx="19" ry="9" fill="#17181d" ${ST2}/>
-      <rect x="-42" y="-190" width="84" height="110" rx="22" fill="${body}" ${ST}/>
-      <rect x="-42" y="-112" width="84" height="12" fill="#14161c"/><rect x="-8" y="-114" width="16" height="16" rx="2" fill="#d9b04a" ${ST2}/>
-      <path d="M-8,-190 L0,-166 L8,-190Z" fill="#fff" ${ST2}/>
-      <path d="M-30,-160 l12,10 -2,14 -10,-4Z" fill="#d9b04a" ${A.st(2)}/>
-      <text x="20" y="-146" text-anchor="middle" font-size="12" fill="#e2b53c" font-family="'Helvetica Neue',Arial,sans-serif" font-weight="800" letter-spacing=".5">NYPD</text>
-      <rect x="-60" y="-184" width="22" height="76" rx="11" fill="${body}" ${ST2}/><rect x="38" y="-184" width="22" height="76" rx="11" fill="${body}" ${ST2}/>
-      <circle cx="-49" cy="-104" r="10" fill="#f1c9a5" ${ST2}/><circle cx="49" cy="-104" r="10" fill="#f1c9a5" ${ST2}/>
-      <circle cx="0" cy="-222" r="37" fill="#d9ad88" ${ST2}/>
-      <path d="M-34,-206 Q0,-170 34,-206 Q28,-186 0,-182 Q-28,-186 -34,-206Z" fill="#3a2a22" opacity=".28"/>
-      <path d="M-48,-240 C-52,-270 -28,-288 0,-288 C28,-288 52,-270 48,-240Z" fill="#1a2350" ${ST2}/>
-      <path d="M-40,-272 C-20,-282 20,-282 40,-272" fill="none" stroke="#2c3a78" stroke-width="4" stroke-linecap="round"/>
-      <rect x="-52" y="-244" width="104" height="18" rx="6" fill="#1a2350" ${ST2}/><path d="M-48,-236 H48" stroke="#d9b04a" stroke-width="2.5"/>
-      <path d="M0,-276 L12,-271 L11,-259 C10,-254 5,-251 0,-249 C-5,-251 -10,-254 -11,-259 L-12,-271Z" fill="#e2b53c" ${A.st(2)}/><circle cx="0" cy="-262" r="3.5" fill="#1a2350"/>
-      <path d="M-30,-232 L-6,-220 M30,-232 L6,-220" stroke="${INK}" stroke-width="7" stroke-linecap="round"/>
-      <rect x="-31" y="-224" width="29" height="16" rx="5" fill="#0b0b10" ${ST2}/><rect x="2" y="-224" width="29" height="16" rx="5" fill="#0b0b10" ${ST2}/>
-      <path d="M-2,-218 h4" stroke="#0b0b10" stroke-width="4"/><path d="M-26,-221 l8,0 M7,-221 l8,0" stroke="#7d8696" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M-14,-193 q14,-12 28,0" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>
+      <rect x="-26" y="-92" width="22" height="90" rx="9" fill="${pants}" ${ST2}/><rect x="4" y="-92" width="22" height="90" rx="9" fill="${pants}" ${ST2}/>
+      <ellipse cx="-16" cy="0" rx="19" ry="9" fill="#0d0e12" ${ST2}/><ellipse cx="16" cy="0" rx="19" ry="9" fill="#0d0e12" ${ST2}/><path d="M-26,-4 h10 M8,-4 h10" stroke="#fff" stroke-width="2" opacity=".35"/>
+      <rect x="-58" y="-150" width="18" height="44" rx="9" fill="#e8bd98" ${ST2}/><rect x="40" y="-150" width="18" height="44" rx="9" fill="#e8bd98" ${ST2}/>
+      <circle cx="-49" cy="-104" r="10" fill="#e8bd98" ${ST2}/><circle cx="49" cy="-104" r="10" fill="#e8bd98" ${ST2}/>
+      <rect x="-42" y="-190" width="84" height="108" rx="20" fill="${shirt}" ${ST}/>
+      <path d="M-42,-186 C-56,-184 -64,-172 -62,-146 L-40,-144Z" fill="${shirt}" ${ST2}/><path d="M42,-186 C56,-184 64,-172 62,-146 L40,-144Z" fill="${shirt}" ${ST2}/>
+      ${patch(-52)}${patch(52)}
+      <path d="M-11,-190 L0,-174 L11,-190Z" fill="#0d0e12" ${t2}/>
+      <path d="M-20,-191 L-4,-191 L-6,-174 L-16,-180Z M20,-191 L4,-191 L6,-174 L16,-180Z" fill="${shirt}" ${t2}/>
+      <path d="M0,-174 V-100" stroke="#0d0e12" stroke-width="1.5" opacity=".6"/>${[-160, -142, -124].map((yy) => `<circle cx="0" cy="${yy}" r="2" fill="#0d0e12"/>`).join('')}
+      <rect x="-34" y="-158" width="24" height="24" rx="2" fill="none" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/><path d="M-34,-152 h24" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/>
+      <rect x="10" y="-158" width="24" height="24" rx="2" fill="none" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/><path d="M10,-152 h24" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/>
+      <text x="-22" y="-164" text-anchor="middle" font-size="9" fill="#e2b53c" font-family="'Helvetica Neue',Arial,sans-serif" font-weight="800" letter-spacing=".4">NYPD</text>
+      <path d="M22,-182 L32,-178 L31,-168 C30,-163 26,-160 22,-159 C18,-160 14,-163 13,-168 L12,-178Z" fill="#e2b53c" ${t2}/><circle cx="22" cy="-170" r="4" fill="#2a5bd0"/>
+      <rect x="-44" y="-100" width="88" height="16" rx="3" fill="#0d0e12" ${ST2}/>
+      <rect x="-7" y="-99" width="14" height="14" rx="2" fill="#b9bdc6" ${A.st(1.5)}/>
+      ${[[-38, 12], [16, 10], [27, 10]].map(([px, w]) => `<rect x="${px}" y="-102" width="${w}" height="22" rx="3" fill="#15161b" ${A.st(1.5)}/><circle cx="${px + w / 2}" cy="-95" r="1.8" fill="#d9b04a"/>`).join('')}
+      <circle cx="0" cy="-222" r="37" fill="#e8bd98" ${ST2}/>
+      <path d="M-34,-206 Q0,-170 34,-206 Q28,-186 0,-182 Q-28,-186 -34,-206Z" fill="#6b4a3a" opacity=".16"/>
+      <path d="M-27,-231 L-7,-229 M27,-231 L7,-229" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M-30,-226 C-30,-229 -27,-230 -24,-230 H-6 C-3,-230 -2,-228 -3,-225 C-4,-216 -9,-210 -17,-210 C-26,-210 -30,-217 -30,-226Z M30,-226 C30,-229 27,-230 24,-230 H6 C3,-230 2,-228 3,-225 C4,-216 9,-210 17,-210 C26,-210 30,-217 30,-226Z" fill="#2c313c" stroke="#c9a640" stroke-width="2"/>
+      <path d="M-26,-226 L-18,-226 L-25,-214Z M8,-226 L16,-226 L9,-214Z" fill="#fff" opacity=".35"/><path d="M-3,-228 Q0,-232 3,-228" fill="none" stroke="#c9a640" stroke-width="2"/>
+      <path d="M-30,-228 L-38,-232 M30,-228 L38,-232" stroke="#c9a640" stroke-width="2"/>
+      <path d="M-55,-270 C-55,-280 -46,-284 -34,-284 H34 C46,-284 55,-280 55,-270 L45,-247 H-45Z" fill="#1c2340" ${ST2}/>
+      <path d="M-44,-276 H44" stroke="#2e3760" stroke-width="3" opacity=".8"/>
+      <rect x="-46" y="-250" width="92" height="13" rx="3" fill="#0b0c10" ${ST2}/><path d="M-40,-246 H40" stroke="#fff" stroke-width="1.6" opacity=".35"/>
+      <circle cx="-40" cy="-243" r="3.2" fill="#e2b53c" ${A.st(1)}/><circle cx="40" cy="-243" r="3.2" fill="#e2b53c" ${A.st(1)}/>
+      <path d="M-46,-238 Q0,-222 46,-238 Q40,-228 0,-225 Q-40,-228 -46,-238Z" fill="#0b0c10" ${ST2}/><path d="M-30,-233 Q0,-227 30,-233" fill="none" stroke="#fff" stroke-width="1.6" opacity=".4"/>
+      <path d="M0,-276 C6,-276 10,-272 10,-266 C14,-264 14,-258 10,-256 L8,-251 H-8 L-10,-256 C-14,-258 -14,-264 -10,-266 C-10,-272 -6,-276 0,-276Z" fill="#e2b53c" ${A.st(1.6)}/>
+      <path d="M-6,-266 Q0,-262 6,-266 M0,-272 V-254" stroke="#9a7a20" stroke-width="1.4" fill="none"/>
     </g>`;
   }
   // 文字寬度估算：中日文一字約 22，英文約 11.5（字級 22）
