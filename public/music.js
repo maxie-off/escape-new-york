@@ -126,6 +126,54 @@ window.Music = (function () {
   // ---------- 曲子 ----------
   const TRACKS = {};
 
+  // 小提琴：鋸齒波 + 慢慢出現的抖音 + 帶通，像拉弓
+  function violin(c, out, t, f, dur, v = 0.035) {
+    const g = c.createGain(), bp = c.createBiquadFilter(), lp = c.createBiquadFilter();
+    bp.type = 'peaking'; bp.frequency.value = 2400; bp.gain.value = 5; lp.type = 'lowpass'; lp.frequency.value = 3600;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + Math.min(0.22, dur * 0.3)); g.gain.setValueAtTime(v, t + dur * 0.75); g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.25);
+    const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 5.6;
+    lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(14, t + Math.min(0.6, dur * 0.6)); lfo.connect(lg);
+    bp.connect(lp); lp.connect(g); g.connect(out);
+    [-4, 4].forEach((cents) => { const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = cents; lg.connect(o.detune); o.connect(bp); o.start(t); o.stop(t + dur + 0.3); });
+    lfo.start(t); lfo.stop(t + dur + 0.3);
+  }
+  // 撥弦（pizzicato）
+  function pizz(c, out, t, f, v = 0.08) {
+    const o = c.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+    const o2 = c.createOscillator(); o2.type = 'sawtooth'; o2.frequency.value = f;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(2200, t); lp.frequency.exponentialRampToValueAtTime(400, t + 0.25);
+    const g = c.createGain(), g2 = c.createGain(); g2.gain.value = 0.25;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    o.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g); g.connect(out);
+    o.start(t); o2.start(t); o.stop(t + 0.5); o2.stop(t + 0.5);
+  }
+
+  // 封面＋選角色：福爾摩斯感的偵探弦樂，D 小調、平靜地一層層疊上去（大提琴 → 撥弦低音 → 撥弦琶音 → 小提琴旋律 → 第二小提琴）
+  (function () {
+    const bpm = 76, beat = 60 / bpm, e = beat / 2;
+    const prog = [
+      { r: 38, t: [62, 65, 69] }, { r: 43, t: [62, 67, 70] }, { r: 45, t: [61, 64, 67] }, { r: 38, t: [62, 65, 69] },
+      { r: 46, t: [62, 65, 70] }, { r: 43, t: [62, 67, 70] }, { r: 45, t: [61, 64, 69] }, { r: 38, t: [62, 65, 69] },
+    ]; // Dm Gm A7 Dm | Bb Gm A7 Dm
+    const mel = [
+      [[69, 0, 1.5], [74, 1.5, 0.5], [77, 2, 2]], [[76, 0, 1], [74, 1, 1], [70, 2, 2]], [[73, 0, 1.5], [76, 1.5, 0.5], [79, 2, 1], [77, 3, 1]], [[74, 0, 4]],
+      [[74, 0, 1.5], [77, 1.5, 0.5], [81, 2, 2]], [[79, 0, 1], [77, 1, 1], [74, 2, 2]], [[76, 0, 1], [73, 1, 1], [69, 2, 1], [73, 3, 1]], [[74, 0, 4]],
+    ];
+    const arp = [0, 1, 2, 1, 0, 1, 2, 1];
+    TRACKS.title = {
+      barLen: beat * 4,
+      bar(c, out, t, i) {
+        const ch = prog[i % 8], L = beat * 4;
+        cello(c, out, t, mtof(ch.r), L, 0.04);                                                   // 大提琴長音
+        if (i >= 2) { pizz(c, out, t, mtof(ch.r + 12), 0.11); pizz(c, out, t + beat * 2, mtof(ch.r + 19), 0.08); } // 撥弦低音
+        if (i >= 4) for (let k = 0; k < 8; k++) pizz(c, out, t + k * e, mtof(ch.t[arp[k]]), k % 4 === 0 ? 0.06 : 0.04); // 撥弦琶音
+        if (i >= 8) for (const [n, b, d] of mel[i % 8]) violin(c, out, t + b * beat, mtof(n), d * beat * 0.96, 0.03); // 小提琴旋律
+        if (i >= 16) for (const [n, b, d] of mel[i % 8]) if (d >= 1) violin(c, out, t + b * beat + 0.02, mtof(n - (n % 12 === 2 || n % 12 === 9 ? 5 : 3)), d * beat * 0.96, 0.016); // 第二小提琴（低三度／四度）
+        if (i >= 12 && i % 4 === 3) tick(c, out, t + beat * 3.5, 0.016, 1400);                   // 偶爾一聲懷錶滴答
+      },
+    };
+  })();
+
   // 場景 1：D 多利安，輕鬆；第 4、8 小節的 A7(b9) 帶一點懸疑
   (function () {
     const bpm = 86, beat = 60 / bpm, e = beat / 2;

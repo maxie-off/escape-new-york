@@ -69,7 +69,7 @@ function build(v) {
         { date: T('10 月 1 日', 'Oct 1'), rows: pw.demo.guesses.map((g) => row(g, pw.demo.ans, pw.tag)), answer: pw.demo.ans.toUpperCase() },
         { date: T('10 月 3 日', 'Oct 3'), rows: pw.guesses.slice(0, 4).map((g) => row(g, pw.ans, pw.tag)), answer: '????' },
       ] },
-    { id: 'paper2', kind: 'map', title: T('🗺️ 衣櫃地圖', '🗺️ Wardrobe map'), note: T('抽屜從上往下數！', 'Count the drawers from the top!'), rows: Object.entries(drawers).map(([n, d]) => ({ n: Number(n), emoji: d.emoji, item: d.item })) },
+    { id: 'paper2', kind: 'map', rows: Object.entries(drawers).map(([n, d]) => ({ n: Number(n), emoji: d.emoji, item: d.item })) },
   ];
   const notion = {
     pages: [
@@ -123,10 +123,10 @@ const CHORDS = {
   G: [0, 0, 4, 2, 1, null],
 };
 // 三個行李箱只用顏色區分（箱子上沒有圖案）。共鳴鎖：
-//   - 綠色（情書）箱子一開始就是開的，鎖停在它的密碼上；信裡的 P.S. 說密碼是「我們喜歡的歌的和弦」→ 對照第一張譜《情書》
+//   - 三個箱子都是咖啡色，用位置（左／中／右）區分；右邊（情書）箱子一開始就是開的，鎖停在它的密碼上；信裡的 P.S. 說密碼是「我們喜歡的歌的和弦」→ 對照第一張譜《情書》
 //   - Raccoony 彈對某首歌，那個箱子的鎖會亮起來共鳴（教玩家：哪首歌對哪個箱子）
 //   - 要開鎖：Slothy 轉好四個字母、按「準備」，10 秒內 Raccoony 要彈出同樣的四個和弦；彈完才知道成不成功
-const CASE_COLOR = { plane: T('咖啡色', 'brown'), secret: T('粉紅色', 'pink'), love: T('綠色', 'green') };
+const CASE_COLOR = { plane: T('左邊的', 'left'), secret: T('中間的', 'middle'), love: T('右邊的', 'right') }; // 箱子都是咖啡色，用位置稱呼
 const ARM_MS = 10000, ARM_GRACE = 3000; // 準備後 10 秒內要彈；彈奏本身約 2 秒，加上網路延遲的寬限
 // 前端只拿到「每個小節的琴格數字」，樂譜上不會出現和弦字母；和弦表（掛在 Slothy 床上方的牆上）才有字母。
 const SONGS = [

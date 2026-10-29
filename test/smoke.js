@@ -182,7 +182,7 @@ const waitState = (s, pred) =>
     assert.ok(rows0.filter((r) => r.line !== 'B').every((r) => r.state === 'dark' && r.to === undefined && r.next === undefined));
     assert.ok(!JSON.stringify(s2b).includes('"sym"'), 'B 不該看到看板上的符號');
     assert.ok(!JSON.stringify(s2a).includes('"ch"'), 'A 不該看到頻道');
-    assert.ok(s2b.scene.data.map.stops.find((x) => x.ap === 'JFK').min === 95 && s2b.scene.data.map.routes.length === 7); // 柱子上的路線圖
+    assert.ok(s2b.scene.data.map.stops.find((x) => x.ap === 'JFK').name === 'Howard Beach' && s2b.scene.data.map.routes.length === 7 && !JSON.stringify(s2b.scene.data.map).includes('min')); // 柱子上的路線圖（沒有分鐘數）
     assert.deepEqual(s2b.docs.map((d) => d.id), ['passport']);
     assert.equal((await emit(b, 'scene_action', { type: 'board', line: 'C' })).message.includes('看板還沒修好'), true);
     // 接錯：閘門跳回去、那列閃紅光

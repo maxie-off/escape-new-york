@@ -362,7 +362,7 @@ function render() {
     return;
   }
   Ending.stop(); $('#ending').classList.remove('run'); interludeKind = null;
-  unmountActive(); resetGameMemory(); Music.stop();
+  unmountActive(); resetGameMemory(); Music.play('title'); // 封面與選角色：偵探弦樂
   if (screen === 'title' && !roomCode) return show('title');
   show('setup'); screen = 'setup'; renderSetup();
 }

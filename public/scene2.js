@@ -71,7 +71,7 @@
         : r.state === 'static' ? staticCell(cy, 7 + i * 13) : '';
       const flash = ui.flashLine === r.line ? `<rect class="row-flash" x="160" y="${top + 1}" width="680" height="32" fill="#ff2a1f"/>` : '';
       const dv = ui.dial[r.line] !== undefined ? ui.dial[r.line] : r.dial;
-      const knob = `<g class="hot${r.fixed ? ' fixed' : ''}" data-hot="dial-${r.line}"><rect x="864" y="${cy - 16}" width="76" height="32" fill="transparent" style="pointer-events:all"/><circle cx="884" cy="${cy}" r="14" fill="${r.state === 'dark' ? '#3a3d46' : '#c9ccd2'}" ${ST2}/>
+      const knob = `<g class="hot" data-hot="dial-${r.line}"><rect x="864" y="${cy - 16}" width="76" height="32" fill="transparent" style="pointer-events:all"/><circle cx="884" cy="${cy}" r="14" fill="${r.state === 'dark' ? '#3a3d46' : '#c9ccd2'}" ${ST2}/>
         <line x1="884" y1="${cy}" x2="${(884 + Math.sin((dv / 9) * Math.PI * 1.6 - 0.8 * Math.PI) * 11).toFixed(1)}" y2="${(cy - Math.cos((dv / 9) * Math.PI * 1.6 - 0.8 * Math.PI) * 11).toFixed(1)}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
         <rect x="904" y="${cy - 13}" width="30" height="26" rx="4" fill="#0d0d10" ${A.st(2)}/><text x="919" y="${cy + 8}" text-anchor="middle" font-size="19" fill="#5ad17a" ${HELV}>${dv}</text></g>`;
       return `<g${dim}>${sym(r.sym, 176, cy, 10, '#f4efe4')}${bullet(212, cy, 14, r.line)}</g>${body}${flash}${knob}
@@ -294,7 +294,7 @@
     </svg>`;
   }
 
-  // ---------- 路線圖：168 街 → 每條線開到哪一站；機場站旁寫著要搭幾分鐘 ----------
+  // ---------- 路線圖：168 街 → 每條線開到哪一站；哪一站是機場 ----------
   function routeMap(m) {
     const SX = 78, SY = 230, EX = 452, sy = (i) => 52 + i * 70;
     // 不交叉的畫法：依終點由上到下排起點；往上走的線，終點越上面越早轉彎；往下走的線，終點越下面越早轉彎
@@ -307,7 +307,7 @@
       + R.map((r) => `<path d="${dOf(r)}" fill="none" stroke="${COLORS[r.line] || '#888'}" stroke-width="6" stroke-linejoin="round"/>`).join('') + R.map((r) => bullet(EX - 40 - r.same * 32, r.y1, 13, r.line)).join('');
     const stops = m.stops.map((x, i) => `<rect x="${EX - 4}" y="${sy(i) - 22}" width="14" height="44" rx="7" fill="#fff" ${A.st(2.5)}/>
       <text x="${EX + 22}" y="${sy(i) + (x.ap ? -2 : 7)}" font-size="20" fill="${INK}" ${HELV}>${esc(x.name)}</text>
-      ${x.ap ? `<text x="${EX + 22}" y="${sy(i) + 20}" font-size="16" fill="#1f5fbf" ${HELV}>✈ ${x.ap} · ${x.min} min</text>` : ''}`).join('');
+      ${x.ap ? `<text x="${EX + 22}" y="${sy(i) + 20}" font-size="16" fill="#1f5fbf" ${HELV}>✈ ${x.ap}</text>` : ''}`).join('');
     // 舊舊的、缺角的紙：不規則的邊、摺痕、黃斑
     const edge = 'M14,10 L120,6 L190,12 L300,5 L420,10 L560,4 L628,9 L640,40 L634,58 L652,72 L648,150 L654,260 L646,330 L652,400 L630,412 L612,444 L480,438 L360,446 L220,440 L96,446 L40,440 L24,420 L8,428 L12,330 L6,220 L12,120 L4,60Z';
     return `<svg viewBox="0 0 660 450" class="doc-map" role="img" aria-label="地鐵路線圖">
@@ -320,7 +320,6 @@
       ${lines}${stops}
       <rect x="${SX - 58}" y="${SY - 32}" width="64" height="${m.routes.length * 9 + 26}" rx="10" fill="#fff" ${A.st(3)}/>
       <text x="${SX - 26}" y="${SY + m.routes.length * 9 + 22}" text-anchor="middle" font-size="16" fill="${INK}" ${HELV}>168 St</text>
-      <text x="48" y="428" font-size="13" fill="#7a808b" ${HELV}>${tr('時間＝從 168 街搭到機場', 'Times = ride from 168 St to the airport')}</text>
       <path d="M330,0 V450 M0,225 H660" stroke="#8a6a30" stroke-width="2" opacity=".22"/><path d="M332,0 V450 M0,227 H660" stroke="#fff" stroke-width="1.5" opacity=".35"/>
       <ellipse cx="560" cy="380" rx="46" ry="30" fill="#b08a3a" opacity=".16"/><ellipse cx="120" cy="90" rx="30" ry="22" fill="#b08a3a" opacity=".12"/><circle cx="420" cy="60" r="14" fill="none" stroke="#a07a3a" stroke-width="3" opacity=".18"/>
       <rect width="660" height="450" fill="url(#mapAge)"/>
@@ -384,7 +383,7 @@
     if (k.startsWith('gate-')) { ui.lastGate = k.slice(5); ctx.send({ type: 'gate', term: k.slice(5) }); return; }
     if (k.startsWith('dial-')) {
       const l = k.slice(5), r = data.board.rows.find((x) => x.line === l);
-      if (!r || r.fixed) return;
+      if (!r) return;
       // 連點時以畫面上的數字為準（不等伺服器回來），避免送出重複的頻道
       const cur = ui.dial[l] !== undefined ? ui.dial[l] : r.dial;
       ui.dial[l] = (cur % 9) + 1; draw();

@@ -58,7 +58,7 @@ const scenes = [
       {
         done: (s) => s.hasPassport,
         tiers: [
-          T('門牌寫著「護照記得拿」。Raccoony 的便條說護照在床底下的箱子。綠色箱子已經開了，看看裡面的情書和它的鎖。兩人都可以按畫面右邊的箭頭換視角。', 'The door sign says not to forget the passport. Raccoony’s sticky note says it’s in a suitcase under the bed. The green suitcase is already open: read the letters and look at its lock. You can both tap the arrow on the right to switch views.'),
+          T('門牌寫著「護照記得拿」。Raccoony 的便條說護照在床底下的箱子。右邊的箱子已經開了，看看裡面的情書和它的鎖。兩人都可以按畫面右邊的箭頭換視角。', 'The door sign says not to forget the passport. Raccoony’s sticky note says it’s in a suitcase under the bed. The suitcase on the right is already open: read the letters and look at its lock. You can both tap the arrow on the right to switch views.'),
           T('Raccoony 的吉他可以彈：吉他譜左邊的 1~6 是弦，對照 Slothy 牆上和弦表上方的 6~1，每一小節是一個和弦字母。彈哪首歌，哪個箱子的鎖就會亮；開鎖時 Slothy 按準備，Raccoony 要在 10 秒內彈出同樣的和弦。', 'Raccoony can play the guitar. The 1–6 on the left of the tabs are strings; match them with the 6–1 above the chord chart on Slothy’s wall. Each bar is one chord letter. Playing a song lights that suitcase’s lock. To open it, Slothy presses Ready and Raccoony plays the same chords within 10 seconds.'),
           (s) => S1.answers(s).plane,
         ],
@@ -106,7 +106,7 @@ const scenes = [
       {
         done: (s) => s.solved,
         tiers: [
-          T('Slothy 把行李箱裡的東西說給 Raccoony 聽（點信用卡、衣服、小物可以放大）：衣服是去玩水還是去很冷的地方？小物是做什麼活動用的？Raccoony 看看板上的日期，再按右邊箭頭看旅遊貼文。找出目的地後，看板上飛往那裡的航空公司，就是 Slothy 要在電腦上駭入的資料庫。', 'Slothy, describe the suitcase to Raccoony: are the clothes for the beach or somewhere cold? What activity are the gadgets for? Raccoony, check the date on the board, then tap the right arrow for the travel posts. Once you know the destination, the airline flying there on the board is the database Slothy hacks on the computer.'),
+          T('Slothy 把行李箱裡的東西說給 Raccoony 聽：衣服是去玩水還是去很冷的地方？小物是做什麼活動用的？Raccoony 看看板上的日期，再按右邊箭頭看旅遊貼文。找出目的地後，看板上飛往那裡的航空公司，就是 Slothy 要在電腦上駭入的資料庫。', 'Slothy, describe the suitcase to Raccoony: are the clothes for the beach or somewhere cold? What activity are the gadgets for? Raccoony, check the date on the board, then tap the right arrow for the travel posts. Once you know the destination, the airline flying there on the board is the database Slothy hacks on the computer.'),
           (s) => S3.answers(s).clue,
           (s) => S3.answers(s).gate,
         ],

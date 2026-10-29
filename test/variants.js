@@ -71,6 +71,11 @@ for (let v = 0; v < 5; v++) {
   // 場景 2：修看板（接線 + 調頻）→ 全亮 → 選線
   st = S2.init(v);
   const s2 = S2.solution(v);
+  // 一開始亮著的那條線：旋鈕轉開會變雜訊，轉回來又清楚
+  S2.act(st, 'A', { type: 'tune', line: s2.lit, ch: (s2.ch[s2.lit] % 9) + 1 });
+  assert.equal(S2.view(st, 'A').board.rows.find((r) => r.line === s2.lit).state, 'static', `subway v${v} 亮著的線轉開要變雜訊`);
+  S2.act(st, 'A', { type: 'tune', line: s2.lit, ch: s2.ch[s2.lit] });
+  assert.equal(S2.view(st, 'A').board.rows.find((r) => r.line === s2.lit).state, 'clear');
   assert.equal(S2.act(st, 'B', { type: 'board', line: s2.line }).solved, undefined); // 沒修好不能選
   for (const l of S2.LINES) {
     if (l === s2.lit) continue;
@@ -88,7 +93,7 @@ for (let v = 0; v < 5; v++) {
     assert.ok(Object.entries(V2.works).every(([l, to]) => said.some((t) => t.includes(`${l} line`) && t.includes(`${to} line`))), `subway v${v} 兩個路人要各說一條施工`);
     assert.equal(S2.view(S2.init(v), 'A').passer, null);
     const stopX = { JFK: 'hb', LGA: 'as', EWR: 'nw' }[V2.airport], W = V2.boarding - 120 - V2.now;
-    const ok = S2.LINES.filter((l) => V2.routes[V2.works[l] || l] === stopX && V2.rows.find((r) => r[0] === l)[1] + V2.travel[V2.airport] <= W);
+    const ok = S2.LINES.filter((l) => V2.routes[V2.works[l] || l] === stopX);
     assert.deepEqual(ok, [V2.answer], `subway v${v} 照規則只能有一個答案`);
     const trap = S2.LINES.find((l) => l !== V2.answer && V2.routes[l] === stopX);
     assert.ok(V2.tell.B === (V2.works[V2.answer] ? V2.answer : trap), `subway v${v} 找出答案的那句要在 Slothy 那邊`);

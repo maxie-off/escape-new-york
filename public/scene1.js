@@ -159,11 +159,10 @@
 
 
   // ---------- B：Slothy 的衣櫃 + 床（底下有三個行李箱）+ 房門 ----------
-  const CASE_LOOK = {
-    plane: { fill: '#a8743f', ink: '#6e4520' },
-    secret: { fill: '#ee9fb6', ink: '#b85a78' },
-    love: { fill: '#6fae7c', ink: '#3f7a4c' },
-  };
+  // 三個行李箱都是咖啡色（用位置區分：左 plane、中 secret、右 love）
+  const BROWN = { fill: '#a8743f', ink: '#6e4520' };
+  const CASE_LOOK = { plane: BROWN, secret: BROWN, love: BROWN };
+
   function suitcaseFace(id, x, y, w, h, glow = false, open = false) {
     const L = CASE_LOOK[id];
     const lx = x + w / 2, ly = y + h * 0.5;
@@ -310,7 +309,7 @@
   }
 
   // ---------- 行李箱（字母鎖）與裡面的東西 ----------
-  const CASE_NAME = () => ({ plane: tr('咖啡色行李箱', 'Brown suitcase'), secret: tr('粉紅色行李箱', 'Pink suitcase'), love: tr('綠色行李箱', 'Green suitcase') });
+  const CASE_NAME = () => ({ plane: tr('左邊的行李箱', 'Left suitcase'), secret: tr('中間的行李箱', 'Middle suitcase'), love: tr('右邊的行李箱', 'Right suitcase') });
   function faceSvg(id, glow = false) {
     const x = 20, y = 24, w = 170, h = 120;
     return `<svg viewBox="0 0 210 170" class="s1-face">${suitcaseFace(id, x, y, w, h, glow)}</svg>`;
@@ -371,7 +370,7 @@
       const line = (l) => esc(l).replace(/~(.)~/g, '<s>$1</s>');
       return `<div class="paper lined">${p.lines.map((l) => `<p>${line(l)}</p>`).join('')}</div>`;
     }
-    return `<div class="paper map"><h4>${esc(p.title)}</h4><p class="map-top">${tr('⬆ 上', '⬆ Top')}</p>${p.rows.map((r) => `<div class="map-row"><b>${r.n}</b><span>${esc(r.emoji)} ${esc(r.item)}</span></div>`).join('')}<p class="map-note">${esc(p.note)}</p></div>`;
+    return `<div class="paper map">${p.rows.map((r) => `<div class="map-row"><b>${r.n}</b><span>${esc(r.emoji)} ${esc(r.item)}</span></div>`).join('')}</div>`; // 衣櫃地圖：只有中間的表格
   }
 
   function blockHtml(b) {

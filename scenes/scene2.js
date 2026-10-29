@@ -64,8 +64,8 @@ function passerOf(vv, role) {
   const l = vv.tell[role], to = vv.works[l];
   return { id: PASSER[role], lines: [T('聽說今天', 'I heard the'), T(`${l} 線在施工，`, `${l} line is under construction,`), T(`會改走 ${to} 線喔。`, `so it’s running on the ${to} line today.`)] };
 }
-// 柱子上的路線圖：終點站 + 機場 + 分鐘數 + 每條線開到哪
-const mapOf = (vv) => ({ stops: STOPS.map((x) => ({ id: x.id, name: x.name, ap: x.ap || null, min: x.ap ? vv.travel[x.ap] : null })), routes: Object.entries(vv.routes).map(([line, stop]) => ({ line, stop })) });
+// 柱子上的路線圖：終點站 + 哪一站是機場 + 每條線開到哪
+const mapOf = (vv) => ({ stops: STOPS.map((x) => ({ id: x.id, name: x.name, ap: x.ap || null })), routes: Object.entries(vv.routes).map(([line, stop]) => ({ line, stop })) });
 
 function init(v = 0) {
   const vv = VARIANTS[v];
@@ -145,7 +145,7 @@ function act(state, role, a = {}) {
       if (role !== 'A') return { ok: false, message: T('看板在 Raccoony 那邊。', 'The board is on Raccoony’s side.') };
       const ch = Number(a.ch);
       if (!LINES.includes(line) || !Number.isInteger(ch) || ch < 1 || ch > 9) return { ok: false };
-      if (line === vv.lit) return { ok: true };
+      // 一開始就亮著的那條線也能轉：轉開就變雜訊，玩家會發現旋鈕就是頻道
       const was = clear(state, line);
       state.dial[line] = ch;
       if (!was && clear(state, line)) return finish(state, T(`📺 ${line} 線的資訊清楚了！`, `📺 The ${line} line info is clear now!`));
@@ -178,7 +178,6 @@ function docPatch(v) { return { ticket: { airport: VARIANTS[v].airport, boarding
 
 function answers(state) {
   const vv = VARIANTS[state.v];
-  const arrive = vv.boarding - 120, latest = arrive - vv.travel[vv.airport];
   const ls = LINES.filter((l) => l !== vv.lit);
   const fix = T(ls.map((l) => `${l} 線＝${SYM_ZH[vv.sym[l]].zh}、頻道 ${vv.ch[l]}`).join('；') + '。', ls.map((l) => `${l} line = ${SYM_ZH[vv.sym[l]].en}, channel ${vv.ch[l]}`).join('; ') + '.');
   const stop = STOPS.find((x) => x.ap === vv.airport);
@@ -189,10 +188,10 @@ function answers(state) {
   const qz = vv.works[q] ? T(`；${q} 線改走 ${vv.works[q]} 線，還是到 ${stop.name}`, `; the ${q} line runs on the ${vv.works[q]} line and still reaches ${stop.name}`) : T(`；${q} 線照常開`, `; the ${q} line runs as normal`);
   return {
     fix,
-    clue: T(`機票 ${clock(vv.boarding)} 從 ${vv.airport} 登機、要提前 2 小時到，所以 ${clock(arrive)} 前要到；路線圖上 ${vv.airport} 在 ${stop.name} 站，從 168 街要 ${vv.travel[vv.airport]} 分鐘，所以 ${clock(latest)} 前要上車。看板上開往 ${stop.name} 的是 ${p} 線和 ${q} 線，但路人說今天有線在施工。`,
-      `Boarding is ${clock(vv.boarding)} at ${vv.airport} and you must arrive 2 hours early, so be there by ${clock(arrive)}. The map puts ${vv.airport} at ${stop.name}, ${vv.travel[vv.airport]} minutes from 168 St, so board by ${clock(latest)}. The board shows the ${p} and ${q} lines going to ${stop.name}, but the passers-by say some lines are under construction today.`),
-    line: T(`${p} 線改走 ${vv.works[p]} 線，會開到 ${wrongTo}，到不了機場${qz.zh}。搭 ${q} 線（${next} 分鐘後進站，來得及）。`,
-      `The ${p} line runs on the ${vv.works[p]} line to ${wrongTo}, which misses the airport${qz.en}. Take the ${q} line (arriving in ${next} minutes, still in time).`),
+    clue: T(`機票上的機場是 ${vv.airport}；路線圖上 ${vv.airport} 在 ${stop.name} 站。看板上開往 ${stop.name} 的是 ${p} 線和 ${q} 線，但路人說今天有線在施工，要看它改走的線還到不到 ${stop.name}。`,
+      `The ticket says ${vv.airport}; on the route map ${vv.airport} is at ${stop.name}. The board shows the ${p} and ${q} lines going to ${stop.name}, but the passers-by say some lines are under construction today, so check whether the line it runs on still reaches ${stop.name}.`),
+    line: T(`${p} 線改走 ${vv.works[p]} 線，會開到 ${wrongTo}，到不了機場${qz.zh}。搭 ${q} 線（${next} 分鐘後進站）。`,
+      `The ${p} line runs on the ${vv.works[p]} line to ${wrongTo}, which misses the airport${qz.en}. Take the ${q} line (arriving in ${next} minutes).`),
   };
 }
 function solution(v) { const vv = VARIANTS[v]; return { line: vv.answer, lit: vv.lit, sym: vv.sym, ch: vv.ch }; }

@@ -1,7 +1,7 @@
 // 場景 3 的畫面與互動：機場。
 //   開場（兩人同畫面）：大廳 → 兩人走進來 → 廣播 → 警察衝進來 → Raccoony：「我們去幫忙把炸彈拆除吧！」Slothy：「嗯，一起去抓犯人吧！」→ 各自的畫面。
 //   A（Raccoony）視角 0：大廳 + 航班看板（今天日期、8 個航班）；視角 1：電腦分割畫面（左：旅遊貼文；右：terminal）。
-//   B（Slothy）視角 0：和警察圍著打開的行李箱（雜物裡的信用卡、衣物、小物可以點開放大）＋「選擇登機口」；視角 1：電腦 terminal（圖形題目）。
+//   B（Slothy）視角 0：和警察圍著打開的行李箱（點開看內容物：雜物裡信用卡、衣物、小物比較明顯）＋「選擇登機口」；視角 1：電腦 terminal（圖形題目）。
 // 只負責「畫」和「把操作變成 action」；正確答案由伺服器判定。
 (function () {
   const A = window.Art;
@@ -147,13 +147,15 @@
       <rect x="-42" y="-112" width="84" height="12" fill="#14161c"/><rect x="-8" y="-114" width="16" height="16" rx="2" fill="#d9b04a" ${ST2}/>
       <path d="M-8,-190 L0,-166 L8,-190Z" fill="#fff" ${ST2}/>
       <path d="M-30,-160 l12,10 -2,14 -10,-4Z" fill="#d9b04a" ${A.st(2)}/>
+      <text x="20" y="-146" text-anchor="middle" font-size="12" fill="#e2b53c" font-family="'Helvetica Neue',Arial,sans-serif" font-weight="800" letter-spacing=".5">NYPD</text>
       <rect x="-60" y="-184" width="22" height="76" rx="11" fill="${body}" ${ST2}/><rect x="38" y="-184" width="22" height="76" rx="11" fill="${body}" ${ST2}/>
       <circle cx="-49" cy="-104" r="10" fill="#f1c9a5" ${ST2}/><circle cx="49" cy="-104" r="10" fill="#f1c9a5" ${ST2}/>
       <circle cx="0" cy="-222" r="37" fill="#d9ad88" ${ST2}/>
       <path d="M-34,-206 Q0,-170 34,-206 Q28,-186 0,-182 Q-28,-186 -34,-206Z" fill="#3a2a22" opacity=".28"/>
-      <path d="M-44,-236 Q0,-296 44,-236 L44,-242 Q0,-268 -44,-242Z" fill="#10142e" ${ST2}/>
-      <rect x="-52" y="-242" width="104" height="16" rx="6" fill="#10142e" ${ST2}/>
-      <path d="M-15,-256 l15,-12 l15,12 l-15,10Z" fill="#b8902f" ${A.st(2)}/>
+      <path d="M-48,-240 C-52,-270 -28,-288 0,-288 C28,-288 52,-270 48,-240Z" fill="#1a2350" ${ST2}/>
+      <path d="M-40,-272 C-20,-282 20,-282 40,-272" fill="none" stroke="#2c3a78" stroke-width="4" stroke-linecap="round"/>
+      <rect x="-52" y="-244" width="104" height="18" rx="6" fill="#1a2350" ${ST2}/><path d="M-48,-236 H48" stroke="#d9b04a" stroke-width="2.5"/>
+      <path d="M0,-276 L12,-271 L11,-259 C10,-254 5,-251 0,-249 C-5,-251 -10,-254 -11,-259 L-12,-271Z" fill="#e2b53c" ${A.st(2)}/><circle cx="0" cy="-262" r="3.5" fill="#1a2350"/>
       <path d="M-30,-232 L-6,-220 M30,-232 L6,-220" stroke="${INK}" stroke-width="7" stroke-linecap="round"/>
       <rect x="-31" y="-224" width="29" height="16" rx="5" fill="#0b0b10" ${ST2}/><rect x="2" y="-224" width="29" height="16" rx="5" fill="#0b0b10" ${ST2}/>
       <path d="M-2,-218 h4" stroke="#0b0b10" stroke-width="4"/><path d="M-26,-221 l8,0 M7,-221 l8,0" stroke="#7d8696" stroke-width="2.5" stroke-linecap="round"/>
@@ -758,14 +760,14 @@
   }
 
   // ---------- 彈出層 ----------
-  // 行李箱裡可以點開的東西：卡片、兩件衣物、一個小物
+  // 行李箱裡比較明顯的東西：卡片、兩件衣物、一個小物
   const keyItems = () => [['card'], ['c0', data.clothing[0]], ['c1', data.clothing[1]], ['g0', data.gadgets[0]]].filter((x) => x[0] === 'card' || x[1]);
   function caseHtml() {
     const pos = { c0: [-196, 124, -8, 2.0], c1: [-34, 128, 6, 2.0], g0: [data.gadgets[0] === 'tripod' ? 168 : 150, data.gadgets[0] === 'tripod' ? 10 : -8, -5, data.gadgets[0] === 'tripod' ? 1.75 : 2.1] };
     const key = keyItems().map(([k, id]) => {
-      if (k === 'card') return `<g class="s3-pick" data-act="item" data-id="card">${creditCard(-282, -62, 0.92, -6)}</g>`;
+      if (k === 'card') return `<g>${creditCard(-282, -62, 0.92, -6)}</g>`;
       const [x, y, r, sc] = pos[k];
-      return `<g class="s3-pick" data-act="item" data-id="${k}" transform="translate(${x},${y}) rotate(${r})"><g transform="translate(4,6)" opacity=".22">${realIcon(id, 0, 0, sc).replace(/url\(#rl\w+\)/g, '#000')}</g>${realIcon(id, 0, 0, sc)}</g>`;
+      return `<g transform="translate(${x},${y}) rotate(${r})"><g transform="translate(4,6)" opacity=".22">${realIcon(id, 0, 0, sc).replace(/url\(#rl\w+\)/g, '#000')}</g>${realIcon(id, 0, 0, sc)}</g>`;
     }).join('');
     return `<div class="s3-zoom"><button class="x" data-act="close">✕</button>
       <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="打開的行李箱內部"><defs>${REAL}${CL}</defs>
@@ -777,16 +779,7 @@
         <rect x="-294" y="-194" width="588" height="388" rx="16" fill="url(#rlWeave)"/>
         <g style="filter:saturate(.7)" opacity=".92">${foldedStack(-196, -112, 1.25)}${cupNoodle(-30, -132, 1.05, -78)}${pouch(96, -140, 0.95, 0, 6)}${pouch(222, -128, 0.9, 1, -10)}${sneakers(238, 112, 0.95)}${foldedStack(76, 168, 0.8)}</g>
         ${key}
-      </svg><p class="s3-tap">${tr('🔍 點卡片、衣服、小物可以放大看', '🔍 Tap the card, clothes or gadget to look closer')}</p></div>`;
-  }
-  function itemHtml() {
-    const k = ui.item, id = k === 'card' ? null : keyItems().find((x) => x[0] === k)[1];
-    const inner = k === 'card' ? creditCard(-231, -145, 2.1, 0) : realIcon(id, 0, id === 'tripod' ? 20 : 0, id === 'tripod' ? 3.6 : 4.6);
-    return `<div class="s3-zoom"><button class="x" data-act="close">✕</button>
-      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="放大的物品"><defs>${REAL}${CL}</defs>
-        <rect x="-322" y="-222" width="644" height="444" rx="34" fill="url(#rlLining)" ${ln(3)}/><rect x="-322" y="-222" width="644" height="444" rx="34" fill="url(#rlWeave)"/>
-        ${inner}</svg>
-      <div class="row center"><button class="primary" data-act="backcase">${tr('← 回到行李箱', '← Back to the suitcase')}</button></div></div>`;
+      </svg></div>`;
   }
   function boardHtml() {
     return `<div class="modal-card s3-board"><button class="x" data-act="close">✕</button>
@@ -825,7 +818,7 @@
     const el = $modal();
     if (ui.modal === 'manifest' && !(data.hack && data.hack.manifest)) ui.modal = null;
     if (!ui.modal) { el.hidden = true; el.innerHTML = ''; return; }
-    el.innerHTML = { case: caseHtml, item: itemHtml, board: boardHtml, gate: gateHtml, posts: postsHtml, confirm: confirmHtml, manifest: manifestHtml }[ui.modal]();
+    el.innerHTML = { case: caseHtml, board: boardHtml, gate: gateHtml, posts: postsHtml, confirm: confirmHtml, manifest: manifestHtml }[ui.modal]();
     el.hidden = false;
   }
   function closeModal() { ui.modal = null; renderModal(); }
@@ -836,8 +829,6 @@
     if (!t || t.disabled) return;
     switch (t.dataset.act) {
       case 'close': return closeModal();
-      case 'item': ui.item = t.dataset.id; ui.modal = 'item'; return renderModal();
-      case 'backcase': ui.modal = 'case'; return renderModal();
       case 'airyes': { const code = ui.pendingAir; ui.pendingAir = null; closeModal(); return ctx.send({ type: 'airline', code }); }
       case 'key': if (ui.gate.length < 2) ui.gate = String(Number(ui.gate + t.dataset.k)); if (ui.gate === '0') ui.gate = ''; return renderModal();
       case 'del': ui.gate = ui.gate.slice(0, -1); return renderModal();
