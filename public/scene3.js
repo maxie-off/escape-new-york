@@ -69,7 +69,6 @@
       return `<g>
         <rect x="${x + 70}" y="130" width="64" height="48" rx="5" fill="#c9701a" ${ST2}/><text x="${x + 102}" y="166" text-anchor="middle" font-size="32" fill="#fff" ${HELV}>${i + 1}</text>
         <rect x="${x + 98}" y="178" width="8" height="120" fill="#8b93a3"/>
-        ${traveler(x + 100, 342, 0.62, { top: '#2447a8', skin: i % 2 ? '#e0ac82' : '#f1c9a5', hair: '#2b2420', bottom: '#24262e', shoe: '#17181d' }, false)}
         <rect x="${x}" y="338" width="200" height="104" rx="8" fill="#9aa1ad" ${ST}/>
         <rect x="${x}" y="338" width="200" height="16" rx="6" fill="#737b87" ${ST2}/>
         <rect x="${x + 14}" y="372" width="60" height="38" rx="5" fill="#2b3040" ${ST2}/><rect x="${x + 128}" y="372" width="60" height="38" rx="5" fill="#2b3040" ${ST2}/>
@@ -431,10 +430,8 @@
     const H = hk(), L = x + 22, cx = x + w / 2;
     let inner = '';
     if (H.phase === 'idle') {
-      inner = gtext(L, y + 64, 17, '> connect airline_db') + gtext(L, y + 100, 22, tr('選擇一間航空公司：', 'SELECT AN AIRLINE:'))
-        + data.airlines.map((a, i) => { const yy = y + 124 + i * 70; return `<g class="hot" data-hot="air-${a.code}"><rect x="${L}" y="${yy}" width="${w - 44}" height="56" rx="6" fill="#0a1a0f" stroke="${GRN2}" stroke-width="2"/>
-          ${gtext(L + 14, yy + (a.zh ? 25 : 35), 18, `[${a.code}] ${a.name}`)}${a.zh ? gtext(L + 14, yy + 46, 14, a.zh, { c: '#8fdca5' }) : ''}</g>`; }).join('')
-        + (ui.seen.air ? '' : `<rect class="pulse" x="${L - 6}" y="${y + 118}" width="${w - 32}" height="${data.airlines.length * 70 - 6}" rx="10" fill="none" stroke="#ffd23f" stroke-width="5"/>`);
+      inner = gtext(cx, y + h / 2 - 10, 48, 'TERMINAL', { mid: 1 })
+        + `<text x="${cx}" y="${y + h / 2 + 40}" text-anchor="middle" font-size="18" fill="#8fdca5" filter="url(#tglow)" ${MONO}>${esc(tr('等待遠端連線', 'Waiting for remote connection'))}<tspan class="s3-dot1">.</tspan><tspan class="s3-dot2">.</tspan><tspan class="s3-dot3">.</tspan></text>`;
     } else if (H.phase === 'locked') {
       inner = gtext(cx, y + 190, 30, 'ACCESS DENIED', { c: RED, mid: 1 }) + gtext(cx, y + 232, 18, tr('資料庫不對！安全鎖定中', 'WRONG DATABASE · SECURITY LOCK'), { c: RED, mid: 1 }) + gtext(cx, y + 300, 46, cdText(), { c: RED, mid: 1, id: 's3-cd' });
     } else if (H.phase === 'puzzle') {
@@ -456,7 +453,14 @@
   function termB(x, y, w, h) {
     const H = hk(), cx = x + w / 2, cy = y + h / 2 + 20;
     let inner = '';
-    if (H.phase === 'idle') inner = gtext(cx, cy - 10, 64, 'TERMINAL', { mid: 1 }) + `<text x="${x + 30}" y="${y + h - 30}" font-size="22" fill="${GRN}" ${MONO}>&gt; <tspan class="s3-caret">_</tspan></text>`;
+    if (H.phase === 'idle') {
+      const L = x + 40, bw = w - 80;
+      inner = gtext(L, y + 70, 20, '> connect airline_db') + gtext(L, y + 116, 28, tr('選擇一間航空公司：', 'SELECT AN AIRLINE:'))
+        + data.airlines.map((a, i) => { const yy = y + 146 + i * 96; return `<g class="hot" data-hot="air-${a.code}"><rect x="${L}" y="${yy}" width="${bw}" height="80" rx="8" fill="#0a1a0f" stroke="${GRN2}" stroke-width="2.5"/>
+          ${gtext(L + 22, yy + (a.zh ? 36 : 50), 28, `[${a.code}] ${a.name}`)}${a.zh ? gtext(L + 22, yy + 64, 18, a.zh, { c: '#8fdca5' }) : ''}</g>`; }).join('')
+        + (ui.seen.air ? '' : `<rect class="pulse" x="${L - 8}" y="${y + 138}" width="${bw + 16}" height="${data.airlines.length * 96}" rx="12" fill="none" stroke="#ffd23f" stroke-width="5"/>`)
+        + `<text x="${L}" y="${y + h - 30}" font-size="22" fill="${GRN}" ${MONO}>&gt; <tspan class="s3-caret">_</tspan></text>`;
+    }
     else if (H.phase === 'locked') inner = gtext(cx, cy - 40, 44, 'ACCESS DENIED', { c: RED, mid: 1 }) + gtext(cx, cy + 6, 20, tr('安全鎖定中', 'SECURITY LOCK'), { c: RED, mid: 1 }) + gtext(cx, cy + 70, 46, cdText(), { c: RED, mid: 1, id: 's3-cd' });
     else if (H.phase === 'puzzle') inner = gtext(x + 24, y + 62, 22, `CHALLENGE ${H.step + 1}/${H.total}`) + gtext(x + w - 24, y + 66, 34, cdText(), { id: 's3-cd' }).replace('<text ', '<text text-anchor="end" ') + figure(H, cx, cy + 10);
     else if (H.phase === 'retry') inner = gtext(cx, cy - 20, 48, 'ACCESS DENIED', { c: RED, mid: 1 }) + gtext(cx, cy + 30, 20, tr('等 Raccoony 按重試……', 'Waiting for Raccoony to retry…'), { c: RED, mid: 1 });

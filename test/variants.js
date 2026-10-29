@@ -97,12 +97,12 @@ for (let v = 0; v < 5; v++) {
   assert.ok(!json(B3).includes('"gate"') && !json(B3).includes('"flight"') && !json(A3).includes('"clothing"') && !json(A3).includes(s3.name), `airport v${v} 資訊外洩`);
   // 卡上的名字要在答案那班，而且只在兩班出現（兩個目的地各一班）
   const wrongAir = S3.AIRLINES.find((x) => x.code !== s3.air).code;
-  assert.equal(S3.act(st, 'A', { type: 'airline', code: wrongAir }).correct, false);
+  assert.equal(S3.act(st, 'B', { type: 'airline', code: wrongAir }).correct, false);
   assert.equal(S3.view(st, 'A').hack.phase, 'locked');
-  assert.equal(S3.act(st, 'A', { type: 'airline', code: s3.air }).ok, false); // 鎖住中
+  assert.equal(S3.act(st, 'B', { type: 'airline', code: s3.air }).ok, false); // 鎖住中
   st.hack.lockUntil = 0;
-  assert.equal(S3.act(st, 'B', { type: 'airline', code: s3.air }).ok, false); // 只有 A 能選
-  assert.ok(S3.act(st, 'A', { type: 'airline', code: s3.air }).correct);
+  assert.equal(S3.act(st, 'A', { type: 'airline', code: s3.air }).ok, false); // 只有 B（Slothy）能選
+  assert.ok(S3.act(st, 'B', { type: 'airline', code: s3.air }).correct);
   assert.ok(S3.view(st, 'B').hack.fig && !S3.view(st, 'B').hack.opts && S3.view(st, 'A').hack.opts && !S3.view(st, 'A').hack.fig);
   S3.act(st, 'A', { type: 'hack', choice: s3.puzzles[0] });
   assert.equal(S3.act(st, 'A', { type: 'hack', choice: 'nope' }).correct, false); // 答錯 → 重來
@@ -111,9 +111,8 @@ for (let v = 0; v < 5; v++) {
   for (const c of s3.puzzlesAt(1)) assert.ok(S3.act(st, 'A', { type: 'hack', choice: c }).correct);
   const man = S3.view(st, 'A').hack.manifest;
   assert.ok(man.find((m) => m.flight === s3.flight).names.includes(s3.name));
-  assert.equal(man.filter((m) => m.names.includes(s3.name)).length, 2);
-  const two = man.filter((m) => m.names.includes(s3.name)).map((m) => A3.flights.find((f) => f.flight === m.flight).dest);
-  assert.equal(new Set(two).size, 2, `airport v${v} 兩班要是不同目的地`);
+  assert.equal(man.filter((m) => m.names.includes(s3.name)).length, 1, `airport v${v} 名字只能出現在一班`);
+  assert.equal(new Set(man.flatMap((m) => m.names)).size, man.flatMap((m) => m.names).length, `airport v${v} 名單不能有重複的名字`);
   assert.ok(!json(S3.view(st, 'B')).includes('manifest'));
   for (const f of A3.flights) if (f.gate !== s3.gate) assert.equal(S3.act(st, 'B', { type: 'gate', gate: f.gate }).correct, false);
   assert.equal(S3.act(st, 'A', { type: 'bomb' }).ok, false); // 時間還沒到不能引爆

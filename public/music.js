@@ -308,19 +308,34 @@ window.Music = (function () {
     const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
     return vs.find((v) => v.lang === lang) || vs.find((v) => v.lang && v.lang.replace('_', '-').startsWith(lang.slice(0, 2))) || null;
   }
+  // iPad / Safari 的語音有幾個毛病：
+  //   1. cancel() 之後馬上 speak() 會被吞掉 → 有東西在講才 cancel，而且隔一下再講
+  //   2. utterance 沒有被引用會被回收、念到一半就沒聲音 → 存在 window 上
+  //   3. 有時候卡在 paused → speak 前先 resume()；1.5 秒還沒開始念就再試一次
+  let speakTry = 0;
   function speak(text, opt = {}) {
     if (muted || !window.speechSynthesis) return;
+    const my = ++speakTry;
     try {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = opt.lang || 'zh-TW'; u.rate = opt.rate || 1.05; u.pitch = opt.pitch || 0.9; u.volume = 1;
-      const v = pickVoice(u.lang); if (v) u.voice = v;
-      const duck = (on) => { if (g && ctx) g.master.gain.setTargetAtTime(muted ? 0 : on ? 0.35 : 0.9, ctx.currentTime, 0.2); };
-      u.onstart = () => duck(true); u.onend = () => duck(false); u.onerror = () => duck(false);
-      speechSynthesis.speak(u);
+      const busy = speechSynthesis.speaking || speechSynthesis.pending;
+      if (busy) speechSynthesis.cancel();
+      const go = (retry) => {
+        if (my !== speakTry || muted) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = opt.lang || 'zh-TW'; u.rate = opt.rate || 1.05; u.pitch = opt.pitch || 0.9; u.volume = 1;
+        const v = pickVoice(u.lang); if (v) u.voice = v;
+        const duck = (on) => { if (g && ctx) g.master.gain.setTargetAtTime(muted ? 0 : on ? 0.35 : 0.9, ctx.currentTime, 0.2); };
+        let started = false;
+        u.onstart = () => { started = true; duck(true); }; u.onend = () => duck(false); u.onerror = () => duck(false);
+        window.__utter = u;
+        try { speechSynthesis.resume(); } catch (e) { /* ignore */ }
+        speechSynthesis.speak(u);
+        if (retry) setTimeout(() => { if (!started && my === speakTry && !speechSynthesis.speaking) { try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } setTimeout(() => go(false), 150); } }, 1500);
+      };
+      setTimeout(() => go(true), busy ? 150 : 0);
     } catch (e) { console.warn('speech failed', e); }
   }
-  function hush() { try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
+  function hush() { speakTry++; try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
   function toggleMute() {
     muted = !muted;
     try { localStorage.setItem('muted', muted ? '1' : '0'); } catch (e) { /* ignore */ }

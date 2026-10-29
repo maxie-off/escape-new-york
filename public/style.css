@@ -458,3 +458,6 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 .s3-boom { transform-origin: 500px 350px; animation: s3boom .9s cubic-bezier(.2,1.6,.4,1) both, s3shake .08s linear .9s 10 alternate; }
 @keyframes s3boom { from { transform: scale(.1) rotate(-20deg); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes s3shake { from { transform: translate(-6px, 3px); } to { transform: translate(6px, -3px); } }
+.s3-dot1, .s3-dot2, .s3-dot3 { animation: s3dot 1.4s infinite; opacity: 0; }
+.s3-dot2 { animation-delay: .25s; } .s3-dot3 { animation-delay: .5s; }
+@keyframes s3dot { 20%, 70% { opacity: 1; } 100% { opacity: 0; } }

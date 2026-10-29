@@ -6,8 +6,8 @@
 //   Raccoony(A) 視角 0：大廳＋航班看板（今天日期、8 個航班：4 個目的地 × 同一家航空公司 2 班）。
 //   Raccoony(A) 視角 1：電腦分割畫面：左邊 4 則旅遊貼文（地點＋兩張照片），右邊 terminal（選航空公司、選答案、看旅客名單）。
 // 解法：衣物＋小物 → 去玩水還是冷的地方、做什麼活動；看板日期 → 紐約現在什麼季節（南半球相反）→ 目的地。
-//       Travel Document 的航空公司 → 駭進那家航空公司的資料庫（選錯會被鎖 30 秒）→ 3 道 15 秒的圖形題 →
-//       旅客名單：卡上的名字出現在兩個航班（兩個目的地各一班）→ 用目的地選出那一班 → 看板上的登機口。
+//       Travel Document 的航空公司 → Slothy 在電腦上駭進那家航空公司（選錯鎖 30 秒）→ 3 道 15 秒的圖形題 →
+//       Raccoony 的螢幕出現旅客名單：卡上的名字只在一班 → 看板上那班的登機口。
 // 祕密（答案、登機口、旅客名單）只存在伺服器；B 看不到看板、貼文、名單，A 看不到行李內容。
 
 const { T } = require('../i18n');
@@ -71,15 +71,15 @@ function build(v) {
   const air = DESTS.find((d) => d.id === vv.answer).air;
   const pool = shuffle(OTHERS, r);
   const mine = flights.filter((f) => f.flight.startsWith(air + ' '));
-  const pickFor = {};
-  for (const d of DESTS.filter((x) => x.air === air)) { const two = mine.filter((f) => f.dest === d.id); pickFor[d.id] = two[Math.floor(r() * 2)].flight; }
+  const two = mine.filter((f) => f.dest === vv.answer);
+  const target = two[Math.floor(r() * 2)].flight; // 名字只出現在這一班
   const manifest = mine.map((f) => {
-    const names = pool.splice(0, pickFor[f.dest] === f.flight ? 4 : 5);
-    if (pickFor[f.dest] === f.flight) names.splice(Math.floor(r() * 5), 0, vv.name);
+    const names = pool.splice(0, f.flight === target ? 4 : 5);
+    if (f.flight === target) names.splice(Math.floor(r() * 5), 0, vv.name);
     return { flight: f.flight, names };
   }).sort((a, b) => a.flight.localeCompare(b.flight));
   const cardNo = `4${Math.floor(r() * 900 + 100)} ${Math.floor(r() * 9000 + 1000)} ${Math.floor(r() * 9000 + 1000)} ${Math.floor(r() * 9000 + 1000)}`;
-  return { flights, manifest, air, cardNo, target: pickFor[vv.answer] };
+  return { flights, manifest, air, cardNo, target };
 }
 const BUILT = VARIANTS.map((_, v) => build(v));
 
@@ -135,7 +135,6 @@ function view(state, role) {
       date: { m, d, label: `${MONTH_EN[m - 1]} ${String(d).padStart(2, '0')}`, long: T(`${m} 月 ${d} 日`, `${MONTH_EN[m - 1]} ${d}`) },
       flights: B.flights.map(({ flight, board, boardZh, gate, time }) => ({ flight, dest: board, destZh: T(boardZh, ''), gate, time })),
       posts: DESTS.map((x) => ({ id: x.id, place: x.place })),
-      airlines: AIRLINES.map((x) => ({ code: x.code, name: x.name, zh: T(x.zh, '') })),
       hack: hackView(state, 'A'),
       bomb: Math.max(0, state.bombAt - Date.now()), boom: state.boom,
     };
@@ -147,6 +146,7 @@ function view(state, role) {
     role, maxGate: MAX_GATE,
     card: { issuer: 'NOVA', number: B.cardNo, name: vv.name },
     doc: { airline: airline.name, airlineZh: T(airline.zh, '') },
+    airlines: AIRLINES.map((x) => ({ code: x.code, name: x.name, zh: T(x.zh, '') })),
     clothing: pk.clothing, gadgets: pk.gadget, // 只送圖示 id（畫面上不寫文字）
     hack: hackView(state, 'B'),
     bomb: Math.max(0, state.bombAt - Date.now()), boom: state.boom,
@@ -171,7 +171,7 @@ function act(state, role, a = {}) {
   if (now > state.bombAt + 3000) return explode(state); // 沒人回報也一樣：時間到了就爆
   const h = state.hack;
   if (a.type === 'airline') {
-    if (role !== 'A') return { ok: false };
+    if (role !== 'B') return { ok: false, message: T('航空公司要在 Slothy 的電腦上選。', 'The airline is chosen on Slothy’s computer.') };
     if (h.phase !== 'idle' || h.lockUntil > now) return { ok: false };
     if (a.code === BUILT[state.v].air) {
       Object.assign(h, { phase: 'puzzle', step: 0, deadline: now + STEP_MS });
@@ -226,8 +226,8 @@ function answers(state) {
     aurora: T('行李是去很冷的地方（毛衣、羽絨衣），還帶了腳架：去雷克雅維克拍極光。', 'The suitcase is for somewhere cold (sweater, down jacket) and has a tripod: photographing the northern lights in Reykjavík.'),
   }[d.kind];
   return {
-    clue: T(`${why.zh}Travel Document 寫的是 ${air.name}，Raccoony 要在電腦上駭進這家航空公司。`, `${why.en} The travel document says ${air.name}, so Raccoony should hack that airline on the computer.`),
-    gate: T(`旅客名單上 ${vv.name} 出現在兩班飛機；飛往 ${d.board} 的是 ${f.flight}，在 ${f.gate} 號登機口。`, `${vv.name} is on two flights in the passenger list; the one to ${d.board} is ${f.flight}, at gate ${f.gate}.`),
+    clue: T(`${why.zh}Travel Document 寫的是 ${air.name}，Slothy 要在電腦上駭進這家航空公司。`, `${why.en} The travel document says ${air.name}, so Slothy should hack that airline on the computer.`),
+    gate: T(`旅客名單上 ${vv.name} 在 ${f.flight}（飛往 ${d.board}），看板上是 ${f.gate} 號登機口。`, `In the passenger list, ${vv.name} is on ${f.flight} (to ${d.board}), which leaves from gate ${f.gate} on the board.`),
   };
 }
 function solution(v) {

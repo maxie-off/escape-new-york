@@ -92,7 +92,7 @@ function pickVariants(room) {
 }
 function startGame(room) {
   room.phase = 'playing';
-  room.sceneIndex = 0;
+  room.sceneIndex = Math.min(Number(process.env.START_SCENE) || 0, scenes.length - 1); // 測試用：START_SCENE 直接從某一關開始
   room.hintLevels = {}; room.hintLog = []; room.hintTotal = 0;
   room.feed = [];
   room.docs = { A: [], B: [] };
