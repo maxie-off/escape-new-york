@@ -144,7 +144,7 @@ function view(state, role) {
   const airline = AIRLINES.find((x) => x.code === dest.air);
   return {
     role, maxGate: MAX_GATE,
-    card: { issuer: 'NOVA', number: B.cardNo, name: vv.name },
+    card: { number: B.cardNo, name: vv.name },
     doc: { airline: airline.name, airlineZh: T(airline.zh, '') },
     airlines: AIRLINES.map((x) => ({ code: x.code, name: x.name, zh: T(x.zh, '') })),
     clothing: pk.clothing, gadgets: pk.gadget, // 只送圖示 id（畫面上不寫文字）

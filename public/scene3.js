@@ -248,35 +248,130 @@
     }
   }
 
+  // ---------- 行李箱與裡面的東西：寫實畫風（真實比例、布料皺摺、縫線、柔和明暗）----------
+  const INK2 = '#24242a';
+  const ln = (w = 1.6) => `stroke="${INK2}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+  const lg = (id, stops, x2 = 1, y2 = 1) => `<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(([o, c, a]) => `<stop offset="${o}" stop-color="${c}"${a != null ? ` stop-opacity="${a}"` : ''}/>`).join('')}</linearGradient>`;
+  const REAL = [
+    lg('rlTee', [[0, '#f3cf6b'], [0.55, '#dcaa3e'], [1, '#a9782a']]),
+    lg('rlBik', [[0, '#ff7d78'], [0.6, '#e2484f'], [1, '#a92c3a']]),
+    lg('rlLens', [[0, '#5a5048'], [0.45, '#1a1714'], [1, '#3b2c22']], 0, 1),
+    lg('rlAcet', [[0, '#3a3532'], [0.5, '#141212'], [1, '#2a2522']], 0, 1),
+    lg('rlSw', [[0, '#a8434a'], [0.55, '#86303a'], [1, '#561a22']]),
+    lg('rlDn', [[0, '#5b78ad'], [0.45, '#2f4a7c'], [1, '#1b2b4d']], 0, 1),
+    lg('rlGog', [[0, '#ffe08a'], [0.3, '#ff8a3c'], [0.62, '#b0418f'], [1, '#2f6fd0']]),
+    lg('rlAlu', [[0, '#eef0f3'], [0.45, '#a9b0ba'], [1, '#5d636d']], 1, 0),
+    lg('rlCam', [[0, '#4a4c53'], [0.6, '#1f2024'], [1, '#121316']], 0, 1),
+    lg('rlShell', [[0, '#4d5a63'], [0.5, '#2f3a42'], [1, '#1d252b']], 0, 1),
+    lg('rlLining', [[0, '#8d97a8'], [1, '#6b7486']], 0, 1),
+    lg('rlCard', [[0, '#3a4a8f'], [0.55, '#25306a'], [1, '#141a40']]),
+    lg('rlChip', [[0, '#f4dc8c'], [0.5, '#c9a24a'], [1, '#e8cf7a']]),
+    `<radialGradient id="rlGlass" cx=".38" cy=".35" r=".7"><stop offset="0" stop-color="#6d7fa3"/><stop offset=".35" stop-color="#1f2a40"/><stop offset="1" stop-color="#05070c"/></radialGradient>`,
+    `<pattern id="rlWeave" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0,3 h6 M3,0 v6" stroke="#fff" stroke-width=".5" opacity=".12"/></pattern>`,
+  ].join('');
+  const fold = (d, o = 0.32) => `<path d="${d}" fill="none" stroke="${INK2}" stroke-width="1" opacity="${o}" stroke-linecap="round"/>`;
+  const hl = (d, o = 0.35) => `<path d="${d}" fill="none" stroke="#fff" stroke-width="1.4" opacity="${o}" stroke-linecap="round"/>`;
+  const shadeP = (d, o = 0.18) => `<path d="${d}" fill="#000" opacity="${o}"/>`;
+  // 有寬度的棒子（腳架）：用多邊形畫，才能上金屬漸層
+  const rod = (x0, y0, x1, y1, w0, w1 = w0) => { const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L; return `<polygon points="${[[x0 + nx * w0, y0 + ny * w0], [x1 + nx * w1, y1 + ny * w1], [x1 - nx * w1, y1 - ny * w1], [x0 - nx * w0, y0 - ny * w0]].map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ')}" fill="url(#rlAlu)" ${ln(1)}/>`; };
+  function realIcon(id, x, y, s = 1) {
+    const g = (inner) => `<g transform="translate(${x},${y}) scale(${s})">${inner}</g>`;
+    switch (id) {
+      case 'tshirt': { const D = 'M-10,-30 C-6,-25 6,-25 10,-30 L24,-26 L39,-13 L31,-2 L22,-8 L22,30 C8,32 -8,32 -22,30 L-22,-8 L-31,-2 L-39,-13 L-24,-26 Z';
+        return g(`<path d="${D}" fill="url(#rlTee)"/>${shadeP('M14,-27 L24,-26 L39,-13 L31,-2 L22,-8 L22,30 C18,31 15,31 12,31 C16,10 16,-10 14,-27Z', 0.14)}
+          <path d="${D}" fill="none" ${ln()}/><path d="M-8,-28 C-4,-21 4,-21 8,-28" fill="none" ${ln(1.2)}/><path d="M-36,-9 L-28,-1 M36,-9 L28,-1" ${ln(1)} stroke-dasharray="1.6 1.6"/>
+          <path d="M-21,26 C-7,28 7,28 21,26" fill="none" ${ln(0.9)} stroke-dasharray="1.6 1.6"/>
+          ${fold('M-14,-6 C-10,4 -12,14 -8,24')}${fold('M10,-18 C6,-8 12,4 8,12')}${fold('M-24,-22 C-20,-16 -22,-12 -22,-8', 0.25)}${hl('M-6,-12 C-4,-4 -6,6 -3,14')}`); }
+      case 'bikini': {
+        const cup = 'M-6,-14 C-9,-22 -14,-30 -18,-35 C-22,-27 -27,-18 -31,-12 C-22,-9 -12,-9 -6,-14Z';
+        const bot = 'M-27,4 C-10,9 10,9 27,4 C23,12 13,22 5,28 C2,30 -2,30 -5,28 C-13,22 -23,12 -27,4Z';
+        return g(`<path d="M-18,-35 C-16,-41 -11,-44 -6,-46 M18,-35 C16,-41 11,-44 6,-46 M-31,-12 C-37,-11 -41,-9 -45,-6 M31,-12 C37,-11 41,-9 45,-6 M-6,-14 C-2,-12 2,-12 6,-14" fill="none" stroke="#a92c3a" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="${cup}" fill="url(#rlBik)" ${ln(1.3)}/><g transform="scale(-1,1)"><path d="${cup}" fill="url(#rlBik)" ${ln(1.3)}/></g>
+          ${shadeP('M-6,-14 C-9,-22 -14,-30 -18,-35 C-15,-26 -12,-17 -12,-10 C-9,-10 -7,-12 -6,-14Z', 0.16)}${shadeP('M6,-14 C9,-22 14,-30 18,-35 C17,-26 18,-17 20,-10 C14,-9 9,-11 6,-14Z', 0.2)}
+          ${hl('M-20,-26 C-22,-22 -24,-18 -26,-14', 0.5)}${hl('M14,-28 C13,-24 12,-20 11,-16', 0.35)}
+          <path d="${bot}" fill="url(#rlBik)" ${ln(1.3)}/>${shadeP('M8,7 C17,6 22,5 27,4 C23,12 13,22 5,28 C2,30 0,29 0,28 C6,20 8,14 8,7Z', 0.18)}
+          <path d="M-24,7 C-10,11 10,11 24,7" fill="none" stroke="#fff" stroke-width=".8" opacity=".45" stroke-dasharray="1.6 1.4"/>
+          <path d="M-27,4 L-35,1 M-27,4 L-34,9 M27,4 L35,1 M27,4 L34,9" fill="none" stroke="#a92c3a" stroke-width="1.8" stroke-linecap="round"/>
+          ${fold('M-10,14 C-6,18 -2,20 2,22', 0.3)}${hl('M-18,9 C-14,13 -10,17 -6,20', 0.35)}`); }
+      case 'sunglasses': {
+        const fr = 'M-38,-13 C-38,-17 -35,-18 -31,-18 L-6,-16 C-2,-16 -1,-13 -1,-10 L-3,4 C-4,11 -10,13 -17,13 L-27,13 C-34,13 -37,9 -38,2Z';
+        const lens = 'M-34,-12 C-34,-14 -32,-15 -30,-15 L-7,-13 C-4,-13 -4,-11 -4,-9 L-6,3 C-7,8 -11,10 -17,10 L-26,10 C-31,10 -33,7 -34,2Z';
+        const half = `<path d="${fr}" fill="url(#rlAcet)" ${ln(1.3)}/><path d="${lens}" fill="url(#rlLens)"/><path d="M-30,-12 L-22,-12 L-30,6 L-33,4Z" fill="#fff" opacity=".22"/><path d="M-19,-12 L-16,-12 L-24,8 L-26,8Z" fill="#fff" opacity=".14"/><rect x="-39" y="-15" width="4" height="3" rx="1" fill="#c9ccd2"/>`;
+        return g(`<path d="M-38,-14 C-44,-14 -48,-11 -50,-6 M38,-14 C44,-14 48,-11 50,-6" fill="none" stroke="#2a2522" stroke-width="2.4" stroke-linecap="round"/>
+          ${half}<g transform="scale(-1,1)">${half}</g><path d="M-1,-11 C-1,-15 1,-15 1,-11" fill="none" stroke="#2a2522" stroke-width="3"/>${hl('M-36,-16 L-8,-14', 0.4)}${hl('M8,-14 L36,-16', 0.3)}`); }
+      case 'sweater': { const D = 'M-12,-30 C-6,-26 6,-26 12,-30 L28,-24 C34,-20 38,-10 40,4 L42,22 L32,24 L28,0 L26,30 C10,33 -10,33 -26,30 L-28,0 L-32,24 L-42,22 L-40,4 C-38,-10 -34,-20 -28,-24 Z';
+        const cable = (cx) => `<path d="${Array.from({ length: 7 }, (_, i) => `M${cx - 3},${-20 + i * 7} C${cx + 3},${-17 + i * 7} ${cx + 3},${-14 + i * 7} ${cx - 3},${-13 + i * 7}`).join(' ')}" fill="none" stroke="#c7686f" stroke-width="2.2" stroke-linecap="round"/><path d="${Array.from({ length: 7 }, (_, i) => `M${cx + 3},${-20 + i * 7} C${cx - 3},${-17 + i * 7} ${cx - 3},${-14 + i * 7} ${cx + 3},${-13 + i * 7}`).join(' ')}" fill="none" stroke="#5e1a22" stroke-width="1.2" opacity=".7"/>`;
+        const rib = (x0, x1, y0, y1) => Array.from({ length: Math.round((x1 - x0) / 2.6) }, (_, i) => `<path d="M${(x0 + i * 2.6).toFixed(1)},${y0} V${y1}" stroke="#4a1219" stroke-width=".9" opacity=".55"/>`).join('');
+        return g(`<path d="${D}" fill="url(#rlSw)" ${ln()}/>${cable(-9)}${cable(9)}${cable(0)}
+          <path d="M-16,-22 V26 M16,-22 V26" stroke="#c7686f" stroke-width="1.3" stroke-dasharray="1.2 2" opacity=".8"/>
+          ${rib(-25, 25, 25, 31)}${rib(-41, -33, 18, 23)}${rib(33, 41, 18, 23)}
+          <path d="M-12,-30 C-6,-26 6,-26 12,-30 L10,-25 C5,-21 -5,-21 -10,-25Z" fill="#7a2730" ${ln(1.1)}/>${rib(-9, 9, -27, -22)}
+          ${shadeP('M16,-27 L28,-24 C34,-20 38,-10 40,4 L42,22 L32,24 L28,0 L26,30 C22,31 19,31 16,31Z', 0.15)}${fold('M-22,-6 C-20,2 -24,10 -22,18', 0.35)}${hl('M-30,-18 C-33,-10 -35,0 -36,8')}`); }
+      case 'downjacket': { const D = 'M-12,-34 L12,-34 L14,-26 L26,-24 C34,-20 38,-12 40,0 L42,24 L32,26 L28,4 L26,32 L-26,32 L-28,4 L-32,26 L-42,24 L-40,0 C-38,-12 -34,-20 -26,-24 L-14,-26Z';
+        const ys = [-26, -14, -2, 10, 22];
+        return g(`<path d="${D}" fill="url(#rlDn)" ${ln()}/>
+          ${ys.slice(1).map((yy) => `<path d="M-26,${yy} Q-13,${yy + 3} 0,${yy} Q13,${yy + 3} 26,${yy}" fill="none" ${ln(1.1)}/>`).join('')}
+          ${[-6, 6, 16].map((yy) => `<path d="M-40,${yy} L-29,${yy + 1} M40,${yy} L29,${yy + 1}" ${ln(1)}/>`).join('')}
+          ${ys.slice(0, 4).map((yy) => `<ellipse cx="-13" cy="${yy + 6}" rx="8" ry="2.2" fill="#fff" opacity=".28"/><ellipse cx="13" cy="${yy + 6}" rx="7" ry="2" fill="#fff" opacity=".14"/>`).join('')}
+          ${[-34, -22, -10, 2, 14].map((xx, i) => `<ellipse cx="${xx < 0 ? -35 : 35}" cy="${-12 + i * 9}" rx="2.4" ry="1" fill="#fff" opacity=".18"/>`).join('')}
+          <path d="M-12,-34 L12,-34 L14,-26 L-14,-26Z" fill="#26406e" ${ln(1.2)}/>
+          <path d="M0,-34 V32" stroke="#c9ccd2" stroke-width="2.2" stroke-dasharray="1.2 1.2"/><path d="M0,-34 V32" stroke="${INK2}" stroke-width=".6"/>
+          <rect x="-1.8" y="-24" width="3.6" height="7" rx="1" fill="#d7dade" ${ln(.8)}/>
+          ${shadeP('M14,-26 L26,-24 C34,-20 38,-12 40,0 L42,24 L32,26 L28,4 L26,32 L14,32Z', 0.15)}`); }
+      case 'goggles': {
+        const fr = 'M-36,-14 C-36,-20 -30,-22 -24,-22 L24,-22 C30,-22 36,-20 36,-14 L36,6 C36,12 30,14 24,14 L10,14 C6,14 4,8 0,8 C-4,8 -6,14 -10,14 L-24,14 C-30,14 -36,12 -36,6Z';
+        return g(`<path d="M-36,-11 L-50,-12 L-50,1 L-36,2Z M36,-11 L50,-12 L50,1 L36,2Z" fill="#2b2d33" ${ln(1)}/><path d="M-50,-7 L-36,-6 M-50,-3 L-36,-2 M36,-6 L50,-7 M36,-2 L50,-3" stroke="#c94a5a" stroke-width="1.4"/>
+          <path d="${fr}" fill="#1d1e22" ${ln(1.3)}/><g transform="translate(0,-3) scale(.86)"><path d="${fr}" fill="url(#rlGog)"/></g>
+          <path d="M-27,-17 L-15,-17 L-26,4 L-31,4Z" fill="#fff" opacity=".4"/><path d="M-11,-17 L-7,-17 L-17,4 L-20,4Z" fill="#fff" opacity=".25"/>
+          <path d="M-24,-20 L24,-20" stroke="#6b6f78" stroke-width="1.2" stroke-dasharray="3 2"/>${hl('M-34,-14 C-34,-18 -30,-20 -24,-20', 0.45)}`); }
+      case 'tripod': {
+        const legs = [[-3, -16, -17, 8, -29, 36], [3, -16, 17, 8, 29, 36], [0, -14, 1, 10, 2, 38]];
+        return g(`${legs.map(([ax, ay, bx, by, cx2, cy2]) => `${rod(bx, by, cx2, cy2, 1.5, 1.2)}${rod(ax, ay, bx, by, 2.4, 2)}<rect x="${bx - 3}" y="${by - 2}" width="6" height="4" rx="1" fill="#1d1e22" transform="rotate(${Math.atan2(cy2 - by, cx2 - bx) * 57.3 - 90} ${bx} ${by})"/><ellipse cx="${cx2}" cy="${cy2 + 1}" rx="2.6" ry="1.4" fill="#1d1e22"/>`).join('')}
+          <path d="M-9,-18 L9,-18 L6,-12 L-6,-12Z" fill="#2a2b30" ${ln(1)}/>${rod(0, -27, 0, -15, 2.2)}
+          <circle cx="0" cy="-29" r="4.2" fill="#3a3c42" ${ln(1)}/><path d="M-1.5,-31 a2,2 0 0 1 2.5,-0.5" stroke="#fff" opacity=".5" fill="none"/>
+          <rect x="-9" y="-35" width="18" height="3.4" rx="1" fill="#2a2b30" ${ln(.8)}/>
+          <path d="M-24,-56 L-9,-56 L-6,-61 L6,-61 L9,-56 L24,-56 C26,-56 27,-55 27,-53 L27,-37 C27,-35 26,-34 24,-34 L-24,-34 C-26,-34 -27,-35 -27,-37 L-27,-53 C-27,-55 -26,-56 -24,-56Z" fill="url(#rlCam)" ${ln(1.2)}/>
+          <path d="M-27,-52 C-31,-50 -31,-38 -27,-36" fill="#1a1b1f" ${ln(1)}/><ellipse cx="-19" cy="-57.5" rx="3.2" ry="1.3" fill="#8a8f98"/>
+          <circle cx="3" cy="-45" r="12" fill="#18191d" ${ln(1.2)}/><circle cx="3" cy="-45" r="9.5" fill="none" stroke="#3a3c42" stroke-width="2" stroke-dasharray="1 1"/><circle cx="3" cy="-45" r="7" fill="url(#rlGlass)"/><circle cx="0.5" cy="-47.5" r="2" fill="#fff" opacity=".55"/>
+          <rect x="16" y="-53" width="6" height="4" rx="1" fill="#5a5d64"/>${hl('M-23,-54 L20,-54', 0.25)}`); }
+      default: return itemIcon(id, x, y, s);
+    }
+  }
+
   // ---------- 信用卡、Travel Document ----------
   function creditCard(x, y, s = 1, rot = 0) {
     const c = data.card;
     return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})">
-      <rect x="0" y="0" width="220" height="138" rx="14" fill="#3b2a7a" ${ST2}/>
-      <path d="M2,98 Q110,62 218,94 V124 Q218,136 206,136 H14 Q2,136 2,124Z" fill="#5b45b0"/>
-      <path d="M26,15 L29,23 37,23 31,28 33,36 26,31 19,36 21,28 15,23 23,23Z" fill="#ffd23f"/>
-      <text x="44" y="33" font-size="18" fill="#fff" ${HELV}>${esc(c.issuer)}</text>
-      <rect x="18" y="48" width="34" height="26" rx="5" fill="#e8c55a" ${A.st(1.5)}/><path d="M18,61 h34 M35,48 v26" stroke="#a8852a" stroke-width="1.5"/>
-      <path d="M190,52 q8,9 0,18 M197,48 q11,13 0,26" fill="none" stroke="#cfc6ff" stroke-width="2.5" stroke-linecap="round"/>
-      <text x="18" y="101" font-size="16" fill="#fff" ${MONO}>${esc(c.number)}</text>
-      <text x="18" y="126" font-size="16" fill="#fff" ${HELV}>${esc(c.name)}</text>
-      <text x="204" y="126" text-anchor="end" font-size="10" fill="#cfc6ff" ${HELV}>VALID 08/29</text>
+      <rect x="2" y="4" width="220" height="138" rx="12" fill="#000" opacity=".25"/>
+      <rect x="0" y="0" width="220" height="138" rx="12" fill="url(#rlCard)" ${ln(1.4)}/>
+      <path d="M0,104 C70,78 150,128 220,86 V126 Q220,138 208,138 H12 Q0,138 0,126Z" fill="#fff" opacity=".06"/>
+      <path d="M140,0 L220,0 L220,60Z" fill="#fff" opacity=".05"/>
+      <path d="M28,12 L31.5,22 L42,22 L33.5,28.5 L36.8,39 L28,32.5 L19.2,39 L22.5,28.5 L14,22 L24.5,22Z" fill="#f2cf63" ${ln(.8)}/>
+      <rect x="20" y="50" width="34" height="27" rx="5" fill="url(#rlChip)" ${ln(.9)}/><path d="M20,59 h10 M20,68 h10 M44,59 h10 M44,68 h10 M30,50 v27 M44,50 v27 M30,63.5 h14" stroke="#8a6a24" stroke-width=".9" fill="none"/>
+      <path d="M188,54 q6,8 0,16 M194,50 q9,12 0,24 M200,46 q12,16 0,32" fill="none" stroke="#cfd6ff" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+      <text x="20" y="102" font-size="16" fill="#e9ecf5" letter-spacing=".5" ${MONO} style="paint-order:stroke" stroke="#000" stroke-opacity=".35" stroke-width="1.2">${esc(c.number)}</text>
+      <text x="20" y="127" font-size="14" fill="#e9ecf5" letter-spacing="1" ${HELV}>${esc(c.name)}</text>
+      <text x="204" y="127" text-anchor="end" font-size="9" fill="#b9c2e8" ${HELV}>VALID THRU 08/29</text>
     </g>`;
   }
+  // 被黑色麥克筆塗掉的欄位
+  const scribble = (x, y, w) => `<rect x="${x}" y="${y}" width="${w}" height="22" rx="3" fill="#121216"/>
+    <path d="M${x - 2},${y + 6} ${Array.from({ length: Math.ceil(w / 11) }, (_, i) => `l${5.5},${i % 2 ? -9 : 12} l${5.5},${i % 2 ? 9 : -12}`).join(' ')}" fill="none" stroke="#121216" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M${x},${y + 22} l${w * 0.3},6 l${w * 0.35},-5 l${w * 0.35},4" fill="none" stroke="#121216" stroke-width="4" stroke-linecap="round"/>`;
   function travelDoc(x, y, s = 1, rot = 0) {
     const d = data.doc;
     return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})">
-      <rect x="0" y="0" width="250" height="170" fill="#fffdf3" ${ST2}/>
-      <rect x="0" y="0" width="250" height="30" fill="#2c4a7a" ${ST2}/>
+      <rect x="3" y="4" width="250" height="210" fill="#000" opacity=".22"/>
+      <rect x="0" y="0" width="250" height="210" fill="#fbf8ee" ${ln(1.3)}/>
+      <path d="M0,150 C80,140 170,170 250,150" fill="none" stroke="#000" opacity=".06" stroke-width="10"/>
+      <rect x="0" y="0" width="250" height="30" fill="#2c4a7a"/>
       <text x="125" y="21" text-anchor="middle" font-size="16" fill="#fff" letter-spacing="1.5" ${HELV}>TRAVEL DOCUMENT</text>
-      <text x="16" y="52" font-size="11" fill="#7a808b" ${HELV}>AIRLINE${tr(' 航空公司', '')}</text>
-      <text x="16" y="74" font-size="18" fill="${INK}" ${HELV}>${esc(d.airline)}</text>
-      ${d.airlineZh ? `<text x="16" y="94" font-size="14" fill="#4a4f5c" ${HELV}>${esc(d.airlineZh)}</text>` : ''}
-      <text x="16" y="116" font-size="11" fill="#7a808b" ${HELV}>FLIGHT${tr(' 航班', '')}</text>
-      <rect x="14" y="122" width="112" height="26" rx="3" fill="#15161b"/>
-      <path d="M12,130 l14,-6 10,14 12,-12 10,14 12,-14 12,12 10,-10 12,12 12,-10" fill="none" stroke="#15161b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M14,146 l16,8 18,-8 16,6 20,-6 16,6 14,-4" fill="none" stroke="#15161b" stroke-width="4" stroke-linecap="round"/>
-      ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => `<rect x="${150 + i * 7}" y="${118 + (i % 3)}" width="${i % 2 ? 2 : 4}" height="34" fill="${INK}"/>`).join('')}
+      <text x="16" y="50" font-size="10.5" fill="#7a808b" ${HELV}>AIRLINE${tr(' 航空公司', '')}</text>
+      <text x="16" y="71" font-size="18" fill="${INK}" ${HELV}>${esc(d.airline)}</text>
+      ${d.airlineZh ? `<text x="16" y="89" font-size="13" fill="#4a4f5c" ${HELV}>${esc(d.airlineZh)}</text>` : ''}
+      <text x="16" y="110" font-size="10.5" fill="#7a808b" ${HELV}>FLIGHT${tr(' 航班', '')}</text>${scribble(16, 116, 104)}
+      <text x="16" y="164" font-size="10.5" fill="#7a808b" ${HELV}>DESTINATION${tr(' 目的地', '')}</text>${scribble(16, 170, 150)}
+      ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => `<rect x="${152 + i * 7}" y="${100 + (i % 3)}" width="${i % 2 ? 2 : 4}" height="40" fill="${INK}"/>`).join('')}
     </g>`;
   }
 
@@ -569,15 +664,26 @@
   // ---------- B：和警察圍著地上打開的行李箱（視角 0）／電腦 terminal（視角 1）----------
   function openSuitcase(x, y, s) {
     const its = [...data.clothing, ...data.gadgets];
-    const spots = [[62, -32], [116, 2], [16, 8], [-88, 12]];
+    const spots = [[56, -18, 0.5], [112, 8, 0.5], [6, 14, 0.5]];
+    const ridges = (x0, x1, y0, y1) => Array.from({ length: 9 }, (_, i) => `<path d="M${x0 + ((x1 - x0) * (i + 1)) / 10},${y0} L${x0 + ((x1 - x0) * (i + 1)) / 10 + (i - 4) * 1.5},${y1}" stroke="#fff" stroke-width="1.2" opacity=".08"/>`).join('');
     return `<g transform="translate(${x},${y}) scale(${s})">
-      <ellipse cx="0" cy="44" rx="190" ry="24" fill="#000" opacity=".35"/>
-      <polygon points="-150,-80 150,-80 140,-150 -140,-150" fill="#4a3e31" ${ST}/><polygon points="-130,-86 130,-86 122,-142 -122,-142" fill="#6b5a7a" opacity=".55"/>
-      <rect x="-150" y="-80" width="300" height="122" rx="10" fill="#5a4a3a" ${ST}/>
-      <rect x="-138" y="-70" width="276" height="100" rx="6" fill="#8a7a9a"/>
-      ${travelDoc(-58, -66, 0.3, 5)}${creditCard(-132, -60, 0.32, -7)}
-      ${its.map((id, i) => comicIcon(id, spots[i][0], spots[i][1], 0.62)).join('')}
-      <path d="M-24,-150 v-14 h48 v14" fill="none" stroke="#1f1913" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="0" cy="48" rx="200" ry="22" fill="#000" opacity=".4"/>
+      <polygon points="-142,-150 142,-150 156,-84 -156,-84" fill="url(#rlShell)" ${ln(2.4)}/>
+      <polygon points="-130,-143 130,-143 142,-91 -142,-91" fill="url(#rlLining)"/>
+      <polygon points="-120,-138 120,-138 128,-98 -128,-98" fill="none" stroke="#4d5566" stroke-width="1.2" stroke-dasharray="2 2"/>
+      <path d="M-122,-138 L122,-138 L130,-98 L-130,-98Z" fill="url(#rlWeave)" opacity=".8"/>
+      <path d="M-118,-120 L118,-120" stroke="#2a2d36" stroke-width="2.5"/><rect x="60" y="-124" width="10" height="8" rx="2" fill="#c9ccd2"/>
+      <path d="M-160,-84 L160,-84" stroke="#15191c" stroke-width="5"/>
+      <rect x="-160" y="-82" width="320" height="124" rx="14" fill="url(#rlShell)" ${ln(2.4)}/>${ridges(-160, 160, -78, 38)}
+      <rect x="-146" y="-72" width="292" height="102" rx="8" fill="url(#rlLining)" ${ln(1.2)}/>
+      <rect x="-146" y="-72" width="292" height="102" rx="8" fill="url(#rlWeave)"/>
+      <rect x="-146" y="-72" width="292" height="102" rx="8" fill="none" stroke="#c9ccd2" stroke-width="1.4" stroke-dasharray="1.5 1.5" opacity=".7"/>
+      ${travelDoc(-58, -66, 0.27, 5)}${creditCard(-136, -60, 0.32, -7)}
+      ${its.map((id, i) => realIcon(id, spots[i][0], spots[i][1], spots[i][2])).join('')}
+      <path d="M-146,-30 L146,10" stroke="#2a2d36" stroke-width="5" opacity=".85"/><path d="M-146,-30 L146,10" stroke="#4a4f5c" stroke-width="2" stroke-dasharray="3 3"/>
+      <rect x="-14" y="-17" width="22" height="10" rx="2" fill="#1d1e22" transform="rotate(8 -3 -12)"/>
+      ${[[-150, 44], [150, 44]].map(([wx, wy]) => `<rect x="${wx - 9}" y="${wy - 8}" width="18" height="10" rx="3" fill="#1d1e22"/><ellipse cx="${wx}" cy="${wy + 4}" rx="8" ry="5" fill="#2a2b30" ${ln(1)}/>`).join('')}
+      <rect x="-26" y="-88" width="52" height="8" rx="4" fill="#1d1e22" ${ln(1)}/>
     </g>`;
   }
   function roomB() {
@@ -597,7 +703,7 @@
     const p1 = tr(['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成她。'], ['The suspect must have stolen', 'this owner’s boarding pass and passport.']);
     const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="500" cy="560" rx="200" ry="110" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
     const pulseBtn = ui.seen.case && !ui.seen.pick ? `<rect class="pulse" x="350" y="10" width="300" height="72" rx="36" fill="none" stroke="#ff5a5f" stroke-width="5"/>` : '';
-    return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}</defs>${lightsAndCeiling()}${floor()}
+    return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}${REAL}</defs>${lightsAndCeiling()}${floor()}
       ${dim()}
       ${cop(250, 560, 0.86)}${cop(760, 556, 0.86, '#232d63')}${cop(860, 640, 0.92)}
       ${bubble(60, 120, 330, p1, 250, 300)}
@@ -610,15 +716,18 @@
 
   // ---------- 彈出層 ----------
   function caseHtml() {
-    const its = [[data.clothing[0], -186, 120, -10], [data.clothing[1], -55, 112, 8], [data.gadgets[0], 150, 120, -6]].filter((x) => x[0]);
+    const its = [[data.clothing[0], -205, 118, -8, 2.2], [data.clothing[1], -40, 112, 6, 2.2], [data.gadgets[0], data.gadgets[0] === 'tripod' ? 205 : 165, data.gadgets[0] === 'tripod' ? 132 : 122, -5, data.gadgets[0] === 'tripod' ? 1.85 : 2.3]].filter((x) => x[0]);
     return `<div class="s3-zoom"><button class="x" data-act="close">✕</button>
-      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="打開的行李箱內部"><defs>${HT}</defs>
-        <rect x="-320" y="-220" width="640" height="440" rx="30" fill="#5a4a3a" ${ST}/>
-        <rect x="-296" y="-196" width="592" height="392" rx="18" fill="#8a7a9a"/>
-        <path d="M-296,-120 q296,-30 592,0 M-296,40 q296,30 592,0" stroke="#7a6a8a" stroke-width="6" fill="none" opacity=".6"/>
-        <rect x="-296" y="-196" width="592" height="392" rx="18" fill="none" stroke="#3a2f24" stroke-width="6"/>
-        ${creditCard(-282, -178, 1.05, -5)}${travelDoc(22, -190, 1.05, 4)}
-        ${its.map(([id, x, y, r]) => `<g transform="translate(${x},${y}) rotate(${r})">${comicIcon(id, 0, 0, id === data.gadgets[0] ? 2.6 : 2.4)}</g>`).join('')}
+      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="打開的行李箱內部"><defs>${REAL}</defs>
+        <rect x="-322" y="-222" width="644" height="444" rx="34" fill="url(#rlShell)" ${ln(3)}/>
+        ${Array.from({ length: 13 }, (_, i) => `<path d="M${-300 + i * 50},-222 V-200 M${-300 + i * 50},200 V222" stroke="#fff" stroke-width="2" opacity=".1"/>`).join('')}
+        <rect x="-302" y="-202" width="604" height="404" rx="20" fill="#c9ccd2" opacity=".5"/>
+        <rect x="-302" y="-202" width="604" height="404" rx="20" fill="none" stroke="#e2e4e8" stroke-width="5" stroke-dasharray="3 2" opacity=".55"/>
+        <rect x="-294" y="-194" width="588" height="388" rx="16" fill="url(#rlLining)" ${ln(1.5)}/>
+        <rect x="-294" y="-194" width="588" height="388" rx="16" fill="url(#rlWeave)"/>
+        <path d="M-294,150 L294,150" stroke="#5a6273" stroke-width="2"/><path d="M-294,154 L294,154" stroke="#c9ccd2" stroke-width="2" stroke-dasharray="2 2" opacity=".6"/>
+        ${creditCard(-280, -182, 1.05, -5)}${travelDoc(26, -196, 0.98, 4)}
+        ${its.map(([id, x, y, r, sc]) => `<g transform="translate(${x},${y}) rotate(${r})"><g transform="translate(4,6)" opacity=".22">${realIcon(id, 0, 0, sc).replace(/url\(#rl\w+\)/g, '#000')}</g>${realIcon(id, 0, 0, sc)}</g>`).join('')}
       </svg></div>`;
   }
   function boardHtml() {
