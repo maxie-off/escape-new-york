@@ -1,12 +1,12 @@
 // 場景 3：機場（炸彈客預警）——5 種變化，每場遊戲隨機抽一種
 // 開場（兩人同畫面，前端演出）：大廳 → 兩人走進來 → 廣播 → 警察衝進來 → 兩人對話（去拆炸彈／一起抓犯人）→ 各自的畫面。
-//   Slothy(B) 視角 0：和警察圍著地上打開的行李箱：信用卡（發卡公司、卡號、名字）、Travel Document（航空公司；航班號碼被塗掉）、
-//             衣物（看季節／活動）、小物（墨鏡、雪鏡、腳架……）。上方「選擇登機口」由 Slothy 按。
+//   Slothy(B) 視角 0：和警察圍著地上打開的行李箱：一堆真實的雜物裡，信用卡（卡號、名字）、
+//             關鍵衣物（看季節／活動）、小物（墨鏡、雪鏡、腳架……）比較明顯，可以點開放大。上方「選擇登機口」由 Slothy 按。
 //   Slothy(B) 視角 1：電腦上的 terminal（黑底綠字）。駭客關卡時，這裡顯示線條圖形題目。
 //   Raccoony(A) 視角 0：大廳＋航班看板（今天日期、8 個航班：4 個目的地 × 同一家航空公司 2 班）。
 //   Raccoony(A) 視角 1：電腦分割畫面：左邊 4 則旅遊貼文（地點＋兩張照片），右邊 terminal（選航空公司、選答案、看旅客名單）。
 // 解法：衣物＋小物 → 去玩水還是冷的地方、做什麼活動；看板日期 → 紐約現在什麼季節（南半球相反）→ 目的地。
-//       Travel Document 的航空公司 → Slothy 在電腦上駭進那家航空公司（選錯鎖 30 秒）→ 3 道 15 秒的圖形題 →
+//       看板上飛往那裡的航空公司 → Slothy 在電腦上駭進那家航空公司（選錯鎖 30 秒）→ 3 道 15 秒的圖形題 →
 //       Raccoony 的螢幕出現旅客名單：卡上的名字只在一班 → 看板上那班的登機口。
 // 祕密（答案、登機口、旅客名單）只存在伺服器；B 看不到看板、貼文、名單，A 看不到行李內容。
 
@@ -84,7 +84,14 @@ function build(v) {
 const BUILT = VARIANTS.map((_, v) => build(v));
 
 // ---------- 駭客關卡：3 道圖形題（第一次照原設計；重試時隨機變化）----------
-const SHAPES = ['star', 'triangle', 'heart'];
+// 2. 拼半邊：每一列「左半邊 + 右半邊 = 第三格」；圖形是 n 邊形、中間一個圓（實心／空心／上半實心／下半實心）
+//    問號固定在第三列第二格（缺的是右半邊）。準備三種變化，重試時輪流換。
+//    選項字串：「邊-幾邊形-圓」，例如 R-8-top ＝ 八邊形的右半邊、圓上半實心下半空心
+const HALVES = [
+  { rows: [[5, 'solid'], [6, 'hollow'], [8, 'top']], wrong: ['R-8-bottom', 'L-8-top'], order: [1, 0, 2] },
+  { rows: [[3, 'hollow'], [4, 'solid'], [6, 'bottom']], wrong: ['R-6-top', 'R-5-bottom'], order: [2, 1, 0] },
+  { rows: [[6, 'top'], [5, 'solid'], [7, 'hollow']], wrong: ['R-7-solid', 'L-7-hollow'], order: [0, 2, 1] },
+];
 function puzzles(v, attempt) {
   const r = rng(5000 + v * 131 + attempt * 17);
   const canon = attempt === 0;
@@ -94,17 +101,24 @@ function puzzles(v, attempt) {
   let other = tgt; while (other === tgt || other === n) other = 2 + Math.floor(r() * (n - 2)) || 2;
   if (other === tgt) other = tgt === 2 ? 3 : 2;
   const p1 = { kind: 'floors', fig: { n, mark: tgt }, opts: canon ? ['2F', '6F', '4F'] : shuffle([`${tgt}F`, `${n}F`, `${other}F`], r), answer: `${tgt}F` };
-  // 2. 九宮格：每一列三種圖案各一個，中間都一樣
-  const [a, b, c] = canon ? SHAPES : shuffle(SHAPES, r);
-  const p2 = { kind: 'grid', fig: [a, b, c, c, b, a, a, b, null], opts: canon ? ['star', 'triangle', 'heart'] : shuffle(SHAPES, r), answer: c };
-  // 3. 箭頭（0 上 1 右 2 下 3 左）：中間的箭頭說第一個要往哪邊轉 90°（→ 順時針、← 逆時針），轉完就是第三個
-  const turn = (d, s) => (d + (s === 1 ? 1 : 3)) % 4;
+  // 2. 拼半邊
+  const H = HALVES[attempt % HALVES.length];
+  const [ln, lf] = H.rows[2], ans2 = `R-${ln}-${lf}`;
+  const pool = [ans2, ...H.wrong];
+  const p2 = { kind: 'halves', fig: H.rows.flatMap(([k, f], i) => [`L-${k}-${f}`, i === 2 ? null : `R-${k}-${f}`, `F-${k}-${f}`]), opts: H.order.map((i) => pool[i]), answer: ans2 };
+  // 3. 箭頭轉一轉（0 上 1 右 2 下 3 左）：中間的數字說第一個箭頭要轉幾個 90°（＋順時針、－逆時針），第三格是轉完的樣子
+  //    問號在第三列第一格：要從結果倒推回去
+  const turn = (d, k) => (((d + k) % 4) + 4) % 4;
   let rows;
-  if (canon) rows = [[0, 1], [2, 3], [1, 1]];
-  else { const s = shuffle([1, 3], r); rows = [[Math.floor(r() * 4), s[0]], [Math.floor(r() * 4), s[1]], [Math.floor(r() * 4), r() < 0.5 ? 1 : 3]]; }
-  const g3 = rows.flatMap(([f, s]) => [f, s, turn(f, s)]);
-  const ans3 = g3[6];
-  g3[6] = null;
+  if (canon) rows = [[0, 1], [2, -1], [null, -3, 3]];
+  else {
+    const ks = [1, 2, 3].flatMap((k) => [k, -k]);
+    rows = [[Math.floor(r() * 4), ks[Math.floor(r() * 6)]], [Math.floor(r() * 4), ks[Math.floor(r() * 6)]], [null, ks[Math.floor(r() * 6)], Math.floor(r() * 4)]];
+    if (Math.sign(rows[0][1]) === Math.sign(rows[1][1])) rows[1][1] = -rows[1][1]; // 前兩列一個順時針、一個逆時針，規則才看得出來
+  }
+  const fmt = (k) => (k > 0 ? `+${k}` : `${k}`);
+  const g3 = [rows[0][0], fmt(rows[0][1]), turn(rows[0][0], rows[0][1]), rows[1][0], fmt(rows[1][1]), turn(rows[1][0], rows[1][1]), null, fmt(rows[2][1]), rows[2][2]];
+  const ans3 = turn(rows[2][2], -rows[2][1]);
   const wrong3 = shuffle([0, 1, 2, 3].filter((d) => d !== ans3), r).slice(0, 2);
   const p3 = { kind: 'arrows', fig: g3, opts: canon ? [3, 1, 2] : shuffle([ans3, ...wrong3], r), answer: ans3 };
   return [p1, p2, p3];
@@ -141,11 +155,9 @@ function view(state, role) {
   }
   const dest = DESTS.find((x) => x.id === vv.answer);
   const pk = PACK[dest.kind];
-  const airline = AIRLINES.find((x) => x.code === dest.air);
   return {
     role, maxGate: MAX_GATE,
     card: { number: B.cardNo, name: vv.name },
-    doc: { airline: airline.name, airlineZh: T(airline.zh, '') },
     airlines: AIRLINES.map((x) => ({ code: x.code, name: x.name, zh: T(x.zh, '') })),
     clothing: pk.clothing, gadgets: pk.gadget, // 只送圖示 id（畫面上不寫文字）
     hack: hackView(state, 'B'),
@@ -226,7 +238,7 @@ function answers(state) {
     aurora: T('行李是去很冷的地方（毛衣、羽絨衣），還帶了腳架：去雷克雅維克拍極光。', 'The suitcase is for somewhere cold (sweater, down jacket) and has a tripod: photographing the northern lights in Reykjavík.'),
   }[d.kind];
   return {
-    clue: T(`${why.zh}Travel Document 寫的是 ${air.name}，Slothy 要在電腦上駭進這家航空公司。`, `${why.en} The travel document says ${air.name}, so Slothy should hack that airline on the computer.`),
+    clue: T(`${why.zh}看板上飛往 ${d.board} 的都是 ${air.name}（${air.code}），Slothy 要在電腦上駭進這家航空公司。`, `${why.en} Every flight to ${d.board} on the board is ${air.name} (${air.code}), so Slothy should hack that airline on the computer.`),
     gate: T(`旅客名單上 ${vv.name} 在 ${f.flight}（飛往 ${d.board}），看板上是 ${f.gate} 號登機口。`, `In the passenger list, ${vv.name} is on ${f.flight} (to ${d.board}), which leaves from gate ${f.gate} on the board.`),
   };
 }

@@ -308,13 +308,25 @@
     const stops = m.stops.map((x, i) => `<rect x="${EX - 4}" y="${sy(i) - 22}" width="14" height="44" rx="7" fill="#fff" ${A.st(2.5)}/>
       <text x="${EX + 22}" y="${sy(i) + (x.ap ? -2 : 7)}" font-size="20" fill="${INK}" ${HELV}>${esc(x.name)}</text>
       ${x.ap ? `<text x="${EX + 22}" y="${sy(i) + 20}" font-size="16" fill="#1f5fbf" ${HELV}>✈ ${x.ap} · ${x.min} min</text>` : ''}`).join('');
+    // 舊舊的、缺角的紙：不規則的邊、摺痕、黃斑
+    const edge = 'M14,10 L120,6 L190,12 L300,5 L420,10 L560,4 L628,9 L640,40 L634,58 L652,72 L648,150 L654,260 L646,330 L652,400 L630,412 L612,444 L480,438 L360,446 L220,440 L96,446 L40,440 L24,420 L8,428 L12,330 L6,220 L12,120 L4,60Z';
     return `<svg viewBox="0 0 660 450" class="doc-map" role="img" aria-label="地鐵路線圖">
-      <rect width="660" height="450" rx="10" fill="#fbfaf5"/>
-      <text x="20" y="32" font-size="18" fill="#7a808b" ${HELV}>SUBWAY MAP</text>
+      <defs><clipPath id="mapEdge"><path d="${edge}"/></clipPath>
+        <radialGradient id="mapAge" cx="50%" cy="50%" r="75%"><stop offset=".55" stop-color="#c9a85a" stop-opacity="0"/><stop offset="1" stop-color="#9a7a3a" stop-opacity=".42"/></radialGradient></defs>
+      <path d="${edge}" fill="#000" opacity=".25" transform="translate(4,5)"/>
+      <g clip-path="url(#mapEdge)">
+      <rect width="660" height="450" fill="#f3ecd6"/>
+      <text x="30" y="36" font-size="18" fill="#7a808b" ${HELV}>SUBWAY MAP</text>
       ${lines}${stops}
       <rect x="${SX - 58}" y="${SY - 32}" width="64" height="${m.routes.length * 9 + 26}" rx="10" fill="#fff" ${A.st(3)}/>
       <text x="${SX - 26}" y="${SY + m.routes.length * 9 + 22}" text-anchor="middle" font-size="16" fill="${INK}" ${HELV}>168 St</text>
-      <text x="20" y="436" font-size="13" fill="#7a808b" ${HELV}>${tr('時間＝從 168 街搭到機場', 'Times = ride from 168 St to the airport')}</text>
+      <text x="48" y="428" font-size="13" fill="#7a808b" ${HELV}>${tr('時間＝從 168 街搭到機場', 'Times = ride from 168 St to the airport')}</text>
+      <path d="M330,0 V450 M0,225 H660" stroke="#8a6a30" stroke-width="2" opacity=".22"/><path d="M332,0 V450 M0,227 H660" stroke="#fff" stroke-width="1.5" opacity=".35"/>
+      <ellipse cx="560" cy="380" rx="46" ry="30" fill="#b08a3a" opacity=".16"/><ellipse cx="120" cy="90" rx="30" ry="22" fill="#b08a3a" opacity=".12"/><circle cx="420" cy="60" r="14" fill="none" stroke="#a07a3a" stroke-width="3" opacity=".18"/>
+      <rect width="660" height="450" fill="url(#mapAge)"/>
+      </g>
+      <path d="${edge}" fill="none" stroke="#7a6232" stroke-width="2" opacity=".55"/>
+      <path d="M612,444 L630,412 L652,400 L640,432Z" fill="#d9c79a" stroke="#7a6232" stroke-width="1.5" opacity=".9"/>
     </svg>`;
   }
 

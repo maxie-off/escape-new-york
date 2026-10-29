@@ -264,7 +264,7 @@
     lg('rlCam', [[0, '#4a4c53'], [0.6, '#1f2024'], [1, '#121316']], 0, 1),
     lg('rlShell', [[0, '#4d5a63'], [0.5, '#2f3a42'], [1, '#1d252b']], 0, 1),
     lg('rlLining', [[0, '#8d97a8'], [1, '#6b7486']], 0, 1),
-    lg('rlCard', [[0, '#3a4a8f'], [0.55, '#25306a'], [1, '#141a40']]),
+    lg('rlCard', [[0, '#22325f'], [0.55, '#14204a'], [1, '#0a1230']]),
     lg('rlChip', [[0, '#f4dc8c'], [0.5, '#c9a24a'], [1, '#e8cf7a']]),
     `<radialGradient id="rlGlass" cx=".38" cy=".35" r=".7"><stop offset="0" stop-color="#6d7fa3"/><stop offset=".35" stop-color="#1f2a40"/><stop offset="1" stop-color="#05070c"/></radialGradient>`,
     `<pattern id="rlWeave" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0,3 h6 M3,0 v6" stroke="#fff" stroke-width=".5" opacity=".12"/></pattern>`,
@@ -338,7 +338,55 @@
     }
   }
 
-  // ---------- 信用卡、Travel Document ----------
+  // ---------- 行李裡的雜物（比較暗、不能點）----------
+  const CL = [
+    lg('rlNavy', [[0, '#3d4a63'], [1, '#262f42']], 0, 1), lg('rlHeather', [[0, '#b9bcc2'], [1, '#8f939b']], 0, 1),
+    lg('rlBeige', [[0, '#d8c8a8'], [1, '#b3a07c']], 0, 1), lg('rlOlive', [[0, '#7d8060'], [1, '#5d6045']], 0, 1),
+    lg('rlPink', [[0, '#e8b4bd'], [1, '#c98a96']], 0, 1), lg('rlCanvas', [[0, '#34446a'], [1, '#1f2a45']], 0, 1),
+    lg('rlCup', [[0, '#ffffff'], [0.6, '#eceef3'], [1, '#c9ced8']], 1, 0),
+  ].join('');
+  // 一疊摺好的衣服
+  function foldedStack(x, y, s = 1) {
+    const L = [['rlNavy', 0, -6], ['rlHeather', 4, -24], ['rlBeige', -3, -42], ['rlOlive', 2, -58]];
+    return `<g transform="translate(${x},${y}) scale(${s})">${L.map(([c, dx, dy], i) => `<g transform="translate(${dx},${dy}) rotate(${(i % 2 ? 1.5 : -1.2)})">
+      <path d="M-62,-10 C-64,-16 -60,-19 -54,-19 H54 C60,-19 64,-16 62,-10 L62,6 C62,10 58,12 54,12 H-54 C-58,12 -62,10 -62,6Z" fill="url(#${c})" ${ln(1.2)}/>
+      <path d="M-54,-8 H54" stroke="#fff" stroke-width="1" opacity=".18"/>${fold('M-30,-14 C-28,-6 -30,2 -28,8', 0.35)}${fold('M24,-15 C26,-6 24,2 26,9', 0.3)}
+      ${i === 1 ? '<path d="M-6,-19 C-4,-13 4,-13 6,-19" fill="none" stroke="#6d7179" stroke-width="1.4"/>' : ''}</g>`).join('')}</g>`;
+  }
+  // 化妝包（拉鍊袋）
+  function pouch(x, y, s = 1, kind = 0, rot = 0) {
+    const c = kind ? 'rlBeige' : 'rlPink', D = 'M-46,-26 C-46,-30 -42,-32 -38,-32 H38 C42,-32 46,-30 46,-26 L50,22 C50,28 46,30 40,30 H-40 C-46,30 -50,28 -50,22Z';
+    const pattern = kind ? [-28, -10, 8].map((yy) => `<path d="M-46,${yy} H46" stroke="#8f7c58" stroke-width=".9" opacity=".5"/>`).join('') + [-30, -10, 10, 30].map((xx) => `<path d="M${xx},-26 V28" stroke="#8f7c58" stroke-width=".9" opacity=".5"/>`).join('')
+      : [[-28, -12], [-6, 6], [18, -14], [30, 14], [-30, 16], [6, -20]].map(([px, py]) => `<g transform="translate(${px},${py})"><circle r="3.4" fill="#fff" opacity=".75"/><circle r="1.4" fill="#e07a8a"/></g>`).join('');
+    return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})"><path d="${D}" fill="url(#${c})" ${ln(1.3)}/>${pattern}
+      <path d="M-44,-24 H44" stroke="#6b6f78" stroke-width="3"/><path d="M-44,-24 H44" stroke="#c9ccd2" stroke-width="1.6" stroke-dasharray="1.4 1.4"/>
+      <path d="M30,-24 l6,12 l-6,4 l-4,-12Z" fill="#c9ccd2" ${ln(.8)}/>${shadeP('M20,-26 H38 C42,-32 46,-30 46,-26 L50,22 C50,28 46,30 40,30 H24Z', 0.12)}${hl('M-40,-14 C-42,-4 -42,8 -40,18', 0.3)}</g>`;
+  }
+  // 一雙帆布鞋（俯視）
+  function sneakers(x, y, s = 1) {
+    const shoe = (dx, flip) => `<g transform="translate(${dx},0) scale(${flip ? -1 : 1},1)">
+      <path d="M0,-58 C16,-58 22,-40 22,-20 C22,4 18,30 14,46 C11,56 -11,56 -14,46 C-18,30 -22,4 -22,-20 C-22,-40 -16,-58 0,-58Z" fill="#f2f0ea" ${ln(1.3)}/>
+      <path d="M0,-52 C12,-52 17,-38 17,-20 C17,2 13,26 10,40 C8,46 -8,46 -10,40 C-13,26 -17,2 -17,-20 C-17,-38 -12,-52 0,-52Z" fill="url(#rlCanvas)"/>
+      <path d="M0,-52 C12,-52 16,-42 16,-34 H-16 C-16,-42 -12,-52 0,-52Z" fill="#f2f0ea" ${ln(.9)}/><path d="M-15,-31 H15" stroke="#e8e4da" stroke-width="2"/>
+      <path d="M-8,-22 C-5,-4 -5,12 -6,26 H6 C5,12 5,-4 8,-22Z" fill="#1a2238"/>
+      ${[-16, -6, 4, 14].map((yy) => `<circle cx="-9" cy="${yy}" r="1.6" fill="#c9ccd2"/><circle cx="9" cy="${yy}" r="1.6" fill="#c9ccd2"/><path d="M-9,${yy} L9,${yy + 6} M9,${yy} L-9,${yy + 6}" stroke="#f4f1e8" stroke-width="1.6" stroke-linecap="round"/>`).join('')}
+      <path d="M-4,26 C-10,34 -14,36 -18,34 M4,26 C10,32 16,34 20,30" fill="none" stroke="#f4f1e8" stroke-width="1.6" stroke-linecap="round"/>
+      ${hl('M-14,-30 C-17,-14 -17,4 -14,20', 0.3)}</g>`;
+    return `<g transform="translate(${x},${y}) scale(${s}) rotate(-12)">${shoe(-26, false)}<g transform="translate(4,8) rotate(14)">${shoe(26, true)}</g></g>`;
+  }
+  // 來一客泡麵（側躺）
+  function cupNoodle(x, y, s = 1, rot = -70) {
+    return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})">
+      <path d="M-34,-36 L34,-36 L26,40 L-26,40Z" fill="url(#rlCup)" ${ln(1.3)}/>
+      <path d="M-33,-26 L33,-26 L32,-14 L-32,-14Z" fill="#3a5ea8"/><path d="M-26,40 L26,40 L27,30 L-27,30Z" fill="#3a5ea8"/>
+      <path d="M-30,-6 C-14,2 14,-10 30,-2 L28,22 C12,14 -12,26 -28,18Z" fill="#e9eef8"/>
+      <text x="0" y="14" text-anchor="middle" font-size="19" fill="#1b2a52" font-family="'GenSekiH','GenSeki',serif" font-weight="900" transform="rotate(-4)">來一客</text>
+      <rect x="-24" y="20" width="22" height="8" rx="1.5" fill="#2f5fbf"/><text x="-13" y="26.5" text-anchor="middle" font-size="5.6" fill="#fff" font-weight="700" font-family="'GenSeki',sans-serif">鮮蝦魚板</text>
+      <path d="M-40,-44 L40,-44 L38,-36 L-38,-36Z" fill="#f4f5f8" ${ln(1.2)}/><path d="M-36,-42 H36" stroke="#3a5ea8" stroke-width="2"/>
+      ${shadeP('M14,-36 L34,-36 L26,40 L12,40Z', 0.12)}${hl('M-26,-30 L-20,34', 0.5)}</g>`;
+  }
+
+  // ---------- 信用卡 ----------
   function creditCard(x, y, s = 1, rot = 0) {
     const c = data.card;
     return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})">
@@ -354,27 +402,6 @@
       <text x="204" y="127" text-anchor="end" font-size="9" fill="#b9c2e8" ${HELV}>VALID THRU 08/29</text>
     </g>`;
   }
-  // 被黑色麥克筆塗掉的欄位
-  const scribble = (x, y, w) => `<rect x="${x}" y="${y}" width="${w}" height="22" rx="3" fill="#121216"/>
-    <path d="M${x - 2},${y + 6} ${Array.from({ length: Math.ceil(w / 11) }, (_, i) => `l${5.5},${i % 2 ? -9 : 12} l${5.5},${i % 2 ? 9 : -12}`).join(' ')}" fill="none" stroke="#121216" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M${x},${y + 22} l${w * 0.3},6 l${w * 0.35},-5 l${w * 0.35},4" fill="none" stroke="#121216" stroke-width="4" stroke-linecap="round"/>`;
-  function travelDoc(x, y, s = 1, rot = 0) {
-    const d = data.doc;
-    return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})">
-      <rect x="3" y="4" width="250" height="210" fill="#000" opacity=".22"/>
-      <rect x="0" y="0" width="250" height="210" fill="#fbf8ee" ${ln(1.3)}/>
-      <path d="M0,150 C80,140 170,170 250,150" fill="none" stroke="#000" opacity=".06" stroke-width="10"/>
-      <rect x="0" y="0" width="250" height="30" fill="#2c4a7a"/>
-      <text x="125" y="21" text-anchor="middle" font-size="16" fill="#fff" letter-spacing="1.5" ${HELV}>TRAVEL DOCUMENT</text>
-      <text x="16" y="50" font-size="10.5" fill="#7a808b" ${HELV}>AIRLINE${tr(' 航空公司', '')}</text>
-      <text x="16" y="71" font-size="18" fill="${INK}" ${HELV}>${esc(d.airline)}</text>
-      ${d.airlineZh ? `<text x="16" y="89" font-size="13" fill="#4a4f5c" ${HELV}>${esc(d.airlineZh)}</text>` : ''}
-      <text x="16" y="110" font-size="10.5" fill="#7a808b" ${HELV}>FLIGHT${tr(' 航班', '')}</text>${scribble(16, 116, 104)}
-      <text x="16" y="164" font-size="10.5" fill="#7a808b" ${HELV}>DESTINATION${tr(' 目的地', '')}</text>${scribble(16, 170, 150)}
-      ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => `<rect x="${152 + i * 7}" y="${100 + (i % 3)}" width="${i % 2 ? 2 : 4}" height="40" fill="${INK}"/>`).join('')}
-    </g>`;
-  }
-
   // ---------- 旅遊貼文的「照片」（插畫風）----------
   function person(x, y, s, o = {}) {
     const t = A.st(1.6), sk = o.skin || '#f1c9a5', top = o.top || '#c9463d';
@@ -480,6 +507,21 @@
     return `<g transform="translate(${cx},${cy}) rotate(${d * 90})">${gline(`<path d="${p}"`, w)}</g>`;
   }
   const qmark = (cx, cy, size) => `<text x="${cx}" y="${cy + size * 0.36}" text-anchor="middle" font-size="${size}" fill="${GRN}" filter="url(#tglow)" ${MONO}>?</text>`;
+  // 拼半邊的圖：code＝「L/R/F-幾邊形-圓」（L 左半、R 右半、F 完整）；圓：solid 實心、hollow 空心、top 上半實心、bottom 下半實心
+  let clipN = 0;
+  function halfPiece(code, cx, cy, r) {
+    const [side, ns, fill] = String(code).split('-'), n = Number(ns);
+    const shift = side === 'L' ? r * 0.42 : side === 'R' ? -r * 0.42 : 0, x = cx + shift;
+    const pts = Array.from({ length: n }, (_, i) => { const a = -Math.PI / 2 + (i * 2 * Math.PI) / n; return `${(x + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`; }).join(' ');
+    const rc = r * 0.36, bot = n % 2 ? r * Math.cos(Math.PI / n) : r;
+    const half = (up) => `<path d="M${x - rc},${cy} A${rc},${rc} 0 0 ${up ? 1 : 0} ${x + rc},${cy}Z" fill="${GRN}"/>`;
+    const dot = fill === 'solid' ? `<circle cx="${x}" cy="${cy}" r="${rc}" fill="${GRN}"/>` : fill === 'top' ? half(true) : fill === 'bottom' ? half(false) : '';
+    const body = `${gline(`<polygon points="${pts}"`, 3)}${dot}${gline(`<circle cx="${x}" cy="${cy}" r="${rc}"`, 2.6)}`;
+    if (side === 'F') return body;
+    const id = `hp${++clipN}`, cut = gline(`<path d="M${x},${cy - r} V${(cy + bot).toFixed(1)}"`, 3);
+    return `<defs><clipPath id="${id}"><rect x="${side === 'L' ? x - r - 8 : x}" y="${cy - r - 8}" width="${r + 8}" height="${2 * r + 16}"/></clipPath></defs><g clip-path="url(#${id})">${body}</g>${cut}`;
+  }
+  const opText = (t, cx, cy, size = 40) => `<text x="${cx}" y="${cy + size * 0.36}" text-anchor="middle" font-size="${size}" fill="${GRN}" filter="url(#tglow)" ${MONO}>${esc(t)}</text>`;
   function figure(h, cx, cy) {
     if (h.kind === 'floors') {
       const { n, mark } = h.fig, fh = Math.min(56, 330 / n), w = 210, x0 = cx - 150, bot = cy + (n * fh) / 2;
@@ -498,13 +540,13 @@
     for (let i = 0; i <= 3; i++) o += gline(`<path d="M${gx},${gy + i * cell} h${cell * 3} M${gx + i * cell},${gy} v${cell * 3}"`, 1.8);
     h.fig.forEach((c, i) => {
       const x = gx + (i % 3) * cell + cell / 2, y = gy + Math.floor(i / 3) * cell + cell / 2;
-      o += c === null ? qmark(x, y, 64) : h.kind === 'grid' ? shapeG(c, x, y, 34) : arrowG(c, x, y, 34);
+      o += c === null ? qmark(x, y, 64) : h.kind === 'halves' ? halfPiece(c, x, y, 40) : typeof c === 'string' ? opText(c, x, y, 42) : arrowG(c, x, y, 34);
     });
     return o;
   }
   function optionG(kind, v, cx, cy) {
     if (kind === 'floors') return `<text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="44" fill="${GRN}" filter="url(#tglow)" ${MONO}>${esc(v)}</text>`;
-    return kind === 'grid' ? shapeG(v, cx, cy, 30) : arrowG(Number(v), cx, cy, 30);
+    return kind === 'halves' ? halfPiece(v, cx, cy, 40) : arrowG(Number(v), cx, cy, 30);
   }
   const hk = () => { const h = (data && data.hack) || { phase: 'idle' }; return h.phase === 'locked' && Date.now() >= tAt ? { phase: 'idle' } : h; };
   const secLeft = () => Math.max(0, Math.ceil((tAt - Date.now()) / 1000));
@@ -664,7 +706,7 @@
   // ---------- B：和警察圍著地上打開的行李箱（視角 0）／電腦 terminal（視角 1）----------
   function openSuitcase(x, y, s) {
     const its = [...data.clothing, ...data.gadgets];
-    const spots = [[56, -18, 0.5], [112, 8, 0.5], [6, 14, 0.5]];
+    const spots = [[-28, -36, 0.46], [72, 4, 0.46], [24, -10, 0.46]];
     const ridges = (x0, x1, y0, y1) => Array.from({ length: 9 }, (_, i) => `<path d="M${x0 + ((x1 - x0) * (i + 1)) / 10},${y0} L${x0 + ((x1 - x0) * (i + 1)) / 10 + (i - 4) * 1.5},${y1}" stroke="#fff" stroke-width="1.2" opacity=".08"/>`).join('');
     return `<g transform="translate(${x},${y}) scale(${s})">
       <ellipse cx="0" cy="48" rx="200" ry="22" fill="#000" opacity=".4"/>
@@ -678,7 +720,8 @@
       <rect x="-146" y="-72" width="292" height="102" rx="8" fill="url(#rlLining)" ${ln(1.2)}/>
       <rect x="-146" y="-72" width="292" height="102" rx="8" fill="url(#rlWeave)"/>
       <rect x="-146" y="-72" width="292" height="102" rx="8" fill="none" stroke="#c9ccd2" stroke-width="1.4" stroke-dasharray="1.5 1.5" opacity=".7"/>
-      ${travelDoc(-58, -66, 0.27, 5)}${creditCard(-136, -60, 0.32, -7)}
+      ${foldedStack(-100, 8, 0.42)}${pouch(118, -42, 0.36, 0, 8)}${pouch(124, 12, 0.34, 1, -6)}${sneakers(-40, 2, 0.36)}${cupNoodle(52, -44, 0.42)}
+      ${creditCard(-136, -64, 0.3, -7)}
       ${its.map((id, i) => realIcon(id, spots[i][0], spots[i][1], spots[i][2])).join('')}
       <path d="M-146,-30 L146,10" stroke="#2a2d36" stroke-width="5" opacity=".85"/><path d="M-146,-30 L146,10" stroke="#4a4f5c" stroke-width="2" stroke-dasharray="3 3"/>
       <rect x="-14" y="-17" width="22" height="10" rx="2" fill="#1d1e22" transform="rotate(8 -3 -12)"/>
@@ -703,7 +746,7 @@
     const p1 = tr(['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成她。'], ['The suspect must have stolen', 'this owner’s boarding pass and passport.']);
     const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="500" cy="560" rx="200" ry="110" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
     const pulseBtn = ui.seen.case && !ui.seen.pick ? `<rect class="pulse" x="350" y="10" width="300" height="72" rx="36" fill="none" stroke="#ff5a5f" stroke-width="5"/>` : '';
-    return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}${REAL}</defs>${lightsAndCeiling()}${floor()}
+    return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}${REAL}${CL}</defs>${lightsAndCeiling()}${floor()}
       ${dim()}
       ${cop(250, 560, 0.86)}${cop(760, 556, 0.86, '#232d63')}${cop(860, 640, 0.92)}
       ${bubble(60, 120, 330, p1, 250, 300)}
@@ -715,20 +758,35 @@
   }
 
   // ---------- 彈出層 ----------
+  // 行李箱裡可以點開的東西：卡片、兩件衣物、一個小物
+  const keyItems = () => [['card'], ['c0', data.clothing[0]], ['c1', data.clothing[1]], ['g0', data.gadgets[0]]].filter((x) => x[0] === 'card' || x[1]);
   function caseHtml() {
-    const its = [[data.clothing[0], -205, 118, -8, 2.2], [data.clothing[1], -40, 112, 6, 2.2], [data.gadgets[0], data.gadgets[0] === 'tripod' ? 205 : 165, data.gadgets[0] === 'tripod' ? 132 : 122, -5, data.gadgets[0] === 'tripod' ? 1.85 : 2.3]].filter((x) => x[0]);
+    const pos = { c0: [-196, 124, -8, 2.0], c1: [-34, 128, 6, 2.0], g0: [data.gadgets[0] === 'tripod' ? 168 : 150, data.gadgets[0] === 'tripod' ? 10 : -8, -5, data.gadgets[0] === 'tripod' ? 1.75 : 2.1] };
+    const key = keyItems().map(([k, id]) => {
+      if (k === 'card') return `<g class="s3-pick" data-act="item" data-id="card">${creditCard(-282, -62, 0.92, -6)}</g>`;
+      const [x, y, r, sc] = pos[k];
+      return `<g class="s3-pick" data-act="item" data-id="${k}" transform="translate(${x},${y}) rotate(${r})"><g transform="translate(4,6)" opacity=".22">${realIcon(id, 0, 0, sc).replace(/url\(#rl\w+\)/g, '#000')}</g>${realIcon(id, 0, 0, sc)}</g>`;
+    }).join('');
     return `<div class="s3-zoom"><button class="x" data-act="close">✕</button>
-      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="打開的行李箱內部"><defs>${REAL}</defs>
+      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="打開的行李箱內部"><defs>${REAL}${CL}</defs>
         <rect x="-322" y="-222" width="644" height="444" rx="34" fill="url(#rlShell)" ${ln(3)}/>
         ${Array.from({ length: 13 }, (_, i) => `<path d="M${-300 + i * 50},-222 V-200 M${-300 + i * 50},200 V222" stroke="#fff" stroke-width="2" opacity=".1"/>`).join('')}
         <rect x="-302" y="-202" width="604" height="404" rx="20" fill="#c9ccd2" opacity=".5"/>
         <rect x="-302" y="-202" width="604" height="404" rx="20" fill="none" stroke="#e2e4e8" stroke-width="5" stroke-dasharray="3 2" opacity=".55"/>
         <rect x="-294" y="-194" width="588" height="388" rx="16" fill="url(#rlLining)" ${ln(1.5)}/>
         <rect x="-294" y="-194" width="588" height="388" rx="16" fill="url(#rlWeave)"/>
-        <path d="M-294,150 L294,150" stroke="#5a6273" stroke-width="2"/><path d="M-294,154 L294,154" stroke="#c9ccd2" stroke-width="2" stroke-dasharray="2 2" opacity=".6"/>
-        ${creditCard(-280, -182, 1.05, -5)}${travelDoc(26, -196, 0.98, 4)}
-        ${its.map(([id, x, y, r, sc]) => `<g transform="translate(${x},${y}) rotate(${r})"><g transform="translate(4,6)" opacity=".22">${realIcon(id, 0, 0, sc).replace(/url\(#rl\w+\)/g, '#000')}</g>${realIcon(id, 0, 0, sc)}</g>`).join('')}
-      </svg></div>`;
+        <g style="filter:saturate(.7)" opacity=".92">${foldedStack(-196, -112, 1.25)}${cupNoodle(-30, -132, 1.05, -78)}${pouch(96, -140, 0.95, 0, 6)}${pouch(222, -128, 0.9, 1, -10)}${sneakers(238, 112, 0.95)}${foldedStack(76, 168, 0.8)}</g>
+        ${key}
+      </svg><p class="s3-tap">${tr('🔍 點卡片、衣服、小物可以放大看', '🔍 Tap the card, clothes or gadget to look closer')}</p></div>`;
+  }
+  function itemHtml() {
+    const k = ui.item, id = k === 'card' ? null : keyItems().find((x) => x[0] === k)[1];
+    const inner = k === 'card' ? creditCard(-231, -145, 2.1, 0) : realIcon(id, 0, id === 'tripod' ? 20 : 0, id === 'tripod' ? 3.6 : 4.6);
+    return `<div class="s3-zoom"><button class="x" data-act="close">✕</button>
+      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="放大的物品"><defs>${REAL}${CL}</defs>
+        <rect x="-322" y="-222" width="644" height="444" rx="34" fill="url(#rlLining)" ${ln(3)}/><rect x="-322" y="-222" width="644" height="444" rx="34" fill="url(#rlWeave)"/>
+        ${inner}</svg>
+      <div class="row center"><button class="primary" data-act="backcase">${tr('← 回到行李箱', '← Back to the suitcase')}</button></div></div>`;
   }
   function boardHtml() {
     return `<div class="modal-card s3-board"><button class="x" data-act="close">✕</button>
@@ -767,7 +825,7 @@
     const el = $modal();
     if (ui.modal === 'manifest' && !(data.hack && data.hack.manifest)) ui.modal = null;
     if (!ui.modal) { el.hidden = true; el.innerHTML = ''; return; }
-    el.innerHTML = { case: caseHtml, board: boardHtml, gate: gateHtml, posts: postsHtml, confirm: confirmHtml, manifest: manifestHtml }[ui.modal]();
+    el.innerHTML = { case: caseHtml, item: itemHtml, board: boardHtml, gate: gateHtml, posts: postsHtml, confirm: confirmHtml, manifest: manifestHtml }[ui.modal]();
     el.hidden = false;
   }
   function closeModal() { ui.modal = null; renderModal(); }
@@ -778,6 +836,8 @@
     if (!t || t.disabled) return;
     switch (t.dataset.act) {
       case 'close': return closeModal();
+      case 'item': ui.item = t.dataset.id; ui.modal = 'item'; return renderModal();
+      case 'backcase': ui.modal = 'case'; return renderModal();
       case 'airyes': { const code = ui.pendingAir; ui.pendingAir = null; closeModal(); return ctx.send({ type: 'airline', code }); }
       case 'key': if (ui.gate.length < 2) ui.gate = String(Number(ui.gate + t.dataset.k)); if (ui.gate === '0') ui.gate = ''; return renderModal();
       case 'del': ui.gate = ui.gate.slice(0, -1); return renderModal();

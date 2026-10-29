@@ -221,13 +221,13 @@ const waitState = (s, pred) =>
     // A：看板（日期 + 8 個航班）+ 旅遊貼文 + terminal；B：打開的行李箱（信用卡、Travel Document、衣物、小物）
     assert.ok(s3a.scene.data.role === 'A' && s3a.scene.data.flights.length === 8 && s3a.scene.data.posts.length === 4 && s3a.scene.data.date.m === 1);
     assert.ok(!s3a.scene.data.clothing && !s3a.scene.data.card, 'A 看不到行李內容');
-    assert.ok(s3b.scene.data.role === 'B' && s3b.scene.data.clothing.includes('bikini') && s3b.scene.data.card.name === 'TIFFANY' && s3b.scene.data.doc.airline === 'BLUEBIRD AIRLINES');
+    assert.ok(s3b.scene.data.role === 'B' && s3b.scene.data.clothing.includes('bikini') && s3b.scene.data.card.name === 'TIFFANY' && !s3b.scene.data.doc);
     assert.ok(!s3b.scene.data.flights && !s3b.scene.data.posts, 'B 看不到看板與貼文');
     // 駭入：選航空公司 → 三題 → 旅客名單
     assert.equal((await emit(a, 'scene_action', { type: 'airline', code: 'BB' })).ok, false); // 只有 Slothy 能選
     assert.ok((await emit(b, 'scene_action', { type: 'airline', code: 'BB' })).correct);
     const doneP = waitState(a, (s) => s.scene && s.scene.data.hack && s.scene.data.hack.phase === 'done');
-    for (const c of ['4F', 'heart', 1]) assert.ok((await emit(a, 'scene_action', { type: 'hack', choice: c })).correct);
+    for (const c of ['4F', 'R-8-top', 2]) assert.ok((await emit(a, 'scene_action', { type: 'hack', choice: c })).correct);
     const doneA = await doneP;
     const hers = doneA.scene.data.hack.manifest.filter((m) => m.names.includes('TIFFANY')).map((m) => s3a.scene.data.flights.find((f) => f.flight === m.flight));
     assert.equal(hers.length, 1);

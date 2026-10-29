@@ -106,7 +106,7 @@ const scenes = [
       {
         done: (s) => s.solved,
         tiers: [
-          T('Slothy 把行李箱裡的東西說給 Raccoony 聽：衣服是去玩水還是去很冷的地方？小物是做什麼活動用的？Raccoony 看看板上的日期，再按右邊箭頭看旅遊貼文。Travel Document 上的航空公司，就是要在電腦上駭入的資料庫。', 'Slothy, describe the suitcase to Raccoony: are the clothes for the beach or somewhere cold? What activity are the gadgets for? Raccoony, check the date on the board, then tap the right arrow for the travel posts. The airline on the travel document is the database to hack on the computer.'),
+          T('Slothy 把行李箱裡的東西說給 Raccoony 聽（點信用卡、衣服、小物可以放大）：衣服是去玩水還是去很冷的地方？小物是做什麼活動用的？Raccoony 看看板上的日期，再按右邊箭頭看旅遊貼文。找出目的地後，看板上飛往那裡的航空公司，就是 Slothy 要在電腦上駭入的資料庫。', 'Slothy, describe the suitcase to Raccoony: are the clothes for the beach or somewhere cold? What activity are the gadgets for? Raccoony, check the date on the board, then tap the right arrow for the travel posts. Once you know the destination, the airline flying there on the board is the database Slothy hacks on the computer.'),
           (s) => S3.answers(s).clue,
           (s) => S3.answers(s).gate,
         ],

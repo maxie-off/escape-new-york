@@ -8,8 +8,8 @@
 //   2. Raccoony 把那列的旋鈕轉到電線牌背面的頻道（只有 Slothy 看得到），雜訊才消失。
 //   3. 五列全亮，Slothy 才能選路線；這時兩邊各有一個路人走過來聊天：「聽說今天 X 線在施工，改走 Y 線」。
 // 解法：機票 → 哪個機場、幾點前要到（登機前 2 小時）；看板 → 每條線開往哪一站、幾分鐘後進站；
-//       路線圖 → 那一站是不是機場、要搭多久。開往機場那一站的有兩條線，但兩條今天都在施工：
-//       一條改走的線還是會到機場（答案，比較晚進站但來得及），另一條改走的線不會到（比較早進站，誤導）。
+//       路線圖 → 那一站是不是機場、要搭多久。開往機場那一站的有兩條線，比較早進站的那條今天在施工、改走的線到不了機場（誤導）；
+//       有些變化連答案那條也在施工，但它改走的線還是到得了。能找出答案的那句施工消息一定是 Slothy 那邊的路人說的。
 // 祕密（正確路線、符號、頻道）只存在伺服器；前端只會收到「該角色此刻看得到」的內容。
 
 const { T } = require('../i18n');
@@ -35,23 +35,23 @@ const STOP = Object.fromEntries(STOPS.map((x) => [x.id, x]));
 const VARIANTS = [
   { now: 600, boarding: 840, airport: 'JFK', travel: { JFK: 95, LGA: 80, EWR: 100 },
     routes: { B: 'ci', C: 'hb', E: 'hb', 1: 'bp', 2: 'as', A: 'hb', F: 'fb' },
-    rows: [['B', 3, 13], ['C', 14, 24], ['E', 6, 16], ['1', 30, 40], ['2', 9, 18]], works: { C: 'A', E: 'F' }, tell: { A: 'E', B: 'C' }, answer: 'C', lit: 'B',
+    rows: [['B', 3, 13], ['C', 14, 24], ['E', 6, 16], ['1', 30, 40], ['2', 9, 18]], works: { E: 'F', B: 'F' }, tell: { A: 'B', B: 'E' }, answer: 'C', lit: 'B',
     sym: { B: 'tri', C: 'circ', E: 'sq', 1: 'star', 2: 'dia' }, ch: { B: 4, C: 7, E: 2, 1: 9, 2: 5 }, terms: ['star', 'circ', 'dia', 'tri', 'sq'] },
   { now: 580, boarding: 810, airport: 'LGA', travel: { JFK: 105, LGA: 90, EWR: 95 },
     routes: { B: 'as', C: 'hb', E: 'as', 1: 'ci', 2: 'nw', D: 'fb', 7: 'as' },
-    rows: [['B', 5, 15], ['C', 8, 18], ['E', 12, 22], ['1', 9, 19], ['2', 4, 14]], works: { B: 'D', E: '7' }, tell: { A: 'E', B: 'B' }, answer: 'E', lit: '1',
+    rows: [['B', 5, 15], ['C', 8, 18], ['E', 12, 22], ['1', 9, 19], ['2', 4, 14]], works: { B: 'D', E: '7' }, tell: { A: 'B', B: 'E' }, answer: 'E', lit: '1',
     sym: { B: 'dia', C: 'tri', E: 'star', 1: 'circ', 2: 'sq' }, ch: { B: 3, C: 8, E: 1, 1: 6, 2: 4 }, terms: ['sq', 'tri', 'circ', 'star', 'dia'] },
   { now: 615, boarding: 870, airport: 'EWR', travel: { JFK: 100, LGA: 85, EWR: 110 },
     routes: { B: 'nw', C: 'as', E: 'hb', 1: 'nw', 2: 'fb', A: 'ci', 3: 'nw' },
-    rows: [['B', 7, 17], ['C', 5, 14], ['E', 11, 21], ['1', 18, 28], ['2', 3, 12]], works: { B: 'A', 1: '3' }, tell: { A: 'B', B: '1' }, answer: '1', lit: 'C',
+    rows: [['B', 7, 17], ['C', 5, 14], ['E', 11, 21], ['1', 18, 28], ['2', 3, 12]], works: { B: 'A', 2: 'A' }, tell: { A: '2', B: 'B' }, answer: '1', lit: 'C',
     sym: { B: 'sq', C: 'star', E: 'dia', 1: 'tri', 2: 'circ' }, ch: { B: 6, C: 2, E: 9, 1: 3, 2: 7 }, terms: ['circ', 'dia', 'tri', 'sq', 'star'] },
   { now: 590, boarding: 825, airport: 'JFK', travel: { JFK: 100, LGA: 75, EWR: 90 },
     routes: { B: 'fb', C: 'hb', E: 'as', 1: 'bp', 2: 'hb', F: 'hb', 7: 'bp' },
-    rows: [['B', 6, 16], ['C', 4, 14], ['E', 8, 18], ['1', 20, 30], ['2', 13, 23]], works: { C: '7', 2: 'F' }, tell: { A: '2', B: 'C' }, answer: '2', lit: 'E',
+    rows: [['B', 6, 16], ['C', 4, 14], ['E', 8, 18], ['1', 20, 30], ['2', 13, 23]], works: { C: '7', 2: 'F' }, tell: { A: 'C', B: '2' }, answer: '2', lit: 'E',
     sym: { B: 'circ', C: 'dia', E: 'tri', 1: 'sq', 2: 'star' }, ch: { B: 5, C: 1, E: 8, 1: 2, 2: 6 }, terms: ['dia', 'star', 'sq', 'circ', 'tri'] },
   { now: 605, boarding: 855, airport: 'LGA', travel: { JFK: 95, LGA: 115, EWR: 105 },
     routes: { B: 'as', C: 'ci', E: 'as', 1: 'fb', 2: 'nw', D: 'as', A: 'bp' },
-    rows: [['B', 10, 20], ['C', 7, 17], ['E', 3, 13], ['1', 15, 25], ['2', 5, 14]], works: { E: 'A', B: 'D' }, tell: { A: 'B', B: 'E' }, answer: 'B', lit: '2',
+    rows: [['B', 10, 20], ['C', 7, 17], ['E', 3, 13], ['1', 15, 25], ['2', 5, 14]], works: { E: 'A', 1: 'A' }, tell: { A: '1', B: 'E' }, answer: 'B', lit: '2',
     sym: { B: 'star', C: 'sq', E: 'circ', 1: 'dia', 2: 'tri' }, ch: { B: 9, C: 4, E: 3, 1: 7, 2: 1 }, terms: ['tri', 'sq', 'star', 'dia', 'circ'] },
 ];
 const SYM_ZH = { tri: T('三角形', 'triangle'), circ: T('圓形', 'circle'), sq: T('方形', 'square'), star: T('星形', 'star'), dia: T('菱形', 'diamond') };
@@ -182,15 +182,17 @@ function answers(state) {
   const ls = LINES.filter((l) => l !== vv.lit);
   const fix = T(ls.map((l) => `${l} 線＝${SYM_ZH[vv.sym[l]].zh}、頻道 ${vv.ch[l]}`).join('；') + '。', ls.map((l) => `${l} line = ${SYM_ZH[vv.sym[l]].en}, channel ${vv.ch[l]}`).join('; ') + '.');
   const stop = STOPS.find((x) => x.ap === vv.airport);
-  const [p, q] = Object.keys(vv.works).sort((a, b) => (a === vv.answer) - (b === vv.answer));
+  const onBoard = LINES.filter((l) => vv.routes[l] === stop.id);
+  const p = onBoard.find((l) => l !== vv.answer), q = vv.answer;
   const wrongTo = STOP[vv.routes[vv.works[p]]].name;
   const next = vv.rows.find((r) => r[0] === vv.answer)[1];
+  const qz = vv.works[q] ? T(`；${q} 線改走 ${vv.works[q]} 線，還是到 ${stop.name}`, `; the ${q} line runs on the ${vv.works[q]} line and still reaches ${stop.name}`) : T(`；${q} 線照常開`, `; the ${q} line runs as normal`);
   return {
     fix,
-    clue: T(`機票 ${clock(vv.boarding)} 從 ${vv.airport} 登機、要提前 2 小時到，所以 ${clock(arrive)} 前要到；路線圖上 ${vv.airport} 在 ${stop.name} 站，從 168 街要 ${vv.travel[vv.airport]} 分鐘，所以 ${clock(latest)} 前要上車。看板上開往 ${stop.name} 的是 ${p} 線和 ${q} 線，但路人說這兩條今天都在施工。`,
-      `Boarding is ${clock(vv.boarding)} at ${vv.airport} and you must arrive 2 hours early, so be there by ${clock(arrive)}. The map puts ${vv.airport} at ${stop.name}, ${vv.travel[vv.airport]} minutes from 168 St, so board by ${clock(latest)}. The board shows the ${p} and ${q} lines going to ${stop.name}, but the passers-by say both are under construction today.`),
-    line: T(`${p} 線改走 ${vv.works[p]} 線，會開到 ${wrongTo}，到不了機場；${q} 線改走 ${vv.works[q]} 線，還是到 ${stop.name}。搭 ${q} 線（${next} 分鐘後進站，來得及）。`,
-      `The ${p} line runs on the ${vv.works[p]} line to ${wrongTo}, which misses the airport; the ${q} line runs on the ${vv.works[q]} line and still reaches ${stop.name}. Take the ${q} line (arriving in ${next} minutes, still in time).`),
+    clue: T(`機票 ${clock(vv.boarding)} 從 ${vv.airport} 登機、要提前 2 小時到，所以 ${clock(arrive)} 前要到；路線圖上 ${vv.airport} 在 ${stop.name} 站，從 168 街要 ${vv.travel[vv.airport]} 分鐘，所以 ${clock(latest)} 前要上車。看板上開往 ${stop.name} 的是 ${p} 線和 ${q} 線，但路人說今天有線在施工。`,
+      `Boarding is ${clock(vv.boarding)} at ${vv.airport} and you must arrive 2 hours early, so be there by ${clock(arrive)}. The map puts ${vv.airport} at ${stop.name}, ${vv.travel[vv.airport]} minutes from 168 St, so board by ${clock(latest)}. The board shows the ${p} and ${q} lines going to ${stop.name}, but the passers-by say some lines are under construction today.`),
+    line: T(`${p} 線改走 ${vv.works[p]} 線，會開到 ${wrongTo}，到不了機場${qz.zh}。搭 ${q} 線（${next} 分鐘後進站，來得及）。`,
+      `The ${p} line runs on the ${vv.works[p]} line to ${wrongTo}, which misses the airport${qz.en}. Take the ${q} line (arriving in ${next} minutes, still in time).`),
   };
 }
 function solution(v) { const vv = VARIANTS[v]; return { line: vv.answer, lit: vv.lit, sym: vv.sym, ch: vv.ch }; }

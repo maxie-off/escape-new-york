@@ -86,7 +86,13 @@ for (let v = 0; v < 5; v++) {
   { const V2 = S2._VARIANTS[v], pa = S2.view(st, 'A').passer, pb = S2.view(st, 'B').passer;
     const said = [pa, pb].map((p) => loc(p.lines, 'en').join(' '));
     assert.ok(Object.entries(V2.works).every(([l, to]) => said.some((t) => t.includes(`${l} line`) && t.includes(`${to} line`))), `subway v${v} 兩個路人要各說一條施工`);
-    assert.equal(S2.view(S2.init(v), 'A').passer, null); }
+    assert.equal(S2.view(S2.init(v), 'A').passer, null);
+    const stopX = { JFK: 'hb', LGA: 'as', EWR: 'nw' }[V2.airport], W = V2.boarding - 120 - V2.now;
+    const ok = S2.LINES.filter((l) => V2.routes[V2.works[l] || l] === stopX && V2.rows.find((r) => r[0] === l)[1] + V2.travel[V2.airport] <= W);
+    assert.deepEqual(ok, [V2.answer], `subway v${v} 照規則只能有一個答案`);
+    const trap = S2.LINES.find((l) => l !== V2.answer && V2.routes[l] === stopX);
+    assert.ok(V2.tell.B === (V2.works[V2.answer] ? V2.answer : trap), `subway v${v} 找出答案的那句要在 Slothy 那邊`);
+    assert.ok(loc(S2.answers(S2.init(v)).line, 'en').includes(`Take the ${V2.answer} line`)); }
   const a2 = S2.view(st, 'A');
   assert.ok(a2.board.rows.every((r) => r.state === 'clear' && r.to));
   for (const l of S2.LINES) if (l !== s2.line) assert.equal(S2.act(st, 'B', { type: 'board', line: l }).correct, false);
