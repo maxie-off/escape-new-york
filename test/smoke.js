@@ -169,10 +169,10 @@ const waitState = (s, pred) =>
     // ---- 場景 2（互動式：地鐵）----
     const s2a = await toScene2A, s2b = await toScene2;
     assert.ok(s2a.scene.interactive && s2a.scene.data.board && s2a.scene.data.role === 'A');
-    // 防劇透：A 看不到路人的 110 分鐘；B 看不到看板分鐘數與答案
-    assert.ok(!JSON.stringify(s2a.scene.data).includes('110'), 'A 不該看到 110'); // 只看場景資料（feed 的時間戳可能剛好含 110）
+    // 防劇透：A 看不到路線圖；B 看不到看板分鐘數與答案；看板全亮之前沒有路人
+    assert.ok(!s2a.scene.data.map && s2a.scene.data.passer === null, 'A 不該看到路線圖');
     {
-      assert.ok(s2b.scene.data.people.length === 4 && !s2b.scene.data.board);
+      assert.ok(s2b.scene.data.passer === null && !s2b.scene.data.board);
       assert.ok(!JSON.stringify(s2b).includes('"next"'), 'B 不該看到看板分鐘');
     }
     assert.ok(s2a.docs.some((d) => d.id === 'ticket'), '機票收藏要跟到場景 2'); // 收藏跨場景保留
@@ -182,7 +182,7 @@ const waitState = (s, pred) =>
     assert.ok(rows0.filter((r) => r.line !== 'B').every((r) => r.state === 'dark' && r.to === undefined && r.next === undefined));
     assert.ok(!JSON.stringify(s2b).includes('"sym"'), 'B 不該看到看板上的符號');
     assert.ok(!JSON.stringify(s2a).includes('"ch"'), 'A 不該看到頻道');
-    assert.ok(s2b.scene.data.map && s2b.scene.data.map.JFK === 'Queens'); // 柱子上的舊地圖
+    assert.ok(s2b.scene.data.map.stops.find((x) => x.ap === 'JFK').min === 95 && s2b.scene.data.map.routes.length === 7); // 柱子上的路線圖
     assert.deepEqual(s2b.docs.map((d) => d.id), ['passport']);
     assert.equal((await emit(b, 'scene_action', { type: 'board', line: 'C' })).message.includes('看板還沒修好'), true);
     // 接錯：閘門跳回去、那列閃紅光

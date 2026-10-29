@@ -8,19 +8,19 @@
 // 祕密（密碼、抽屜對應關係）只存在伺服器；前端只會收到「該角色此刻看得到」的內容。
 
 // ---- 5 種變化 ----
-// 電腦密碼：1A2B 猜字遊戲。每種變化用不同的兩個代號字母（A/B、X/Z、P/Q…），
+// 電腦密碼：1A2B 猜字遊戲，但不用 A、B：每種變化用 S/F、X/Z、J/K 其中一組，而且組內誰代表什麼會互換。
 // 第一個代號＝字母對、位置也對；第二個代號＝字母對、位置不對。代號的意思不直接寫出來：
-// Slothy 衣櫃上的紙左半邊是「10 月 1 日」一整局完整紀錄（最後寫出 answer），玩家從這局倒推代號的意思；
+// Slothy 衣櫃上的紙左半邊是「10 月 1 日」那局的四個猜測（沒有全對的那一行，最多 3 個位置對）＋寫在下面的 answer，玩家拿 answer 倒推代號的意思；
 // 右半邊「10 月 3 日」有今天的前四個猜測，Raccoony 書桌上的紙也寫著「10 月 3 日」、有後三個猜測。
 // （已用英文字典驗證：七條合起來只剩一個答案，任何一半單獨都不只一個。）
 const { T } = require('../i18n');
 
 const PW = [
-  { ans: 'acid', guesses: ['bold', 'pony', 'able', 'dime', 'milk', 'east', 'cold'], tag: ['A', 'B'], demo: { ans: 'node', guesses: ['snow', 'nick', 'dove', 'done'] } },
-  { ans: 'mint', guesses: ['glow', 'kind', 'horn', 'gift', 'swim', 'plum', 'beat'], tag: ['X', 'Z'], demo: { ans: 'cake', guesses: ['lime', 'peak', 'bark', 'acme'] } },
-  { ans: 'frog', guesses: ['chip', 'fuel', 'fond', 'farm', 'sock', 'page', 'word'], tag: ['P', 'Q'], demo: { ans: 'fish', guesses: ['wolf', 'shin', 'dish', 'fist'] } },
-  { ans: 'lamp', guesses: ['loud', 'grab', 'sail', 'soap', 'town', 'beat', 'rope'], tag: ['K', 'M'], demo: { ans: 'road', guesses: ['dart', 'cord', 'read', 'load'] } },
-  { ans: 'wave', guesses: ['chip', 'slow', 'very', 'five', 'land', 'fast', 'path'], tag: ['S', 'T'], demo: { ans: 'bird', guesses: ['crab', 'grid', 'brim', 'bind'] } },
+  { ans: 'acid', guesses: ['bold', 'pony', 'able', 'dime', 'milk', 'east', 'cold'], tag: ['S', 'F'], demo: { ans: 'node', guesses: ['snow', 'nick', 'dove', 'note'] } },
+  { ans: 'mint', guesses: ['glow', 'kind', 'horn', 'gift', 'swim', 'plum', 'beat'], tag: ['Z', 'X'], demo: { ans: 'cake', guesses: ['lime', 'peak', 'acme', 'cave'] } },
+  { ans: 'frog', guesses: ['chip', 'fuel', 'fond', 'farm', 'sock', 'page', 'word'], tag: ['J', 'K'], demo: { ans: 'fish', guesses: ['wolf', 'shin', 'dish', 'fist'] } },
+  { ans: 'lamp', guesses: ['loud', 'grab', 'sail', 'soap', 'town', 'beat', 'rope'], tag: ['F', 'S'], demo: { ans: 'road', guesses: ['dart', 'cord', 'read', 'load'] } },
+  { ans: 'wave', guesses: ['chip', 'slow', 'very', 'five', 'land', 'fast', 'path'], tag: ['X', 'Z'], demo: { ans: 'bird', guesses: ['crab', 'grid', 'brim', 'bind'] } },
 ];
 // 回傳 [位置對, 字母對但位置不對]
 function counts(g, ans) {
@@ -66,7 +66,7 @@ function build(v) {
   const papers = [
     { id: 'paper1', kind: 'log', note: T('10/3 那局最後差點猜到 Slothy 的答案……就把它設成電腦密碼了。', 'On 10/3 I almost guessed Slothy’s word… so I made it my computer password.'),
       days: [
-        { date: T('10 月 1 日', 'Oct 1'), rows: [...pw.demo.guesses, pw.demo.ans].map((g) => row(g, pw.demo.ans, pw.tag)), answer: pw.demo.ans.toUpperCase() },
+        { date: T('10 月 1 日', 'Oct 1'), rows: pw.demo.guesses.map((g) => row(g, pw.demo.ans, pw.tag)), answer: pw.demo.ans.toUpperCase() },
         { date: T('10 月 3 日', 'Oct 3'), rows: pw.guesses.slice(0, 4).map((g) => row(g, pw.ans, pw.tag)), answer: '????' },
       ] },
     { id: 'paper2', kind: 'map', title: T('🗺️ 衣櫃地圖', '🗺️ Wardrobe map'), note: T('抽屜從上往下數！', 'Count the drawers from the top!'), rows: Object.entries(drawers).map(([n, d]) => ({ n: Number(n), emoji: d.emoji, item: d.item })) },
@@ -280,8 +280,8 @@ function answers(state) {
   const d = B.drawers[B.keyDrawer];
   return {
     password: T(`電腦密碼是 ${B.password}。`, `The computer password is ${B.password}.`),
-    tag: T(`看 10 月 1 日那局：最後的答案已經寫出來了，拿它倒推每一行。${B.tag[0]}＝字母對、位置也對；${B.tag[1]}＝字母對、位置不對。`,
-      `Look at the Oct 1 game: its answer is written at the bottom, so work backwards from it. ${B.tag[0]} = right letter in the right spot; ${B.tag[1]} = right letter in the wrong spot.`),
+    tag: T(`看 10 月 1 日那局：答案寫在最下面，拿它去對照每一行猜測。${B.tag[0]}＝字母對、位置也對；${B.tag[1]}＝字母對、位置不對。`,
+      `Look at the Oct 1 game: its answer is written at the bottom, so check each guess against it. ${B.tag[0]} = right letter in the right spot; ${B.tag[1]} = right letter in the wrong spot.`),
     keyItem: d.item,
     drawer: T(`鑰匙在第 ${B.keyDrawer} 格（${d.item.zh}），密碼 ${d.code}。`, `The key is in drawer ${B.keyDrawer} (${d.item.en}), code ${d.code}.`),
     plane: T(`《飛機場的十點半》是 ${B.codes.plane}，彈它會讓${CASE_COLOR.plane.zh}箱子的鎖亮。Slothy 把${CASE_COLOR.plane.zh}箱子轉成 ${B.codes.plane}、按準備，Raccoony 在 10 秒內彈 ${B.codes.plane}。`,

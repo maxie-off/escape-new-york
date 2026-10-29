@@ -88,7 +88,7 @@ const scenes = [
       {
         done: (s) => s.solved,
         tiers: [
-          T('看板全亮了！先看機票：要去哪個機場、幾點登機？Slothy 月台柱子上的地圖說機場在哪一區，路人說要搭多久。', 'The board is fully lit! Check the ticket: which airport, and when is boarding? The map on Slothy’s pillar shows the borough, and the passers-by say how long the ride is.'),
+          T('看板全亮了！先看機票：要去哪個機場、幾點登機？Slothy 柱子上的路線圖畫著每條線開到哪一站、哪一站是機場、要搭幾分鐘。兩邊都有路人走過來說今天哪條線在施工、改走哪條線。', 'The board is fully lit! Check the ticket: which airport, and when is boarding? The route map on Slothy’s pillar shows where each line ends, which stop is the airport, and how many minutes it takes. A passer-by on each side says which line is under construction today and which line it runs on instead.'),
           (s) => S2.answers(s).clue,
           (s) => S2.answers(s).line,
         ],

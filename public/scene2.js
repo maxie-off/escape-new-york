@@ -9,7 +9,7 @@
   const ST2 = A.st(2.5);
   const FONT = A.FONT;
   const HELV = `font-family="'Helvetica Neue',Helvetica,Arial,'GenSeki','PingFang TC','Noto Sans TC',sans-serif" font-weight="700"`;
-  const COLORS = { B: '#FF6319', C: '#0039A6', E: '#0039A6', 1: '#EE352E', 2: '#EE352E' }; // MTA 官方路線色
+  const COLORS = { A: '#0039A6', B: '#FF6319', C: '#0039A6', D: '#FF6319', E: '#0039A6', F: '#FF6319', 1: '#EE352E', 2: '#EE352E', 3: '#EE352E', 7: '#B933AD' }; // MTA 官方路線色
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   const fresh = () => ({ modal: null, sel: null, seenBtn: false, view: 0, seen: {}, selWire: null, dial: {}, flashN: undefined, flashLine: null, snap: null });
@@ -99,6 +99,7 @@
       ${[100, 280, 460, 640, 820].map((x) => `<line x1="${x}" y1="568" x2="${x - 40}" y2="700" stroke="${INK}" stroke-width="2.5" opacity=".3"/>`).join('')}
       <line x1="-10" y1="636" x2="1010" y2="636" stroke="${INK}" stroke-width="2.5" opacity=".3"/>
       <g><rect x="880" y="560" width="64" height="96" rx="10" fill="#3c4a40" ${ST}/><rect x="876" y="552" width="72" height="14" rx="5" fill="#2c372f" ${ST}/></g>
+      ${data.passer ? person(data.passer.id, data.passer.lines, { cen: 900, y: 692, s: 0.62, from: 'right', side: true }) : ''}
       ${A.raccoony(110, 698, 0.66)}
     </svg>`;
   }
@@ -135,22 +136,33 @@
   };
 
   const textW = (t) => [...String(t)].reduce((a, c) => a + (/[\u2E80-\u9FFF\uFF00-\uFFEF]/.test(c) ? 23 : 12), 0);
-  function bubbleSvg(lines) {
-    const w = Math.max(300, Math.ceil(Math.max(...lines.map(textW)) + 34)), lh = 30, h = lines.length * lh + 20, x = -48, y = -(262 + h);
+  function bubbleSvg(lines, left = false) {
+    const w = Math.max(300, Math.ceil(Math.max(...lines.map(textW)) + 34)), lh = 30, h = lines.length * lh + 20, x = left ? 48 - w : -48, y = -(262 + h);
+    const tx = left ? x + w - 84 : x + 54;
     return `<g class="bub" opacity="0" style="pointer-events:none">
-      <path d="M${x + 54},${y + h - 2} L${x + 46},${y + h + 26} L${x + 84},${y + h - 2}Z" fill="#fff" ${ST2}/>
+      <path d="M${tx},${y + h - 2} L${tx + (left ? 38 : -8)},${y + h + 26} L${tx + 30},${y + h - 2}Z" fill="#fff" ${ST2}/>
       <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="#fff" ${ST}/>
-      <rect x="${x + 52}" y="${y + h - 4}" width="34" height="7" fill="#fff"/>
+      <rect x="${tx - 2}" y="${y + h - 4}" width="34" height="7" fill="#fff"/>
       <text x="${x + 16}" y="${y + 33}" font-size="23" fill="${INK}" ${FONT}>${lines.map((l, i) => `<tspan x="${x + 16}" dy="${i ? lh : 0}">${esc(l)}</tspan>`).join('')}</text>
     </g>`;
   }
 
-  function person(k, lines) {
+  // 頭左邊的泡泡（Raccoony 那邊用：不要擋到看板）；k 讓字不跟著人一起縮小
+  function bubbleSide(lines, k) {
+    const w = Math.ceil(Math.max(...lines.map(textW)) + 34), lh = 30, h = lines.length * lh + 20;
+    return `<g class="bub" opacity="0" style="pointer-events:none"><g transform="translate(-58,-214) scale(${k})">
+      <path d="M-4,-14 L26,4 L-4,10Z" fill="#fff" ${ST2}/>
+      <rect x="${-w}" y="${-h / 2}" width="${w}" height="${h}" rx="16" fill="#fff" ${ST}/><rect x="-8" y="-12" width="9" height="20" fill="#fff"/>
+      <text x="${16 - w}" y="${-h / 2 + 33}" font-size="23" fill="${INK}" ${FONT}>${lines.map((l, i) => `<tspan x="${16 - w}" dy="${i ? lh : 0}">${esc(l)}</tspan>`).join('')}</text></g></g>`;
+  }
+  // o：{ cen 停下來的位置, y 腳的位置, s 大小, from 'left'|'right' 從哪邊走進來, side 泡泡放頭的左邊 }
+  function person(k, lines, o = {}) {
     const P = LOOKS[k];
     const tw = P.torsoW || 72, lw = P.legW || 24;
     const leg = (s) => { const bx = s === 'L' ? -15 : 15; return `<g class="leg${s}" data-bx="${bx}" data-by="-92" transform="translate(${bx},-92)"><rect x="${-lw / 2}" y="0" width="${lw}" height="84" rx="10" fill="${P.bottom}" ${ST2}/><ellipse cx="3" cy="86" rx="${P.shoeW || 19}" ry="9" fill="${P.shoe}" ${ST2}/></g>`; };
     const arm = (s) => { const bx = (s === 'L' ? -1 : 1) * (tw / 2 + 2); return `<g class="arm${s}" data-bx="${bx}" data-by="-160" transform="translate(${bx},-160)"><rect x="-10" y="-6" width="20" height="70" rx="10" fill="${P.sleeve || P.top}" ${ST2}/><circle cx="0" cy="68" r="10" fill="${P.skin}" ${ST2}/>${s === 'R' ? P.handR || '' : P.handL || ''}</g>`; };
-    return `<g class="person" data-k="${k}" transform="translate(-400,632)">
+    const cen = o.cen ?? 420, y = o.y ?? 632, sc = o.s ?? 1, from = o.from || 'left';
+    return `<g class="person" data-k="${k}" data-cen="${cen}" data-y="${y}" data-s="${sc}" data-from="${from}" transform="translate(-400,${y}) scale(${sc})">
       ${P.back || ''}${leg('L')}${leg('R')}
       <rect x="${-tw / 2}" y="-172" width="${tw}" height="${172 + P.torsoBottom}" rx="20" fill="${P.top}" ${ST2}/>${P.torso || ''}
       ${arm('L')}${arm('R')}
@@ -158,7 +170,7 @@
       <circle cx="-13" cy="-208" r="4.2" fill="${INK}"/><circle cx="13" cy="-208" r="4.2" fill="${INK}"/>
       <ellipse cx="-24" cy="-196" rx="7" ry="4.5" fill="#ff9bb0" opacity=".45"/><ellipse cx="24" cy="-196" rx="7" ry="4.5" fill="#ff9bb0" opacity=".45"/>
       <ellipse class="mouth" cx="0" cy="-192" rx="6" ry="2.5" fill="#7a2b2b"/>${P.face || ''}
-      ${bubbleSvg(lines)}
+      ${o.side ? bubbleSide(lines, 0.82 / sc) : bubbleSvg(lines, from === 'right')}
     </g>`;
   }
 
@@ -190,23 +202,22 @@
       <line x1="-10" y1="620" x2="1010" y2="620" stroke="${INK}" stroke-width="2.5" opacity=".28"/>
       ${[230, 770].map((x) => `<rect x="${x - 17}" y="0" width="34" height="548" fill="#566b66" ${ST}/><path d="M${x - 17},120 h34 M${x - 17},300 h34 M${x - 17},480 h34" stroke="${INK}" stroke-width="3" opacity=".5"/><rect x="${x - 26}" y="540" width="52" height="14" fill="#3b4a46" ${ST2}/>`).join('')}
       <g class="hot" data-hot="map"><g transform="rotate(-4 770 300)">
-        <rect x="712" y="236" width="116" height="128" fill="#e8d9a8" ${ST2}/><rect x="720" y="246" width="100" height="86" fill="#cdbb86"/>
-        <path d="M730,252 L752,250 L760,300 L748,326 L736,300Z" fill="#b9a46c"/><path d="M770,268 L812,262 L816,312 L776,318Z" fill="#a8b98a" opacity=".8"/><path d="M752,322 L800,316 L812,330 L756,332Z" fill="#c9a07a" opacity=".8"/>
-        ${[[742, 284], [790, 290], [780, 324]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#3a6fb0" ${A.st(1.2)}/>`).join('')}
-        <text x="770" y="352" text-anchor="middle" font-size="13" fill="#5a4a2a" ${HELV}>NEW YORK</text>
+        <rect x="712" y="236" width="116" height="128" fill="#f4f1e8" ${ST2}/><rect x="720" y="246" width="100" height="86" fill="#fff"/>
+        ${data.map.routes.map((r, i) => { const si = data.map.stops.findIndex((x) => x.id === r.stop), y0 = 289, y1 = 252 + si * 14, bx = 734 + i * 9; return `<path d="M726,${y0} H${bx} V${y1} H808" fill="none" stroke="${COLORS[r.line] || '#888'}" stroke-width="2.6" stroke-linejoin="round"/>`; }).join('')}
+        <circle cx="726" cy="289" r="4" fill="#fff" ${A.st(1.5)}/>${data.map.stops.map((x, i) => `<circle cx="810" cy="${252 + i * 14}" r="3" fill="${x.ap ? '#3a8cff' : '#fff'}" ${A.st(1)}/>`).join('')}
+        <text x="770" y="352" text-anchor="middle" font-size="12" fill="#5a4a2a" ${HELV}>SUBWAY MAP</text>
         <path d="M812,364 L828,348 L828,364Z" fill="#b39d68" ${A.st(1.5)}/><rect x="700" y="230" width="30" height="12" fill="#f0e6c0" opacity=".85" transform="rotate(-20 715 236)"/><rect x="810" y="230" width="30" height="12" fill="#f0e6c0" opacity=".85" transform="rotate(18 825 236)"/>
         <path d="M724,262 l18,10 M790,340 l12,-6" stroke="#8a7a55" stroke-width="1.5" opacity=".7"/></g>
         ${ui.seen.map ? '' : `<rect class="pulse" x="700" y="226" width="140" height="150" rx="8" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}</g>
-      ${data.people.map((p) => person(p.id, p.lines)).join('')}
+      ${data.passer ? person(data.passer.id, data.passer.lines, { cen: 430 }) : ''}
       ${A.slothy(112, 690, 1.12)}
       ${navBtn('right')}
       <g class="hot" data-hot="pick"><rect x="380" y="18" width="240" height="56" rx="28" fill="${data.allClear ? '#ffd23f' : '#c9ccd2'}" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>${tr('選擇路線', 'Pick a line')}</text>${pulse}</g>
     </svg>`;
   }
 
-  // ---------- 路人動畫（走過來 → 停下說話 → 走開，4 人輪流循環） ----------
-  const SLOT = 13, IN = 3.4, TALK = 5.4, OUT = 4.2;
-  const CEN = [420, 400, 440, 410];
+  // ---------- 路人動畫（走過來 → 停下說話 → 走開 → 等一下再來）----------
+  const SLOT = 17, IN = 3.4, TALK = 6.4, OUT = 3.6;
   const setRot = (el, a) => el.setAttribute('transform', `translate(${el.dataset.bx},${el.dataset.by}) rotate(${a.toFixed(1)})`);
 
   function resolveRefs() {
@@ -214,22 +225,22 @@
       root, legL: root.querySelector('.legL'), legR: root.querySelector('.legR'),
       armL: root.querySelector('.armL'), armR: root.querySelector('.armR'),
       mouth: root.querySelector('.mouth'), bub: root.querySelector('.bub'),
+      cen: Number(root.dataset.cen), y: Number(root.dataset.y), s: Number(root.dataset.s), right: root.dataset.from === 'right',
     }));
   }
   function frame(now) {
     anim.raf = requestAnimationFrame(frame);
-    const n = anim.els.length;
-    if (!n) return;
+    if (!anim.els.length) return;
     const t = (now - anim.t0) / 1000;
-    const tt = t % (SLOT * n);
     anim.els.forEach((p, i) => {
-      const local = tt - i * SLOT;
-      let x = -400, walking = false, talking = false;
-      if (local >= 0 && local < IN) { x = -170 + (CEN[i % 4] + 170) * (local / IN); walking = true; }
-      else if (local >= IN && local < IN + TALK) { x = CEN[i % 4]; talking = true; }
-      else if (local >= IN + TALK && local < SLOT) { x = CEN[i % 4] + (1180 - CEN[i % 4]) * ((local - IN - TALK) / OUT); walking = true; }
+      const local = (t + i * 5) % SLOT;
+      const off = p.right ? 1180 : -170, gone = p.right ? 1180 : 1180;
+      let x = p.right ? 1300 : -400, walking = false, talking = false;
+      if (local < IN) { x = off + (p.cen - off) * (local / IN); walking = true; }
+      else if (local < IN + TALK) { x = p.cen; talking = true; }
+      else if (local < IN + TALK + OUT) { x = p.cen + (gone - p.cen) * ((local - IN - TALK) / OUT); walking = true; }
       const ph = t * 9 + i, sw = walking ? Math.sin(ph) : 0;
-      p.root.setAttribute('transform', `translate(${x.toFixed(1)},${(632 - (walking ? Math.abs(Math.sin(ph)) * 6 : 0)).toFixed(1)})`);
+      p.root.setAttribute('transform', `translate(${x.toFixed(1)},${(p.y - (walking ? Math.abs(Math.sin(ph)) * 6 : 0)).toFixed(1)}) scale(${p.s})`);
       setRot(p.legL, sw * 24); setRot(p.legR, -sw * 24); setRot(p.armL, -sw * 20); setRot(p.armR, sw * 20);
       p.mouth.setAttribute('ry', talking ? (2.5 + Math.abs(Math.sin(t * 12 + i)) * 5).toFixed(1) : '2.5');
       const fade = talking ? Math.min(1, (local - IN) / 0.3, (IN + TALK - local) / 0.3) : 0;
@@ -283,9 +294,33 @@
     </svg>`;
   }
 
+  // ---------- 路線圖：168 街 → 每條線開到哪一站；機場站旁寫著要搭幾分鐘 ----------
+  function routeMap(m) {
+    const SX = 78, SY = 230, EX = 452, sy = (i) => 52 + i * 70;
+    // 不交叉的畫法：依終點由上到下排起點；往上走的線，終點越上面越早轉彎；往下走的線，終點越下面越早轉彎
+    const R = m.routes.map((r) => ({ ...r, si: m.stops.findIndex((x) => x.id === r.stop) })).sort((p, q) => p.si - q.si || String(p.line).localeCompare(String(q.line)));
+    R.forEach((r, k) => { r.same = R.filter((x, j) => x.stop === r.stop && j < k).length; r.y0 = SY - 24 + k * 9; r.y1 = sy(r.si) - 9 + r.same * 9; });
+    const up = R.filter((r) => r.y1 < r.y0).sort((p, q) => p.y1 - q.y1), down = R.filter((r) => r.y1 >= r.y0).sort((p, q) => q.y1 - p.y1);
+    up.forEach((r, k) => { r.bx = 120 + k * 46; }); down.forEach((r, k) => { r.bx = 120 + k * 46; });
+    const dOf = (r) => `M${SX},${r.y0} H${r.bx} V${r.y1} H${EX}`;
+    const lines = R.map((r) => `<path d="${dOf(r)}" fill="none" stroke="${INK}" stroke-width="9.5" stroke-linejoin="round"/>`).join('')
+      + R.map((r) => `<path d="${dOf(r)}" fill="none" stroke="${COLORS[r.line] || '#888'}" stroke-width="6" stroke-linejoin="round"/>`).join('') + R.map((r) => bullet(EX - 40 - r.same * 32, r.y1, 13, r.line)).join('');
+    const stops = m.stops.map((x, i) => `<rect x="${EX - 4}" y="${sy(i) - 22}" width="14" height="44" rx="7" fill="#fff" ${A.st(2.5)}/>
+      <text x="${EX + 22}" y="${sy(i) + (x.ap ? -2 : 7)}" font-size="20" fill="${INK}" ${HELV}>${esc(x.name)}</text>
+      ${x.ap ? `<text x="${EX + 22}" y="${sy(i) + 20}" font-size="16" fill="#1f5fbf" ${HELV}>✈ ${x.ap} · ${x.min} min</text>` : ''}`).join('');
+    return `<svg viewBox="0 0 660 450" class="doc-map" role="img" aria-label="地鐵路線圖">
+      <rect width="660" height="450" rx="10" fill="#fbfaf5"/>
+      <text x="20" y="32" font-size="18" fill="#7a808b" ${HELV}>SUBWAY MAP</text>
+      ${lines}${stops}
+      <rect x="${SX - 58}" y="${SY - 32}" width="64" height="${m.routes.length * 9 + 26}" rx="10" fill="#fff" ${A.st(3)}/>
+      <text x="${SX - 26}" y="${SY + m.routes.length * 9 + 22}" text-anchor="middle" font-size="16" fill="${INK}" ${HELV}>168 St</text>
+      <text x="20" y="436" font-size="13" fill="#7a808b" ${HELV}>${tr('時間＝從 168 街搭到機場', 'Times = ride from 168 St to the airport')}</text>
+    </svg>`;
+  }
+
   // ---------- 彈出層：選路線 / 地圖 ----------
   function modalHtml() {
-    if (ui.modal && ui.modal.type === 'map') return `<div class="modal-card s2-oldmap"><button class="x" data-act="close">✕</button><h2>${tr('柱子上的舊地圖', 'Old map on the pillar')}</h2><div class="oldmap">${window.Docs.mapSvg(data.map)}</div></div>`;
+    if (ui.modal && ui.modal.type === 'map') return `<div class="modal-card s2-oldmap"><button class="x" data-act="close">✕</button><h2>${tr('柱子上的路線圖', 'Route map on the pillar')}</h2><div class="oldmap">${routeMap(data.map)}</div></div>`;
     const inner = !ui.sel
       ? `<h2>${tr('要搭哪一線？', 'Which line?')}</h2><div class="bullets">${data.lines.map((l) => `<button class="bullet" style="background:${COLORS[l]}" data-act="sel" data-l="${l}">${l}</button>`).join('')}</div>`
       : `<h2>${tr('搭', 'Take the')} <span class="bullet sm" style="background:${COLORS[ui.sel]}">${ui.sel}</span> ${tr('線嗎？', 'line?')}</h2><div class="row center"><button class="primary big" data-act="board">${tr('搭乘', 'Board')}</button><button class="big" data-act="back">${tr('重選', 'Back')}</button></div>`;
@@ -348,7 +383,7 @@
   function draw() {
     if (!box) return;
     box.innerHTML = data.role === 'A' ? roomA() : ui.view === 1 ? roomBox() : roomB();
-    if (data.role === 'B') resolveRefs();
+    resolveRefs();
     renderModal();
   }
 
@@ -370,7 +405,7 @@
       m.onclick = onModalClick;
       m.onkeydown = null;
       draw();
-      if (data.role === 'B') startLoop();
+      startLoop();
     },
     unmount() { stopLoop(); ui = fresh(); box = null; const m = $modal(); m.hidden = true; m.innerHTML = ''; },
   };

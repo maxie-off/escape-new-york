@@ -32,7 +32,9 @@ for (let v = 0; v < 5; v++) {
   assert.equal(log.kind, 'log'); assert.equal(log.days.length, 2);
   const [d1, d3] = log.days;
   assert.equal(d1.answer, sol.demo.ans.toUpperCase()); // 10/1 有完整答案，用來倒推代號
-  assert.equal(d1.rows[d1.rows.length - 1].fb, `4${sol.tag[0]}0${sol.tag[1]}`);
+  assert.ok(d1.rows.every((r) => !r.fb.startsWith('4')), `bedroom v${v} 10/1 不能有全對的那一行`);
+  assert.ok(d1.rows.some((r) => /^[23]/.test(r.fb)), `bedroom v${v} 10/1 要有 2 或 3 個位置對的一行`);
+  assert.ok(![...sol.tag].some((t) => 'AB'.includes(t)) && [['S', 'F'], ['X', 'Z'], ['J', 'K']].some((p) => p.includes(sol.tag[0]) && p.includes(sol.tag[1])), `bedroom v${v} 代號要是 S/F、X/Z、J/K`);
   assert.ok(d1.rows.some((r) => r.fb[2] !== '0' && r.fb[0] === '0'), `bedroom v${v} 範例要有只有「位置不對」的一行`);
   assert.equal(d3.rows.length, 4); assert.equal(A1.deskPaper.rows.length, 3);
   assert.ok(loc(A1.deskPaper.date, 'zh').includes('10 月 3 日') && loc(A1.deskPaper.date, 'en').includes('Oct 3'));
@@ -81,6 +83,10 @@ for (let v = 0; v < 5; v++) {
     S2.act(st, 'A', { type: 'tune', line: l, ch: s2.ch[l] });
   }
   assert.ok(st.allClear, `subway v${v} 看板全亮`);
+  { const V2 = S2._VARIANTS[v], pa = S2.view(st, 'A').passer, pb = S2.view(st, 'B').passer;
+    const said = [pa, pb].map((p) => loc(p.lines, 'en').join(' '));
+    assert.ok(Object.entries(V2.works).every(([l, to]) => said.some((t) => t.includes(`${l} line`) && t.includes(`${to} line`))), `subway v${v} 兩個路人要各說一條施工`);
+    assert.equal(S2.view(S2.init(v), 'A').passer, null); }
   const a2 = S2.view(st, 'A');
   assert.ok(a2.board.rows.every((r) => r.state === 'clear' && r.to));
   for (const l of S2.LINES) if (l !== s2.line) assert.equal(S2.act(st, 'B', { type: 'board', line: l }).correct, false);
