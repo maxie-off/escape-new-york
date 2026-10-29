@@ -17,13 +17,15 @@
   const PA_EN = 'Attention please. The airport has received a bomb threat. Please stay calm. The police are investigating.';
   const LINE_R = () => tr('我們去幫忙把炸彈拆除吧！', 'Let’s go help defuse the bomb!');
   const LINE_S = () => tr('嗯，一起去抓犯人吧！', 'Yeah, let’s catch the culprit together!');
-  const T_R = 10600, T_S = 13200, INTRO_MS = 16200;
+  const T_R = 10600, T_S = 13200, T_BOMB = 15200, INTRO_MS = 18600;
+  const BOMB_LINE = () => tr('💣 炸彈開始倒數了！只剩 10 分鐘！！', '💣 The bomb starts ticking! Only 10 minutes left!!');
 
   const fresh = () => ({ modal: null, gate: '', view: 0, seen: {}, pendingAir: null, saidHack: false });
   let ui = fresh();
   let introDone = false, introStarted = false, introTimers = [];
   let ctx = null, data = null, box = null;
   let tAt = 0, timeoutSent = false, unlockDrawn = false, ticker = 0;
+  let bombAt = 0, bombOn = false;
   const $modal = () => document.getElementById('modal');
   const SVG_OPEN = (label) => `<svg viewBox="0 0 1000 700" class="scene-svg" role="img" aria-label="${label}">`;
   const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
@@ -202,6 +204,48 @@
       case 'bikini': return g(`<path d="M-22,-28 L-4,-26 M4,-26 L22,-28" stroke="${INK}" stroke-width="2"/><path d="M-24,-26 q-2,14 9,18 q10,-3 11,-18Z" fill="#ff5d8f" ${t}/><path d="M4,-26 q1,15 11,18 q11,-4 9,-18Z" fill="#ff5d8f" ${t}/><path d="M-4,-22 h8" stroke="${INK}" stroke-width="2.5"/><path d="M-22,6 h44 l-7,10 q-15,12 -30,0Z" fill="#ff5d8f" ${t}/><circle cx="-12" cy="-16" r="2" fill="#fff"/><circle cx="14" cy="-16" r="2" fill="#fff"/><circle cx="0" cy="12" r="2" fill="#fff"/>`);
       case 'sweater': return g(`<path d="M-16,-26 h32 l18,12 -6,28 -9,-3 v19 h-38 v-19 l-9,3 -6,-28Z" fill="#c9463d" ${t}/><path d="M-12,-26 q12,10 24,0" fill="#f3e7d3" ${t}/><path d="M-16,-14 l4,-4 4,4 4,-4 4,4 4,-4 4,4 4,-4 4,4" fill="none" stroke="#f3e7d3" stroke-width="3"/><path d="M-13,-6 h26" stroke="#f3e7d3" stroke-width="2" stroke-dasharray="3 3"/><path d="M-19,24 h38" stroke="#f3e7d3" stroke-width="3"/>`);
       default: return '';
+    }
+  }
+
+
+  // ---------- 行李裡的衣物與小物：美漫風（稜角分明、粗黑邊、硬陰影 + 網點、白色反光）----------
+  const HT = `<pattern id="s3ht" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="2.5" cy="2.5" r="1.2" fill="#000" opacity=".42"/></pattern>`;
+  function comicIcon(id, x, y, s = 1) {
+    const g = (inner) => `<g transform="translate(${x},${y}) scale(${s})">${inner}</g>`;
+    const o = A.st(3.2);
+    const shade = (d, c) => `<path d="${d}" fill="${c}"/><path d="${d}" fill="url(#s3ht)"/>`;
+    const glint = (d) => `<path d="${d}" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/>`;
+    const body = (D, c, shadeD, dark) => `<path d="${D}" fill="${c}"/>${shade(shadeD, dark)}<path d="${D}" fill="none" ${o}/>`;
+    switch (id) {
+      case 'tshirt': return g(`${body('M-12,-26 L-5,-26 L0,-20 L5,-26 L12,-26 L32,-13 L23,1 L15,-4 L15,28 L-15,28 L-15,-4 L-23,1 L-32,-13Z', '#ffb21e', 'M5,-26 L12,-26 L32,-13 L23,1 L15,-4 L15,28 L5,28Z', '#d9731a')}
+        <path d="M-5,-26 L0,-20 L5,-26" fill="none" ${o}/><path d="M-15,-4 L-15,4 M15,-4 L15,4" ${A.st(2.4)}/>${glint('M-9,-14 L-6,0')}`);
+      case 'bikini': return g(`<path d="M-17,-30 L-22,-37 M17,-30 L22,-37 M-29,-8 L-37,-6 M29,-8 L37,-6 M-5,-8 L5,-8" ${A.st(3)}/>
+        ${body('M-17,-30 L-5,-8 L-29,-8Z', '#ff2e74', 'M-17,-30 L-11,-8 L-5,-8Z', '#b5174f')}${body('M17,-30 L29,-8 L5,-8Z', '#ff2e74', 'M17,-30 L29,-8 L21,-8Z', '#b5174f')}
+        ${body('M-25,6 L25,6 L18,13 L5,27 L-5,27 L-18,13Z', '#ff2e74', 'M6,6 L25,6 L18,13 L5,27 L2,27Z', '#b5174f')}
+        <path d="M-22,10 L-16,14 L-10,10 L-4,14 L2,10" fill="none" stroke="#fff" stroke-width="2"/>${glint('M-18,-20 L-21,-13')}`);
+      case 'sunglasses': return g(`<path d="M-33,-10 L-40,-4 M33,-10 L40,-4" ${A.st(3.5)}/>
+        <path d="M-33,-12 L-3,-12 L-6,8 L-29,10Z" fill="#15161b" ${o}/><path d="M3,-12 L33,-12 L29,10 L6,8Z" fill="#15161b" ${o}/><path d="M-3,-9 L3,-9" ${A.st(4)}/>
+        <path d="M-31,-12 L-3,-12 L-3.6,-7 L-32,-7Z M3,-12 L31,-12 L32,-7 L3.6,-7Z" fill="#e5382f"/>
+        ${glint('M-24,-3 L-19,5 M-15,-3 L-12,2')}${glint('M12,-3 L17,5 M21,-3 L24,2')}`);
+      case 'sweater': return g(`${body('M-14,-28 L14,-28 L34,-16 L29,18 L20,16 L20,30 L-20,30 L-20,16 L-29,18 L-34,-16Z', '#d8342c', 'M6,-28 L14,-28 L34,-16 L29,18 L20,16 L20,30 L6,30Z', '#951c17')}
+        <path d="M-10,-28 L0,-19 L10,-28Z" fill="#f3e7d3" ${A.st(2.6)}/>
+        <path d="M-19,-13 L-13,-19 L-7,-13 L-1,-19 L5,-13 L11,-19 L17,-13" fill="none" stroke="#f3e7d3" stroke-width="3.6" stroke-linejoin="miter"/>
+        <path d="M-19,-6 L19,-6" stroke="#f3e7d3" stroke-width="2.4" stroke-dasharray="4 3"/><path d="M-20,24 L20,24 M-29,13 L-20,12 M29,13 L20,12" stroke="#f3e7d3" stroke-width="3.4"/>${glint('M-12,0 L-10,12')}`);
+      case 'downjacket': return g(`${body('M-14,-30 L14,-30 L31,-18 L33,22 L20,22 L20,30 L-20,30 L-20,22 L-33,22 L-31,-18Z', '#2f6fe0', 'M4,-30 L14,-30 L31,-18 L33,22 L20,22 L20,30 L4,30Z', '#173c94')}
+        <path d="M-13,-36 L13,-36 L15,-29 L-15,-29Z" fill="#2f6fe0" ${A.st(2.6)}/>
+        <path d="M-20,-15 L20,-15 M-20,0 L20,0 M-20,15 L20,15 M-31,-4 L-20,-4 M31,-4 L20,-4 M-32,10 L-20,10 M32,10 L20,10" ${A.st(2.4)}/>
+        <path d="M0,-36 L0,30" ${A.st(3)}/><path d="M-2,-24 L2,-24" stroke="#ffd23f" stroke-width="4"/>${glint('M-15,-24 L-9,-24 M-15,-8 L-11,-8')}`);
+      case 'goggles': return g(`<path d="M-32,-4 L-44,-4 M32,-4 L44,-4" stroke="#15161b" stroke-width="8" stroke-linecap="square"/>
+        <path d="M-31,-15 L31,-15 L33,6 L11,13 L5,5 L-5,5 L-11,13 L-33,6Z" fill="#ff7a1a"/>
+        <path d="M-31,-15 L31,-15 L32,-7 L-32,-7Z" fill="#ffd23f"/>${shade('M-32.5,0 L32.5,0 L33,6 L11,13 L5,5 L-5,5 L-11,13 L-33,6Z', '#a8327f')}
+        <path d="M-31,-15 L31,-15 L33,6 L11,13 L5,5 L-5,5 L-11,13 L-33,6Z" fill="none" ${A.st(3.6)}/>${glint('M-21,-11 L-14,2 M-12,-11 L-9,-5')}`);
+      case 'tripod': return g(`${body('M-3,-12 L-25,34 L-19,34 L1,-10Z', '#6b7080', 'M-3,-12 L-25,34 L-22,34 L-1,-11Z', '#3f4350')}${body('M3,-12 L25,34 L19,34 L-1,-10Z', '#6b7080', 'M3,-12 L25,34 L22,34 L1,-11Z', '#3f4350')}
+        ${body('M-2,-12 L2,-12 L2,34 L-2,34Z', '#6b7080', 'M0,-12 L2,-12 L2,34 L0,34Z', '#3f4350')}
+        <path d="M-14,12 L-9,12 M9,12 L14,12" ${A.st(4)}/>
+        <path d="M-6,-20 L6,-20 L4,-12 L-4,-12Z" fill="#2b2b33" ${A.st(2.6)}/>
+        ${body('M-20,-42 L-9,-42 L-6,-47 L6,-47 L9,-42 L20,-42 L20,-20 L-20,-20Z', '#2b2b33', 'M6,-47 L9,-42 L20,-42 L20,-20 L6,-20Z', '#111216')}
+        <path d="M0,-40 L9,-35 L9,-25 L0,-21 L-9,-25 L-9,-35Z" fill="#7d8696" ${A.st(2.4)}/><path d="M0,-36 L5,-33 L5,-27 L0,-25 L-5,-27 L-5,-33Z" fill="#15161b"/>${glint('M-3,-34 L-1,-30')}`);
+      default: return itemIcon(id, x, y, s);
     }
   }
 
@@ -390,7 +434,7 @@
       inner = gtext(L, y + 64, 17, '> connect airline_db') + gtext(L, y + 100, 22, tr('選擇一間航空公司：', 'SELECT AN AIRLINE:'))
         + data.airlines.map((a, i) => { const yy = y + 124 + i * 70; return `<g class="hot" data-hot="air-${a.code}"><rect x="${L}" y="${yy}" width="${w - 44}" height="56" rx="6" fill="#0a1a0f" stroke="${GRN2}" stroke-width="2"/>
           ${gtext(L + 14, yy + (a.zh ? 25 : 35), 18, `[${a.code}] ${a.name}`)}${a.zh ? gtext(L + 14, yy + 46, 14, a.zh, { c: '#8fdca5' }) : ''}</g>`; }).join('')
-        + (ui.seen.air ? '' : `<rect class="pulse" x="${L - 6}" y="${y + 118}" width="${w - 32}" height="284" rx="10" fill="none" stroke="#ffd23f" stroke-width="5"/>`);
+        + (ui.seen.air ? '' : `<rect class="pulse" x="${L - 6}" y="${y + 118}" width="${w - 32}" height="${data.airlines.length * 70 - 6}" rx="10" fill="none" stroke="#ffd23f" stroke-width="5"/>`);
     } else if (H.phase === 'locked') {
       inner = gtext(cx, y + 190, 30, 'ACCESS DENIED', { c: RED, mid: 1 }) + gtext(cx, y + 232, 18, tr('資料庫不對！安全鎖定中', 'WRONG DATABASE · SECURITY LOCK'), { c: RED, mid: 1 }) + gtext(cx, y + 300, 46, cdText(), { c: RED, mid: 1, id: 's3-cd' });
     } else if (H.phase === 'puzzle') {
@@ -501,7 +545,7 @@
       <rect x="-150" y="-80" width="300" height="122" rx="10" fill="#5a4a3a" ${ST}/>
       <rect x="-138" y="-70" width="276" height="100" rx="6" fill="#8a7a9a"/>
       ${travelDoc(-58, -66, 0.3, 5)}${creditCard(-132, -60, 0.32, -7)}
-      ${its.map((id, i) => itemIcon(id, spots[i][0], spots[i][1], 0.62)).join('')}
+      ${its.map((id, i) => comicIcon(id, spots[i][0], spots[i][1], 0.62)).join('')}
       <path d="M-24,-150 v-14 h48 v14" fill="none" stroke="#1f1913" stroke-width="7" stroke-linecap="round"/>
     </g>`;
   }
@@ -522,8 +566,7 @@
     const p1 = tr(['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成她。'], ['The suspect must have stolen', 'this owner’s boarding pass and passport.']);
     const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="500" cy="560" rx="200" ry="110" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
     const pulseBtn = ui.seen.case && !ui.seen.pick ? `<rect class="pulse" x="350" y="10" width="300" height="72" rx="36" fill="none" stroke="#ff5a5f" stroke-width="5"/>` : '';
-    return `${SVG_OPEN('警察圍著打開的行李箱')}${lightsAndCeiling()}${floor()}
-      ${crowd(8, 51, 470, 520)}
+    return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}</defs>${lightsAndCeiling()}${floor()}
       ${dim()}
       ${cop(250, 560, 0.86)}${cop(760, 556, 0.86, '#232d63')}${cop(860, 640, 0.92)}
       ${bubble(60, 120, 330, p1, 250, 300)}
@@ -538,13 +581,13 @@
   function caseHtml() {
     const its = [[data.clothing[0], -186, 120, -10], [data.clothing[1], -55, 112, 8], [data.gadgets[0], 150, 120, -6]].filter((x) => x[0]);
     return `<div class="s3-zoom"><button class="x" data-act="close">✕</button>
-      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="打開的行李箱內部">
+      <svg viewBox="-330 -230 660 460" class="s3-zoom-svg" role="img" aria-label="打開的行李箱內部"><defs>${HT}</defs>
         <rect x="-320" y="-220" width="640" height="440" rx="30" fill="#5a4a3a" ${ST}/>
         <rect x="-296" y="-196" width="592" height="392" rx="18" fill="#8a7a9a"/>
         <path d="M-296,-120 q296,-30 592,0 M-296,40 q296,30 592,0" stroke="#7a6a8a" stroke-width="6" fill="none" opacity=".6"/>
         <rect x="-296" y="-196" width="592" height="392" rx="18" fill="none" stroke="#3a2f24" stroke-width="6"/>
         ${creditCard(-282, -178, 1.05, -5)}${travelDoc(22, -190, 1.05, 4)}
-        ${its.map(([id, x, y, r]) => `<g transform="translate(${x},${y}) rotate(${r})">${itemIcon(id, 0, 0, id === data.gadgets[0] ? 2.6 : 2.4)}</g>`).join('')}
+        ${its.map(([id, x, y, r]) => `<g transform="translate(${x},${y}) rotate(${r})">${comicIcon(id, 0, 0, id === data.gadgets[0] ? 2.6 : 2.4)}</g>`).join('')}
       </svg></div>`;
   }
   function boardHtml() {
@@ -638,7 +681,17 @@
     renderModal();
   }
   // 倒數：每 0.25 秒更新畫面上的秒數；時間到就通知伺服器
+  // 左上角的炸彈倒數（所有視角都看得到）
+  function bombClock() {
+    let el = document.getElementById('s3-bomb');
+    if (!bombOn || !box) { if (el) el.remove(); return; }
+    if (!el) { el = document.createElement('div'); el.id = 's3-bomb'; el.setAttribute('aria-live', 'off'); document.body.appendChild(el); }
+    const left = Math.max(0, Math.ceil((bombAt - Date.now()) / 1000));
+    el.textContent = `💣 ${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`;
+    el.classList.toggle('hurry', left <= 60);
+  }
   function tick() {
+    bombClock();
     if (!box || !introDone || !data || !data.hack) return;
     const ph = data.hack.phase;
     const el = document.getElementById('s3-cd');
@@ -656,6 +709,7 @@
     if (ctx && ctx.say) ctx.say(pa, { now: true, ms: 8000 });
     at(T_R, () => ctx.say && ctx.say('Raccoony：' + LINE_R(), { now: true, ms: T_S - T_R }));
     at(T_S, () => ctx.say && ctx.say('Slothy：' + LINE_S(), { now: true, ms: INTRO_MS - T_S }));
+    at(T_BOMB, () => { bombOn = true; bombClock(); if (window.Music && Music.buzz) Music.buzz(); ctx.say && ctx.say(BOMB_LINE(), { now: true, ms: INTRO_MS - T_BOMB + 600 }); });
     at(INTRO_MS, () => {
       introDone = true; draw();
       if (ctx.say) ctx.say(data.role === 'B' ? tr('警察圍著地上一個打開的行李箱……', 'The police are gathered around an open suitcase on the floor…') : tr('大廳又恢復了人來人往。看看航班看板吧。', 'The hall is busy again. Check the departures board.'), { now: true, ms: 5000 });
@@ -667,6 +721,8 @@
     render(container, newData, c) {
       box = container; ctx = c; data = newData;
       if (data.hack && data.hack.remain != null) tAt = Date.now() + data.hack.remain;
+      if (data.bomb != null) bombAt = Date.now() + data.bomb;
+      if (introDone) bombOn = true;
       timeoutSent = false; unlockDrawn = false;
       if (data.hack && data.hack.phase !== 'puzzle') busy = false;
       box.onclick = onStageClick;
@@ -679,6 +735,7 @@
     },
     unmount() {
       introTimers.forEach(clearTimeout); introTimers = []; clearInterval(ticker); ticker = 0;
+      bombOn = false; const bc = document.getElementById('s3-bomb'); if (bc) bc.remove();
       if (window.Music && Music.hush) Music.hush(); introDone = false; introStarted = false;
       ui = fresh(); box = null;
       const m = $modal(); m.hidden = true; m.innerHTML = '';

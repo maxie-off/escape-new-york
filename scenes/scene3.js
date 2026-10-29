@@ -15,13 +15,13 @@ const { T } = require('../i18n');
 const MAX_GATE = 60;
 const STEP_MS = 15000;
 const LOCK_MS = 30000;
+// 炸彈倒數：開場對話結束時開始，10 分鐘（開場動畫約 15 秒）
+const BOMB_LEAD_MS = 15000, BOMB_MS = 10 * 60 * 1000;
 
-// 資料庫裡的航空公司（虛構）。看板上只有前兩家的航班。
+// 航空公司（虛構）：看板上的 8 班都是這兩家，terminal 也只列這兩家
 const AIRLINES = [
   { code: 'BB', name: 'BLUEBIRD AIRLINES', zh: '藍鳥航空' },
   { code: 'PS', name: 'POLAR STAR AIR', zh: '北極星航空' },
-  { code: 'CS', name: 'CORAL SKY AIRWAYS', zh: '珊瑚天空航空' },
-  { code: 'GK', name: 'GOLDEN KITE AIR', zh: '金風箏航空' },
 ];
 // 四個目的地：同一家航空公司飛兩個地方，兩兩的衣物一樣
 //   雪梨／里斯本：都去海邊衝浪（衣物、小物都一樣）→ 只能靠「今天紐約是夏天還是冬天」分
@@ -42,9 +42,9 @@ const PACK = {
 const VARIANTS = [
   { date: [1, 15], answer: 'syd', name: 'TIFFANY' },
   { date: [7, 8], answer: 'lis', name: 'SADIE' },
-  { date: [1, 22], answer: 'hok', name: 'HONEY' },
+  { date: [1, 22], answer: 'hok', name: 'HANNI' },
   { date: [12, 12], answer: 'rek', name: 'TIFFANY' },
-  { date: [8, 3], answer: 'lis', name: 'HONEY' },
+  { date: [8, 3], answer: 'lis', name: 'HANNI' },
 ];
 const MONTH_EN = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 const OTHERS = ['OLIVER', 'EMMA', 'LIAM', 'NOAH', 'AVA', 'MIA', 'LUCAS', 'ZOE', 'ETHAN', 'CHLOE', 'MASON', 'LILY', 'JACK', 'GRACE', 'LEO', 'RUBY', 'MAX', 'ELLA', 'SAM', 'NORA', 'OWEN', 'IVY'];
@@ -109,7 +109,7 @@ function puzzles(v, attempt) {
   return [p1, p2, p3];
 }
 
-function init(v = 0) { return { v, solved: false, hack: { phase: 'idle', step: 0, deadline: 0, lockUntil: 0, attempt: 0 } }; }
+function init(v = 0) { return { v, solved: false, bombAt: Date.now() + BOMB_LEAD_MS + BOMB_MS, hack: { phase: 'idle', step: 0, deadline: 0, lockUntil: 0, attempt: 0 } }; }
 
 function hackView(state, role) {
   const h = state.hack, now = Date.now();
@@ -136,6 +136,7 @@ function view(state, role) {
       posts: DESTS.map((x) => ({ id: x.id, place: x.place })),
       airlines: AIRLINES.map((x) => ({ code: x.code, name: x.name, zh: T(x.zh, '') })),
       hack: hackView(state, 'A'),
+      bomb: Math.max(0, state.bombAt - Date.now()),
     };
   }
   const dest = DESTS.find((x) => x.id === vv.answer);
@@ -147,6 +148,7 @@ function view(state, role) {
     doc: { airline: airline.name, airlineZh: T(airline.zh, '') },
     clothing: pk.clothing, gadgets: pk.gadget, // 只送圖示 id（畫面上不寫文字）
     hack: hackView(state, 'B'),
+    bomb: Math.max(0, state.bombAt - Date.now()),
   };
 }
 

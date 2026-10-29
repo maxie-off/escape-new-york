@@ -453,3 +453,5 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 .s3-man { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .s3-man div { border: 2px solid #1f9e44; border-radius: 6px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 20px; }
 .s3-man b { font-size: 22px; border-bottom: 1px solid #1f9e44; padding-bottom: 6px; margin-bottom: 4px; }
+#s3-bomb { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px); left: calc(env(safe-area-inset-left, 0px) + 14px); z-index: 6; padding: 4px 12px; background: #15161b; color: #ff4b3e; border: 3px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--ink); font: 700 20px/1.2 'Courier New', Courier, monospace; letter-spacing: .04em; text-shadow: 0 0 6px rgba(255,75,62,.7); pointer-events: none; }
+#s3-bomb.hurry { animation: s3blink .8s steps(2) infinite; }
