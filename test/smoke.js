@@ -218,13 +218,21 @@ const waitState = (s, pred) =>
 
     // ---- 場景 3（機場）----
     assert.equal(s3a.scene.id, 'airport');
-    // A：看板（日期 + 10 個航班）+ 新聞；B：打開的行李箱（衣物與物品）+ 警察的話
-    assert.ok(s3a.scene.data.role === 'A' && s3a.scene.data.flights.length === 10 && s3a.scene.data.news.list.length === 10 && s3a.scene.data.date.m === 1);
-    assert.ok(!s3a.scene.data.items, 'A 看不到行李內容');
-    assert.ok(s3b.scene.data.role === 'B' && s3b.scene.data.items.some((x) => x.id === 'wetsuit') && s3b.scene.data.police.length === 1);
-    assert.ok(!s3b.scene.data.flights && !s3b.scene.data.news, 'B 看不到看板與新聞');
-    const sydGate = s3a.scene.data.flights.find((f) => f.dest === 'SYDNEY').gate;
-    const otherGate = s3a.scene.data.flights.find((f) => f.dest === 'LISBON').gate; // 夏天衝浪的誘答（紐約 1 月是冬天）
+    // A：看板（日期 + 8 個航班）+ 旅遊貼文 + terminal；B：打開的行李箱（信用卡、Travel Document、衣物、小物）
+    assert.ok(s3a.scene.data.role === 'A' && s3a.scene.data.flights.length === 8 && s3a.scene.data.posts.length === 4 && s3a.scene.data.date.m === 1);
+    assert.ok(!s3a.scene.data.clothing && !s3a.scene.data.card, 'A 看不到行李內容');
+    assert.ok(s3b.scene.data.role === 'B' && s3b.scene.data.clothing.includes('bikini') && s3b.scene.data.card.name === 'TIFFANY' && s3b.scene.data.doc.airline === 'BLUEBIRD AIRLINES');
+    assert.ok(!s3b.scene.data.flights && !s3b.scene.data.posts, 'B 看不到看板與貼文');
+    // 駭入：選航空公司 → 三題 → 旅客名單
+    assert.equal((await emit(b, 'scene_action', { type: 'airline', code: 'BB' })).ok, false);
+    assert.ok((await emit(a, 'scene_action', { type: 'airline', code: 'BB' })).correct);
+    const doneP = waitState(a, (s) => s.scene && s.scene.data.hack && s.scene.data.hack.phase === 'done');
+    for (const c of ['4F', 'heart', 1]) assert.ok((await emit(a, 'scene_action', { type: 'hack', choice: c })).correct);
+    const doneA = await doneP;
+    const hers = doneA.scene.data.hack.manifest.filter((m) => m.names.includes('TIFFANY')).map((m) => s3a.scene.data.flights.find((f) => f.flight === m.flight));
+    assert.equal(hers.length, 2);
+    const sydGate = hers.find((f) => f.dest === 'SYDNEY').gate;
+    const otherGate = hers.find((f) => f.dest === 'LISBON').gate; // 夏天衝浪的誘答（紐約 1 月是冬天）
     assert.equal((await emit(a, 'scene_action', { type: 'gate', gate: sydGate })).ok, false); // 只有 B
     assert.equal((await emit(b, 'scene_action', { type: 'gate', gate: otherGate })).correct, false);
     assert.equal((await emit(b, 'scene_action', { type: 'gate', gate: 101 })).ok, false);

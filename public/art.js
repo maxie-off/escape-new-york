@@ -46,6 +46,9 @@ window.Art = (function () {
       <path d="M-12,${y - 86} q12,7 0,12 q-5,-5 0,-12Z M12,${y - 86} q-12,7 0,12 q5,-5 0,-12Z" fill="#141518" ${st(2)}/>
     </g>`;
   }
+  // 迷你獵鹿帽：小小一頂，戴在兩隻耳朵中間的頭頂上
+  function miniHat(top = -150) { return `<g transform="translate(0,${top + 4}) rotate(-5) scale(.42)">${deerstalker(0, 30)}</g>`; }
+  function miniHatBack(top = -178) { return `<g transform="translate(0,${top + 4}) scale(.42)">${deerstalkerBack(22)}</g>`; }
   function raccoony(x = 0, y = 0, s = 1, flip = false) {
     const fur = '#6e5d5a', furDark = '#4a3d3b', cream = '#ead7c9', tan = '#d9b99f', vest = '#27345a';
     // 尾巴：一條，有深色環紋
@@ -76,9 +79,7 @@ window.Art = (function () {
       <circle cx="-19.2" cy="-112" r="1.9" fill="#fff"/><circle cx="22.8" cy="-112" r="1.9" fill="#fff"/>
       <ellipse cx="0" cy="-101" rx="9" ry="6.5" fill="#3a2d2b"/>
       <ellipse cx="0" cy="-83" rx="5" ry="6" fill="#6b2f2b" ${st(2.5)}/>
-      ${deerstalker(0, -108)}
-      <circle cx="-44" cy="-186" r="14" fill="${fur}" ${st(3)}/><circle cx="-44" cy="-185" r="7" fill="#e8c9bd"/>
-      <circle cx="44" cy="-186" r="14" fill="${fur}" ${st(3)}/><circle cx="44" cy="-185" r="7" fill="#e8c9bd"/>
+      ${miniHat()}
     </g>`;
   }
 
@@ -111,5 +112,5 @@ window.Art = (function () {
     return `<svg viewBox="-85 -205 170 215" width="${size}" height="${size * 1.26}">${who}</svg>`;
   }
 
-  return { INK, st, FONT, raccoony, slothy, portrait, deerstalker, deerstalkerBack };
+  return { INK, st, FONT, raccoony, slothy, portrait, deerstalker, deerstalkerBack, miniHat, miniHatBack };
 })();

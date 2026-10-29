@@ -8,7 +8,7 @@ The game opens in a dark room, then there are three scenes:
 
 1. Raccoony's bedroom. Find the computer password, read the diary, find the key. The door sign says to take your passport, which is in one of the suitcases under the bed. Raccoony has the guitar tabs, Slothy has the chord chart on the bed; together they give the suitcase codes.
 2. The 168 Street subway platform. Work out which train gets you to JFK by noon. When you pick right, a train rushes past.
-3. The airport. A bomb threat has everyone on edge. Raccoony reads the police and a phone search, Slothy gets into an abandoned suitcase. Each of you ends up with one of the two books, and only both halves of the code name the gate. Then the two of them run down the corridor, and the screen goes black on "To be continued".
+3. The airport. A bomb threat has everyone on edge, and the two friends decide to help. Slothy studies an abandoned suitcase (credit card, a travel document with the flight number scribbled out, clothes and gadgets); Raccoony has the departures board and four travel posts. Together they work out where the owner is flying, hack the airline's database through three 15-second picture puzzles (Slothy sees the puzzle, Raccoony picks the answer), and use the passenger list to find the flight and the gate. Then the two of them run down the corridor, and the screen goes black on "To be continued".
 
 The 💡 button gives hints in three steps for whichever puzzle you're stuck on: a direction, then the key clue, then the answer (it asks you to tap twice before showing the answer). The ending shows how many hints you used.
 

@@ -83,8 +83,7 @@
       <circle cx="-32" cy="-170" r="14" fill="${fur}" ${st(3)}/><circle cx="32" cy="-170" r="14" fill="${fur}" ${st(3)}/>
       <circle cx="0" cy="-134" r="44" fill="${fur}" ${st(3.5)}/>
       <path d="M-14,-170 q14,-8 28,0 M-18,-156 q18,-8 36,0" fill="none" stroke="${dark}" stroke-width="5" stroke-linecap="round" opacity=".7"/>
-      ${window.Art && Art.deerstalkerBack ? Art.deerstalkerBack(-134) : ''}
-      <circle cx="-38" cy="-202" r="12" fill="${fur}" ${st(3)}/><circle cx="38" cy="-202" r="12" fill="${fur}" ${st(3)}/>`;
+      ${window.Art && Art.miniHatBack ? Art.miniHatBack(-178) : ''}`;
   }
   function slothyBack() {
     const body = '#b4bfd0', dark = '#9aa6ba', claw = '#5a6070';

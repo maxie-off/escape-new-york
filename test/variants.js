@@ -88,18 +88,39 @@ for (let v = 0; v < 5; v++) {
   assert.ok(/[0-9]:[0-9]{2} [AP]M/.test(S2.docPatch(v).ticket.boarding) && ['JFK', 'LGA', 'EWR'].includes(S2.docPatch(v).ticket.airport));
   assert.ok(allHints(scenes[2], st).every((t) => !t.includes('undefined') && !t.includes('NaN')));
 
-  // 場景 3：行李推理 → 登機口
+  // 場景 3：行李推理 + 駭入航空公司 → 旅客名單 → 登機口
   st = S3.init(v);
   const s3 = S3.solution(v);
   const A3 = S3.view(st, 'A'), B3 = S3.view(st, 'B');
-  assert.equal(A3.flights.length, 10); assert.equal(new Set(A3.flights.map((f) => f.gate)).size, 10);
-  assert.ok(!json(B3).includes('"gate"') && !json(A3).includes('"items"'));
+  assert.equal(A3.flights.length, 8); assert.equal(new Set(A3.flights.map((f) => f.gate)).size, 8);
+  assert.equal(A3.posts.length, 4);
+  assert.ok(!json(B3).includes('"gate"') && !json(B3).includes('"flight"') && !json(A3).includes('"clothing"') && !json(A3).includes(s3.name), `airport v${v} 資訊外洩`);
+  // 卡上的名字要在答案那班，而且只在兩班出現（兩個目的地各一班）
+  const wrongAir = S3.AIRLINES.find((x) => x.code !== s3.air).code;
+  assert.equal(S3.act(st, 'A', { type: 'airline', code: wrongAir }).correct, false);
+  assert.equal(S3.view(st, 'A').hack.phase, 'locked');
+  assert.equal(S3.act(st, 'A', { type: 'airline', code: s3.air }).ok, false); // 鎖住中
+  st.hack.lockUntil = 0;
+  assert.equal(S3.act(st, 'B', { type: 'airline', code: s3.air }).ok, false); // 只有 A 能選
+  assert.ok(S3.act(st, 'A', { type: 'airline', code: s3.air }).correct);
+  assert.ok(S3.view(st, 'B').hack.fig && !S3.view(st, 'B').hack.opts && S3.view(st, 'A').hack.opts && !S3.view(st, 'A').hack.fig);
+  S3.act(st, 'A', { type: 'hack', choice: s3.puzzles[0] });
+  assert.equal(S3.act(st, 'A', { type: 'hack', choice: 'nope' }).correct, false); // 答錯 → 重來
+  assert.equal(st.hack.phase, 'retry');
+  S3.act(st, 'A', { type: 'hack_retry' });
+  for (const c of s3.puzzlesAt(1)) assert.ok(S3.act(st, 'A', { type: 'hack', choice: c }).correct);
+  const man = S3.view(st, 'A').hack.manifest;
+  assert.ok(man.find((m) => m.flight === s3.flight).names.includes(s3.name));
+  assert.equal(man.filter((m) => m.names.includes(s3.name)).length, 2);
+  const two = man.filter((m) => m.names.includes(s3.name)).map((m) => A3.flights.find((f) => f.flight === m.flight).dest);
+  assert.equal(new Set(two).size, 2, `airport v${v} 兩班要是不同目的地`);
+  assert.ok(!json(S3.view(st, 'B')).includes('manifest'));
   for (const f of A3.flights) if (f.gate !== s3.gate) assert.equal(S3.act(st, 'B', { type: 'gate', gate: f.gate }).correct, false);
   assert.ok(S3.act(st, 'B', { type: 'gate', gate: s3.gate }).solved, `airport v${v}`);
   assert.ok(allHints(scenes[3], st).every((t) => !t.includes('undefined')));
 }
 // 每種變化的答案都不一樣
 const uniq = (f) => new Set([0, 1, 2, 3, 4].map(f)).size === 5;
-assert.ok(uniq((v) => S1.solution(v).tag.join('')) && uniq((v) => S1.solution(v).password) && uniq((v) => S1.solution(v).codes.plane) && uniq((v) => S2.solution(v).line) && uniq((v) => S3.solution(v).answer) && uniq((v) => json(S0.solution(v))));
+assert.ok(uniq((v) => S1.solution(v).tag.join('')) && uniq((v) => S1.solution(v).password) && uniq((v) => S1.solution(v).codes.plane) && uniq((v) => S2.solution(v).line) && uniq((v) => S3.solution(v).flight) && uniq((v) => json(S0.solution(v))));
 for (const sc of scenes) for (let v = 0; v < 5; v++) { const st = sc.module.init(v); for (const h of sc.hints) for (const t of h.tiers) { const x = typeof t === 'function' ? t(st) : t; assert.ok(!/[\u4e00-\u9fff]/.test(loc(x, 'en')), `英文提示裡有中文：${loc(x, 'en')}`); } }
 console.log('✅ variants test passed (4 scenes × 5 variants)');

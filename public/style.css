@@ -433,3 +433,23 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 .paper.lined, .paper.note { letter-spacing: 0; }
 .paper.lined { font-size: 22px; } .paper.log { font-size: 20px; } .paper.log .log-note { font-size: 16px; }
 .comic-word { letter-spacing: .02em; }
+
+/* 場景 3：開場對話、旅遊貼文、駭客 terminal */
+.s3-say { opacity: 0; animation: s3say .35s ease-out both; }
+@keyframes s3say { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.s3-caret { animation: s3blink 1s steps(2) infinite; }
+.s3-posts { max-width: 900px; width: 94vw; background: #eef1f6; }
+.s3-post-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; }
+.s3-post { background: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 8px 10px 10px; box-shadow: 3px 3px 0 var(--ink); }
+.s3-post-top { display: flex; align-items: center; gap: 6px; font: 700 17px var(--body); margin: 0 0 8px; }
+.s3-post-ph { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.s3-photo { width: 100%; height: auto; display: block; border: 2px solid var(--ink); border-radius: 4px; background: #fff; }
+.s3-term-card { background: #040a06; color: #39ff6a; border-color: #1b1b1f; font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 6px rgba(57,255,106,.6); max-width: 560px; }
+.s3-term-card p { margin: 6px 0; font-size: 18px; font-weight: 700; }
+.s3-term-card .s3-t-big { font-size: 26px; margin: 4px 44px 12px 0; }
+.s3-term-card .s3-t-air { font-size: 20px; padding: 10px 12px; border: 2px dashed #1f9e44; margin: 12px 0 16px; }
+.s3-t-btn { font: 700 22px 'Courier New', monospace; background: #0a1a0f; color: #39ff6a; border: 3px solid #39ff6a; box-shadow: none; padding: 10px 26px; margin: 0 8px; border-radius: 8px; }
+.s3-t-btn.ghost { border-color: #1f9e44; color: #8fdca5; }
+.s3-man { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.s3-man div { border: 2px solid #1f9e44; border-radius: 6px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 20px; }
+.s3-man b { font-size: 22px; border-bottom: 1px solid #1f9e44; padding-bottom: 6px; margin-bottom: 4px; }

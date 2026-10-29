@@ -1,90 +1,197 @@
 // 場景 3：機場（炸彈客預警）——5 種變化，每場遊戲隨機抽一種
-// 開場（兩人同畫面，前端演出）：大廳 → 兩人從左下角走進來 → 廣播 → 廣播快結束時，警察從左右兩邊衝進來 → 各自的畫面。
-//   Slothy(B)：和一群警察圍著地上一個打開的行李箱。警察說：嫌犯搶走了行李主人的登機證和護照、假扮成他；
-//             行李裡是主人的衣物和物品——從衣物看天氣、從物品看活動，推理他要飛去哪裡。點開行李箱看每樣東西。
-//             上方「選擇登機口」由 Slothy 按。
-//   Raccoony(A)：大廳裡走來走去的旅客（沒有警察了）＋航班看板（今天的日期、10 個航班：時間、航班、目的地、登機口）。
-//             按右邊箭頭 → 電腦螢幕上的網路新聞「今年十大旅遊勝地」（每個地方什麼季節、適合做什麼）。
-// 解法：行李（B）→ 天氣＋活動；今天日期（A 的看板）→ 紐約是什麼季節；新聞（A）→ 哪個地方此刻是那種天氣、適合那種活動
-//       （南半球季節相反）→ 看板上飛往那裡的航班 → 登機口。
-// 祕密（答案、登機口對應）只存在伺服器；B 看不到看板與新聞，A 看不到行李內容。
+// 開場（兩人同畫面，前端演出）：大廳 → 兩人走進來 → 廣播 → 警察衝進來 → 兩人對話（去拆炸彈／一起抓犯人）→ 各自的畫面。
+//   Slothy(B) 視角 0：和警察圍著地上打開的行李箱：信用卡（發卡公司、卡號、名字）、Travel Document（航空公司；航班號碼被塗掉）、
+//             衣物（看季節／活動）、小物（墨鏡、雪鏡、腳架……）。上方「選擇登機口」由 Slothy 按。
+//   Slothy(B) 視角 1：電腦上的 terminal（黑底綠字）。駭客關卡時，這裡顯示線條圖形題目。
+//   Raccoony(A) 視角 0：大廳＋航班看板（今天日期、8 個航班：4 個目的地 × 同一家航空公司 2 班）。
+//   Raccoony(A) 視角 1：電腦分割畫面：左邊 4 則旅遊貼文（地點＋兩張照片），右邊 terminal（選航空公司、選答案、看旅客名單）。
+// 解法：衣物＋小物 → 去玩水還是冷的地方、做什麼活動；看板日期 → 紐約現在什麼季節（南半球相反）→ 目的地。
+//       Travel Document 的航空公司 → 駭進那家航空公司的資料庫（選錯會被鎖 30 秒）→ 3 道 15 秒的圖形題 →
+//       旅客名單：卡上的名字出現在兩個航班（兩個目的地各一班）→ 用目的地選出那一班 → 看板上的登機口。
+// 祕密（答案、登機口、旅客名單）只存在伺服器；B 看不到看板、貼文、名單，A 看不到行李內容。
 
 const { T } = require('../i18n');
 
 const MAX_GATE = 60;
+const STEP_MS = 15000;
+const LOCK_MS = 30000;
 
-// 十大旅遊勝地（新聞內容；A 看得到）
-const DESTS = [
-  { id: 'syd', zh: '雪梨', en: 'SYDNEY', name: T('雪梨', 'Sydney'), country: T('澳洲', 'Australia'), news: T('南半球，天氣和季節都和紐約相反。邦代海灘是衝浪天堂，豔陽高照。', 'Southern Hemisphere: the weather and seasons are the opposite of New York’s. Bondi Beach is a surfing paradise under blazing sun.') },
-  { id: 'hok', zh: '北海道', en: 'SAPPORO', name: T('北海道', 'Hokkaido'), country: T('日本', 'Japan'), news: T('12～3 月大雪紛飛，二世谷是世界知名的滑雪場；7 月薰衣草花田盛開。', 'Heavy snow from December to March; Niseko is a world-famous ski resort. Lavender fields bloom in July.') },
-  { id: 'zqn', zh: '皇后鎮', en: 'QUEENSTOWN', name: T('皇后鎮', 'Queenstown'), country: T('紐西蘭', 'New Zealand'), news: T('南半球。6～9 月是滑雪季；12～2 月夏天最適合玩高空彈跳。', 'Southern Hemisphere. June to September is ski season; December to February summer is perfect for bungee jumping.') },
-  { id: 'rek', zh: '雷克雅維克', en: 'REYKJAVIK', name: T('雷克雅維克', 'Reykjavík'), country: T('冰島', 'Iceland'), news: T('9～3 月夜晚很長，帶上腳架和相機追極光；夏天幾乎沒有黑夜。', 'Long nights from September to March: bring a tripod and camera to chase the northern lights. Summer has almost no night.') },
-  { id: 'kyo', zh: '京都', en: 'OSAKA / KYOTO', name: T('京都', 'Kyoto'), country: T('日本', 'Japan'), news: T('4 月初櫻花滿開，在樹下鋪野餐墊賞櫻；11 月滿山楓紅。（從大阪機場進出）', 'Cherry blossoms peak in early April: spread a picnic mat under the trees. Red maple leaves in November. (Fly in via Osaka.)') },
-  { id: 'lis', zh: '里斯本', en: 'LISBON', name: T('里斯本', 'Lisbon'), country: T('葡萄牙', 'Portugal'), news: T('6～9 月陽光充足，是海邊衝浪的好季節；冬天又濕又冷。', 'Sunny from June to September, a great season for surfing. Winters are wet and cold.') },
-  { id: 'bkk', zh: '曼谷', en: 'BANGKOK', name: T('曼谷', 'Bangkok'), country: T('泰國', 'Thailand'), news: T('一年四季都很熱；參觀寺廟要穿長褲、遮住肩膀。', 'Hot all year round. Wear long pants and cover your shoulders to visit temples.') },
-  { id: 'cai', zh: '開羅', en: 'CAIRO', name: T('開羅', 'Cairo'), country: T('埃及', 'Egypt'), news: T('10～4 月比較涼爽，最適合騎駱駝看金字塔；夏天熱到 40 度。', 'Cooler from October to April, the best time to ride a camel to the pyramids. Summer hits 40°C.') },
-  { id: 'hba', zh: '荷巴特', en: 'HOBART', name: T('荷巴特', 'Hobart'), country: T('澳洲・塔斯馬尼亞', 'Tasmania, Australia'), news: T('南半球。5～8 月的冬夜，最有機會看到南極光。', 'Southern Hemisphere. Winter nights from May to August are your best chance to see the southern lights.') },
-  { id: 'hnl', zh: '檀香山', en: 'HONOLULU', name: T('檀香山', 'Honolulu'), country: T('美國・夏威夷', 'Hawaii, USA'), news: T('一年四季都溫暖，可以浮潛看海龜、學草裙舞。', 'Warm all year: snorkel with sea turtles and learn the hula.') },
+// 資料庫裡的航空公司（虛構）。看板上只有前兩家的航班。
+const AIRLINES = [
+  { code: 'BB', name: 'BLUEBIRD AIRLINES', zh: '藍鳥航空' },
+  { code: 'PS', name: 'POLAR STAR AIR', zh: '北極星航空' },
+  { code: 'CS', name: 'CORAL SKY AIRWAYS', zh: '珊瑚天空航空' },
+  { code: 'GK', name: 'GOLDEN KITE AIR', zh: '金風箏航空' },
 ];
-
-// 行李裡可能出現的東西（前端依 id 畫圖；name 是點開時的說明）
-const ITEMS = {
-  sunglasses: '一副墨鏡', wetsuit: '一件衝浪防寒衣', surfwax: '一塊衝浪板蠟', tshirt: '幾件短袖 T 恤', shorts: '一條短褲', sunscreen: '一瓶防曬乳',
-  skigloves: '一雙滑雪手套', goggles: '一副滑雪鏡', scarf: '一條厚圍巾', downjacket: '一件羽絨外套', jpbook: '一本旅遊會話手冊',
-  beanie: '一頂毛帽', tripod: '一支三腳架', camera: '一台相機', thermos: '一個保溫瓶', picnic: '一張野餐墊', lightjacket: '一件薄外套',
-  toothbrush: '一支牙刷', charger: '一個充電器', socks: '幾雙襪子',
+// 四個目的地：同一家航空公司飛兩個地方，兩兩的衣物一樣
+//   雪梨／里斯本：都去海邊衝浪（衣物、小物都一樣）→ 只能靠「今天紐約是夏天還是冬天」分
+//   北海道／雷克雅維克：都很冷（衣物一樣）→ 靠小物分（雪鏡＝滑雪、腳架＝拍極光）
+const DESTS = [
+  { id: 'syd', board: 'SYDNEY', boardZh: '雪梨', air: 'BB', kind: 'beach', place: T('雪梨，澳洲', 'Sydney, Australia') },
+  { id: 'lis', board: 'LISBON', boardZh: '里斯本', air: 'BB', kind: 'beach', place: T('里斯本，葡萄牙', 'Lisbon, Portugal') },
+  { id: 'hok', board: 'SAPPORO', boardZh: '札幌（北海道）', air: 'PS', kind: 'ski', place: T('北海道，日本', 'Hokkaido, Japan') },
+  { id: 'rek', board: 'REYKJAVIK', boardZh: '雷克雅維克', air: 'PS', kind: 'aurora', place: T('雷克雅維克，冰島', 'Reykjavík, Iceland') },
+];
+const PACK = {
+  beach: { clothing: ['bikini', 'tshirt'], gadget: ['sunglasses'] },
+  ski: { clothing: ['sweater', 'downjacket'], gadget: ['goggles'] },
+  aurora: { clothing: ['sweater', 'downjacket'], gadget: ['tripod'] },
 };
 
-// 每個變化：今天的日期（紐約，月/日）、答案、行李內容
+// 每個變化：今天的日期（紐約，月/日）、答案、卡上的名字
 const VARIANTS = [
-  { date: [1, 15], answer: 'syd', items: ['sunglasses', 'wetsuit', 'surfwax', 'tshirt', 'shorts', 'sunscreen', 'toothbrush'] },
-  { date: [1, 22], answer: 'hok', items: ['skigloves', 'goggles', 'scarf', 'downjacket', 'jpbook', 'socks'] },
-  { date: [7, 8], answer: 'zqn', items: ['skigloves', 'goggles', 'beanie', 'downjacket', 'charger', 'socks'] },
-  { date: [10, 18], answer: 'rek', items: ['tripod', 'camera', 'beanie', 'downjacket', 'thermos', 'toothbrush'] },
-  { date: [4, 5], answer: 'kyo', items: ['picnic', 'lightjacket', 'jpbook', 'camera', 'charger'] },
+  { date: [1, 15], answer: 'syd', name: 'TIFFANY' },
+  { date: [7, 8], answer: 'lis', name: 'SADIE' },
+  { date: [1, 22], answer: 'hok', name: 'HONEY' },
+  { date: [12, 12], answer: 'rek', name: 'TIFFANY' },
+  { date: [8, 3], answer: 'lis', name: 'HONEY' },
 ];
 const MONTH_EN = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const AIRLINE = { syd: 'QF', hok: 'NH', zqn: 'NZ', rek: 'FI', kyo: 'JL', lis: 'TP', bkk: 'TG', cai: 'MS', hba: 'VA', hnl: 'HA' };
+const OTHERS = ['OLIVER', 'EMMA', 'LIAM', 'NOAH', 'AVA', 'MIA', 'LUCAS', 'ZOE', 'ETHAN', 'CHLOE', 'MASON', 'LILY', 'JACK', 'GRACE', 'LEO', 'RUBY', 'MAX', 'ELLA', 'SAM', 'NORA', 'OWEN', 'IVY'];
 
-// 看板：用固定的種子打亂，每個變化的時間、航班號碼、登機口都不同
 function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-function buildBoard(v) {
+function shuffle(arr, r) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// 看板（8 班）＋ 旅客名單：用固定的種子，每個變化的時間、航班號碼、登機口、名單都不同
+function build(v) {
   const r = rng(1000 + v * 97);
-  const gates = [];
-  while (gates.length < DESTS.length) { const g = 1 + Math.floor(r() * 48); if (!gates.includes(g)) gates.push(g); }
-  const flights = DESTS.map((d, i) => ({ id: d.id, flight: `${AIRLINE[d.id]} ${100 + Math.floor(r() * 899)}`, dest: d.en, destZh: d.zh, gate: gates[i], t: 12 * 60 + 10 + Math.floor(r() * 46) * 5 }));
+  const vv = VARIANTS[v];
+  const gates = [], nums = [];
+  while (gates.length < 8) { const g = 1 + Math.floor(r() * 48); if (!gates.includes(g)) gates.push(g); }
+  while (nums.length < 8) { const n = 100 + Math.floor(r() * 899); if (!nums.includes(n)) nums.push(n); }
+  let k = 0;
+  const flights = DESTS.flatMap((d) => [0, 1].map(() => {
+    const i = k++;
+    return { dest: d.id, flight: `${d.air} ${nums[i]}`, board: d.board, boardZh: d.boardZh, gate: gates[i], t: 11 * 60 + 40 + Math.floor(r() * 60) * 5 };
+  }));
   flights.sort((a, b) => a.t - b.t);
-  return flights.map((f) => ({ ...f, time: `${String(Math.floor(f.t / 60)).padStart(2, '0')}:${String(f.t % 60).padStart(2, '0')}` }));
+  flights.forEach((f) => { f.time = `${String(Math.floor(f.t / 60)).padStart(2, '0')}:${String(f.t % 60).padStart(2, '0')}`; });
+  // 答案那家航空公司的 4 班：名字出現在兩個目的地各一班（其中一班是答案）
+  const air = DESTS.find((d) => d.id === vv.answer).air;
+  const pool = shuffle(OTHERS, r);
+  const mine = flights.filter((f) => f.flight.startsWith(air + ' '));
+  const pickFor = {};
+  for (const d of DESTS.filter((x) => x.air === air)) { const two = mine.filter((f) => f.dest === d.id); pickFor[d.id] = two[Math.floor(r() * 2)].flight; }
+  const manifest = mine.map((f) => {
+    const names = pool.splice(0, pickFor[f.dest] === f.flight ? 4 : 5);
+    if (pickFor[f.dest] === f.flight) names.splice(Math.floor(r() * 5), 0, vv.name);
+    return { flight: f.flight, names };
+  }).sort((a, b) => a.flight.localeCompare(b.flight));
+  const cardNo = `4${Math.floor(r() * 900 + 100)} ${Math.floor(r() * 9000 + 1000)} ${Math.floor(r() * 9000 + 1000)} ${Math.floor(r() * 9000 + 1000)}`;
+  return { flights, manifest, air, cardNo, target: pickFor[vv.answer] };
 }
-const BOARDS = VARIANTS.map((_, v) => buildBoard(v));
+const BUILT = VARIANTS.map((_, v) => build(v));
 
-const POLICE = [
-  [T('嫌犯應該是搶走了行李主人的', 'The suspect must have stolen'), T('登機證和護照，假扮成他。', 'this owner’s boarding pass and passport.')],
-];
+// ---------- 駭客關卡：3 道圖形題（第一次照原設計；重試時隨機變化）----------
+const SHAPES = ['star', 'triangle', 'heart'];
+function puzzles(v, attempt) {
+  const r = rng(5000 + v * 131 + attempt * 17);
+  const canon = attempt === 0;
+  // 1. 大樓：最下面 1F、最上面 nF，「?」那層就是答案
+  const n = canon ? 6 : 5 + Math.floor(r() * 3);
+  const tgt = canon ? 4 : 2 + Math.floor(r() * (n - 2));
+  let other = tgt; while (other === tgt || other === n) other = 2 + Math.floor(r() * (n - 2)) || 2;
+  if (other === tgt) other = tgt === 2 ? 3 : 2;
+  const p1 = { kind: 'floors', fig: { n, mark: tgt }, opts: canon ? ['2F', '6F', '4F'] : shuffle([`${tgt}F`, `${n}F`, `${other}F`], r), answer: `${tgt}F` };
+  // 2. 九宮格：每一列三種圖案各一個，中間都一樣
+  const [a, b, c] = canon ? SHAPES : shuffle(SHAPES, r);
+  const p2 = { kind: 'grid', fig: [a, b, c, c, b, a, a, b, null], opts: canon ? ['star', 'triangle', 'heart'] : shuffle(SHAPES, r), answer: c };
+  // 3. 箭頭（0 上 1 右 2 下 3 左）：中間的箭頭說第一個要往哪邊轉 90°（→ 順時針、← 逆時針），轉完就是第三個
+  const turn = (d, s) => (d + (s === 1 ? 1 : 3)) % 4;
+  let rows;
+  if (canon) rows = [[0, 1], [2, 3], [1, 1]];
+  else { const s = shuffle([1, 3], r); rows = [[Math.floor(r() * 4), s[0]], [Math.floor(r() * 4), s[1]], [Math.floor(r() * 4), r() < 0.5 ? 1 : 3]]; }
+  const g3 = rows.flatMap(([f, s]) => [f, s, turn(f, s)]);
+  const ans3 = g3[6];
+  g3[6] = null;
+  const wrong3 = shuffle([0, 1, 2, 3].filter((d) => d !== ans3), r).slice(0, 2);
+  const p3 = { kind: 'arrows', fig: g3, opts: canon ? [3, 1, 2] : shuffle([ans3, ...wrong3], r), answer: ans3 };
+  return [p1, p2, p3];
+}
 
-function init(v = 0) { return { v, solved: false }; }
+function init(v = 0) { return { v, solved: false, hack: { phase: 'idle', step: 0, deadline: 0, lockUntil: 0, attempt: 0 } }; }
+
+function hackView(state, role) {
+  const h = state.hack, now = Date.now();
+  if (h.phase === 'idle' && h.lockUntil > now) return { phase: 'locked', remain: h.lockUntil - now };
+  const out = { phase: h.phase };
+  if (h.phase === 'puzzle') {
+    const p = puzzles(state.v, h.attempt)[h.step];
+    Object.assign(out, { step: h.step, total: 3, remain: Math.max(0, h.deadline - now), kind: p.kind });
+    if (role === 'A') out.opts = p.opts; else out.fig = p.fig;
+  }
+  if (h.phase === 'done' && role === 'A') out.manifest = BUILT[state.v].manifest;
+  return out;
+}
 
 function view(state, role) {
   const vv = VARIANTS[state.v];
   const [m, d] = vv.date;
+  const B = BUILT[state.v];
   if (role === 'A') {
     return {
       role,
       date: { m, d, label: `${MONTH_EN[m - 1]} ${String(d).padStart(2, '0')}`, long: T(`${m} 月 ${d} 日`, `${MONTH_EN[m - 1]} ${d}`) },
-      flights: BOARDS[state.v].map(({ flight, dest, destZh, gate, time }) => ({ flight, dest, destZh: T(destZh, ''), gate, time })),
-      news: { title: T('今年十大旅遊勝地', 'Top 10 Travel Destinations This Year'), source: 'NYC Travel Daily', list: DESTS.map((x, i) => ({ rank: i + 1, name: x.name, country: x.country, text: x.news })) },
+      flights: B.flights.map(({ flight, board, boardZh, gate, time }) => ({ flight, dest: board, destZh: T(boardZh, ''), gate, time })),
+      posts: DESTS.map((x) => ({ id: x.id, place: x.place })),
+      airlines: AIRLINES.map((x) => ({ code: x.code, name: x.name, zh: T(x.zh, '') })),
+      hack: hackView(state, 'A'),
     };
   }
-  return { role, maxGate: MAX_GATE, police: POLICE, items: vv.items.map((id) => ({ id })) }; // 只送圖示 id（畫面上不寫文字）
+  const dest = DESTS.find((x) => x.id === vv.answer);
+  const pk = PACK[dest.kind];
+  const airline = AIRLINES.find((x) => x.code === dest.air);
+  return {
+    role, maxGate: MAX_GATE,
+    card: { issuer: 'NOVA', number: B.cardNo, name: vv.name },
+    doc: { airline: airline.name, airlineZh: T(airline.zh, '') },
+    clothing: pk.clothing, gadgets: pk.gadget, // 只送圖示 id（畫面上不寫文字）
+    hack: hackView(state, 'B'),
+  };
+}
+
+function fail(state, why) {
+  const h = state.hack;
+  h.phase = 'retry'; h.step = 0; h.attempt += 1;
+  return { ok: true, correct: false, message: why, events: [{ text: T('⛔ ACCESS DENIED——駭客失敗，重新來過！', '⛔ ACCESS DENIED. Hack failed, try again!') }] };
 }
 
 function act(state, role, a = {}) {
+  const h = state.hack, now = Date.now();
+  if (a.type === 'airline') {
+    if (role !== 'A') return { ok: false };
+    if (h.phase !== 'idle' || h.lockUntil > now) return { ok: false };
+    if (a.code === BUILT[state.v].air) {
+      Object.assign(h, { phase: 'puzzle', step: 0, deadline: now + STEP_MS });
+      return { ok: true, correct: true, events: [{ text: T('💻 連上資料庫了！破解防火牆：每題 15 秒！', '💻 Connected! Crack the firewall: 15 seconds per question!') }] };
+    }
+    h.lockUntil = now + LOCK_MS;
+    return { ok: true, correct: false, message: T('⛔ 不是這家航空公司！安全系統鎖住 30 秒。', '⛔ Wrong airline! The security system locked you out for 30 seconds.'), events: [{ text: T('🚨 駭錯資料庫了！被鎖住 30 秒……', '🚨 Wrong database! Locked out for 30 seconds…') }] };
+  }
+  if (a.type === 'hack') {
+    if (role !== 'A' || h.phase !== 'puzzle') return { ok: false };
+    if (now > h.deadline + 1500) return fail(state, T('⏰ 時間到了！', '⏰ Time’s up!'));
+    const p = puzzles(state.v, h.attempt)[h.step];
+    if (String(a.choice) !== String(p.answer)) return fail(state, T('❌ 答錯了！', '❌ Wrong answer!'));
+    h.step += 1;
+    if (h.step >= 3) { h.phase = 'done'; return { ok: true, correct: true, events: [{ text: T('✅ ACCESS GRANTED！旅客名單出現在 Raccoony 的螢幕上。', '✅ ACCESS GRANTED! The passenger list is on Raccoony’s screen.') }] }; }
+    h.deadline = now + STEP_MS;
+    return { ok: true, correct: true };
+  }
+  if (a.type === 'hack_timeout') {
+    if (h.phase !== 'puzzle' || now < h.deadline - 800) return { ok: false };
+    return fail(state, T('⏰ 時間到了！', '⏰ Time’s up!'));
+  }
+  if (a.type === 'hack_retry') {
+    if (role !== 'A' || h.phase !== 'retry') return { ok: false };
+    Object.assign(h, { phase: 'puzzle', step: 0, deadline: now + STEP_MS });
+    return { ok: true };
+  }
   if (a.type !== 'gate') return { ok: false };
   if (role !== 'B') return { ok: false, message: T('選登機口的按鈕在 Slothy 那邊。', 'The gate picker is on Slothy’s side.') };
-  const vv = VARIANTS[state.v];
   const n = Number(a.gate);
   if (!Number.isInteger(n) || n < 1 || n > MAX_GATE) return { ok: false };
-  const right = BOARDS[state.v].find((f) => f.id === vv.answer).gate;
+  const right = solution(state.v).gate;
   if (n === right) {
     state.solved = true;
     return { ok: true, solved: true, events: [{ text: T(`✈️ ${n} 號登機口！嫌犯就在這裡！`, `✈️ Gate ${n}! The suspect is here!`) }] };
@@ -94,15 +201,27 @@ function act(state, role, a = {}) {
 
 function answers(state) {
   const vv = VARIANTS[state.v];
+  const B = BUILT[state.v];
   const d = DESTS.find((x) => x.id === vv.answer);
-  const f = BOARDS[state.v].find((x) => x.id === vv.answer);
+  const f = B.flights.find((x) => x.flight === B.target);
+  const air = AIRLINES.find((x) => x.code === d.air);
   const [m, day] = vv.date;
+  const nySummer = m >= 5 && m <= 9;
+  const why = {
+    beach: T(`行李是去海邊玩水的（比基尼、墨鏡）。今天 ${m} 月 ${day} 日，紐約是${nySummer ? '夏天' : '冬天'}；南半球的雪梨季節相反，所以現在正是夏天的是${d.board === 'SYDNEY' ? '雪梨' : '里斯本'}。`,
+      `The suitcase is for the beach (bikini, sunglasses). Today is ${MONTH_EN[m - 1]} ${day}: it’s ${nySummer ? 'summer' : 'winter'} in New York. Sydney is in the Southern Hemisphere with opposite seasons, so the place having summer right now is ${d.board === 'SYDNEY' ? 'Sydney' : 'Lisbon'}.`),
+    ski: T('行李是去很冷的地方（毛衣、羽絨衣），還帶了雪鏡：去北海道滑雪。', 'The suitcase is for somewhere cold (sweater, down jacket) and has ski goggles: skiing in Hokkaido.'),
+    aurora: T('行李是去很冷的地方（毛衣、羽絨衣），還帶了腳架：去雷克雅維克拍極光。', 'The suitcase is for somewhere cold (sweater, down jacket) and has a tripod: photographing the northern lights in Reykjavík.'),
+  }[d.kind];
   return {
-    clue: T(`今天是 ${m} 月 ${day} 日。南半球的季節和紐約相反；把行李裡的衣服（天氣）和東西（活動）對照新聞裡每個地方的季節介紹。`,
-      `Today is ${MONTH_EN[m - 1]} ${day}. Seasons in the Southern Hemisphere are the opposite of New York’s. Match the clothes (weather) and items (activities) in the suitcase with each place’s seasons in the news.`),
-    gate: T(`行李主人要去${d.zh}（${d.country.zh}）：看板上 ${f.flight} 飛 ${d.en}，在 ${f.gate} 號登機口。`, `The owner is headed to ${d.name.en} (${d.country.en}): flight ${f.flight} to ${d.en} leaves from gate ${f.gate}.`),
+    clue: T(`${why.zh}Travel Document 寫的是 ${air.name}，Raccoony 要在電腦上駭進這家航空公司。`, `${why.en} The travel document says ${air.name}, so Raccoony should hack that airline on the computer.`),
+    gate: T(`旅客名單上 ${vv.name} 出現在兩班飛機；飛往 ${d.board} 的是 ${f.flight}，在 ${f.gate} 號登機口。`, `${vv.name} is on two flights in the passenger list; the one to ${d.board} is ${f.flight}, at gate ${f.gate}.`),
   };
 }
-function solution(v) { const vv = VARIANTS[v]; const f = BOARDS[v].find((x) => x.id === vv.answer); return { answer: vv.answer, gate: f.gate, items: vv.items, month: vv.date[0] }; }
+function solution(v) {
+  const B = BUILT[v];
+  const f = B.flights.find((x) => x.flight === B.target);
+  return { answer: VARIANTS[v].answer, gate: f.gate, flight: f.flight, air: B.air, name: VARIANTS[v].name, month: VARIANTS[v].date[0], puzzles: puzzles(v, 0).map((p) => p.answer), puzzlesAt: (k) => puzzles(v, k).map((p) => p.answer) };
+}
 
-module.exports = { init, view, act, answers, solution, VARIANTS: VARIANTS.length };
+module.exports = { init, view, act, answers, solution, VARIANTS: VARIANTS.length, AIRLINES };
