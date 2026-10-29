@@ -369,7 +369,7 @@
       const line = (l) => esc(l).replace(/~(.)~/g, '<s>$1</s>');
       return `<div class="paper lined">${p.lines.map((l) => `<p>${line(l)}</p>`).join('')}</div>`;
     }
-    return `<div class="paper map">${p.rows.map((r) => `<div class="map-row"><b>${r.n}</b><span>${esc(r.emoji)} ${esc(r.item)}</span></div>`).join('')}</div>`; // 衣櫃地圖：只有中間的表格
+    return `<div class="paper map">${p.rows.map((r) => `<div class="map-row"><b>${r.n}.</b><span>${esc(r.item)}</span></div>`).join('')}</div>`; // 衣櫃地圖：只有中間的表格
   }
 
   function blockHtml(b) {

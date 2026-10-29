@@ -1,5 +1,4 @@
 /* 英文字體（SIL OFL，放在 public/fonts/）：Press Start 2P（封面像素字）、Bebas Neue（標題）、Nunito（內文）、Caveat（手寫筆記） */
-@font-face { font-family: 'Iansui'; src: url('fonts/iansui-map.woff2') format('woff2'); font-weight: 400; font-display: swap; } /* 芫荽（SIL OFL，fonts/OFL-Iansui.txt）：只含衣櫃地圖用到的字 */
 @font-face { font-family: 'Caveat'; src: url('fonts/caveat-700.woff2') format('woff2'); font-weight: 700; font-display: swap; }
 /* 英文字體（SIL OFL，放在 public/fonts/）：Press Start 2P（封面像素字）、Bebas Neue（標題）、Nunito（內文） */
 @font-face { font-family: 'Press Start 2P'; src: url('fonts/press-start-2p.woff2') format('woff2'); font-weight: 400; font-display: swap; }
@@ -463,17 +462,23 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 .s3-dot2 { animation-delay: .25s; } .s3-dot3 { animation-delay: .5s; }
 @keyframes s3dot { 20%, 70% { opacity: 1; } 100% { opacity: 0; } }
 
-/* 衣櫃地圖：隨手寫在牛皮紙上的清單 */
-.paper.map { max-width: 340px; margin: 6px auto; padding: 22px 28px 26px; text-align: left; border: none; box-shadow: 3px 5px 10px rgba(0,0,0,.35);
+/* 衣櫃地圖：寫在又皺又舊的牛皮紙上的清單 */
+.paper.map { max-width: 340px; margin: 6px auto; padding: 24px 30px 28px; text-align: left; border: none;
+  box-shadow: inset 0 0 26px rgba(70,40,10,.55), inset 0 0 6px rgba(60,35,10,.5), 3px 6px 12px rgba(0,0,0,.4);
   background:
-    radial-gradient(ellipse at 20% 15%, rgba(255,255,255,.18), transparent 45%),
-    radial-gradient(ellipse at 85% 90%, rgba(90,55,20,.22), transparent 50%),
-    repeating-linear-gradient(97deg, rgba(110,70,30,.07) 0 2px, transparent 2px 7px),
-    repeating-linear-gradient(8deg, rgba(255,240,210,.06) 0 1px, transparent 1px 5px),
-    #c79e66;
+    linear-gradient(112deg, transparent 27%, rgba(255,240,210,.22) 28.5%, rgba(60,35,10,.28) 30%, transparent 32.5%),
+    linear-gradient(68deg, transparent 54%, rgba(60,35,10,.24) 56%, rgba(255,240,210,.2) 57.5%, transparent 60%),
+    linear-gradient(176deg, transparent 47%, rgba(255,240,210,.18) 48.5%, rgba(60,35,10,.26) 50%, transparent 52%),
+    linear-gradient(22deg, transparent 72%, rgba(60,35,10,.18) 74%, rgba(255,240,210,.14) 75.5%, transparent 78%),
+    linear-gradient(140deg, transparent 8%, rgba(60,35,10,.16) 10%, transparent 13%),
+    radial-gradient(ellipse 60px 44px at 78% 22%, rgba(90,55,20,.32), rgba(90,55,20,.12) 70%, transparent 72%),
+    radial-gradient(circle at 78% 22%, transparent 48px, rgba(80,45,15,.25) 50px, transparent 53px),
+    radial-gradient(ellipse 80px 50px at 18% 84%, rgba(80,50,15,.26), transparent 75%),
+    radial-gradient(ellipse at 50% 50%, rgba(255,235,200,.12), transparent 60%),
+    repeating-linear-gradient(97deg, rgba(110,70,30,.08) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(8deg, rgba(255,240,210,.07) 0 1px, transparent 1px 5px),
+    #b88f58;
   transform: rotate(-2.2deg);
-  clip-path: polygon(0 2%, 9% 0, 22% 1.5%, 37% 0, 55% 1%, 71% 0, 88% 1.2%, 100% 0, 99% 18%, 100% 37%, 98.6% 58%, 100% 79%, 99% 100%, 82% 98.5%, 64% 100%, 45% 98.8%, 27% 100%, 11% 98.6%, 0 100%, 1.2% 79%, 0 56%, 1.4% 34%, 0 15%); }
-.paper.map .map-row { border: none; background: none; margin: 0; padding: 7px 4px 5px; gap: 14px; font: 400 27px/1.15 'Iansui', 'Caveat', 'Bradley Hand', cursive; color: #3a2a18;
-  border-bottom: 2px dashed rgba(58,42,24,.35); }
-.paper.map .map-row:nth-child(odd) { transform: rotate(.8deg); } .paper.map .map-row:nth-child(even) { transform: rotate(-.6deg) translateX(4px); }
-.paper.map .map-row b { width: 34px; height: 32px; background: none; border: 2.5px solid #3a2a18; border-radius: 52% 46% 55% 44% / 48% 56% 44% 52%; font: 400 24px 'Iansui', 'Caveat', cursive; color: #3a2a18; }
+  clip-path: polygon(0 3%, 6% 0.5%, 9% 2.5%, 22% 1%, 30% 2.8%, 37% 0, 55% 1.6%, 63% 0.4%, 71% 2%, 88% 0.8%, 93% 3%, 100% 0, 98.4% 12%, 100% 20%, 98.8% 37%, 100% 46%, 97.8% 58%, 99.6% 70%, 98.6% 79%, 100% 92%, 97% 100%, 82% 97.8%, 70% 99.6%, 64% 97.6%, 45% 99%, 36% 97%, 27% 100%, 11% 97.8%, 4% 99.4%, 0 96%, 1.8% 79%, 0 66%, 1.6% 56%, 0 44%, 2% 34%, 0.4% 22%, 1.6% 12%); }
+.paper.map .map-row { border: none; background: none; margin: 0; padding: 6px 2px; gap: 12px; font: 700 26px/1.2 'GenSeki', 'Nunito', 'PingFang TC', sans-serif; color: #2e2010; }
+.paper.map .map-row b { width: auto; height: auto; background: none; border: none; border-radius: 0; font: 800 26px 'Nunito', sans-serif; color: #2e2010; display: inline; }
