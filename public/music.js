@@ -433,6 +433,17 @@ window.Music = (function () {
       o.connect(f); f.connect(gn); gn.connect(bus); o.start(t + x); o.stop(t + x + 0.1);
     }
   }
+  function boom() { // 轟——炸彈爆炸：低頻衝擊 + 長長的雜訊尾巴
+    if (!ctx || !g) return;
+    const bus = sfxBus(0.25), t = ctx.currentTime + 0.02;
+    { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(28, t + 1.2);
+      const gn = ctx.createGain(); gn.gain.setValueAtTime(0.55, t); gn.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+      o.connect(gn); gn.connect(bus); o.start(t); o.stop(t + 1.5); }
+    { const n = ctx.createBufferSource(); n.buffer = noiseBuf(ctx); n.loop = true;
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(2400, t); lp.frequency.exponentialRampToValueAtTime(160, t + 2.2);
+      const gn = ctx.createGain(); gn.gain.setValueAtTime(0.5, t); gn.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+      n.connect(lp); lp.connect(gn); gn.connect(bus); n.start(t); n.stop(t + 2.7); }
+  }
   function ding() { // 叮叮叮——對了
     if (!ctx || !g) return;
     const bus = sfxBus(0.4), t = ctx.currentTime + 0.02;
@@ -470,5 +481,5 @@ window.Music = (function () {
     });
   }
 
-  return { unlock, play, stop, pa, speak, hush, buzz, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
+  return { unlock, play, stop, pa, speak, hush, buzz, boom, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
 })();

@@ -25,7 +25,7 @@
   let introDone = false, introStarted = false, introTimers = [];
   let ctx = null, data = null, box = null;
   let tAt = 0, timeoutSent = false, unlockDrawn = false, ticker = 0;
-  let bombAt = 0, bombOn = false;
+  let bombAt = 0, bombOn = false, boomSent = false, lastBoom = null, booming = false, boomTimer = 0;
   const $modal = () => document.getElementById('modal');
   const SVG_OPEN = (label) => `<svg viewBox="0 0 1000 700" class="scene-svg" role="img" aria-label="${label}">`;
   const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
@@ -464,6 +464,33 @@
     return termFrame(x, y, w, h, inner);
   }
 
+  // ---------- 爆炸：美漫風「BOOM!」----------
+  function roomBoom() {
+    const star = (r1, r2, n, rot = 0) => Array.from({ length: n * 2 }, (_, i) => { const a = rot + (i * Math.PI) / n, r = i % 2 ? r2 : r1 * (0.85 + ((i * 37) % 7) / 30); return `${(500 + r * Math.cos(a)).toFixed(0)},${(350 + r * Math.sin(a)).toFixed(0)}`; }).join(' ');
+    return `${SVG_OPEN('BOOM')}<defs>${HT}</defs>
+      <rect x="-900" width="2800" height="700" fill="#1b0b06"/>
+      <g class="s3-boom">
+        <polygon points="${star(560, 300, 14)}" fill="#c5262c" ${ST}/>
+        <polygon points="${star(430, 230, 12, 0.2)}" fill="#ff7a1a" ${ST}/><polygon points="${star(430, 230, 12, 0.2)}" fill="url(#s3ht)"/>
+        <polygon points="${star(300, 170, 10, 0.45)}" fill="#ffd23f" ${ST}/>
+        ${[[140, 120, 60], [860, 140, 70], [120, 590, 70], [880, 580, 60], [500, 70, 50]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#4a4f5c" ${ST}/><circle cx="${x + r * 0.5}" cy="${y - r * 0.4}" r="${r * 0.6}" fill="#6b7080" ${ST2}/>`).join('')}
+        <g transform="translate(500,395) rotate(-8)">
+          <text x="0" y="0" text-anchor="middle" font-size="170" fill="#ffd23f" stroke="${INK}" stroke-width="30" stroke-linejoin="round" font-family="'Bebas Neue',Impact,sans-serif" letter-spacing="6">BOOM!</text>
+          <text x="0" y="0" text-anchor="middle" font-size="170" fill="#fff36b" font-family="'Bebas Neue',Impact,sans-serif" letter-spacing="6">BOOM!</text>
+        </g>
+      </g>
+      <text x="500" y="640" text-anchor="middle" font-size="30" fill="#fff" ${FONT}>${tr('炸彈爆炸了……時間倒回去，再來一次！', 'The bomb went off… time rewinds. Try again!')}</text>
+    </svg>`;
+  }
+  function startBoom() {
+    booming = true; bombOn = false; bombClock();
+    ui = fresh(); introDone = false; introStarted = false; introTimers.forEach(clearTimeout); introTimers = [];
+    if (window.Music) { if (Music.hush) Music.hush(); if (Music.boom) Music.boom(); }
+    draw();
+    clearTimeout(boomTimer);
+    boomTimer = setTimeout(() => { booming = false; draw(); startIntro(); }, 4000);
+  }
+
   // ---------- 開場：兩人同畫面（走進大廳 → 廣播 → 警察衝進來 → 兩人對話）----------
   function roomIntro() {
     const copsL = [0, 1, 2].map((i) => `<g class="s3-rush-l" style="animation-delay:${8.0 + i * 0.12}s">${cop(470 + i * 80, 600 - (i % 2) * 24, 0.62)}</g>`).join('');
@@ -676,7 +703,8 @@
 
   function draw() {
     if (!box) return;
-    if (!introDone) box.innerHTML = roomIntro();
+    if (booming) box.innerHTML = roomBoom();
+    else if (!introDone) box.innerHTML = roomIntro();
     else box.innerHTML = data.role === 'A' ? roomA() : roomB();
     renderModal();
   }
@@ -692,6 +720,7 @@
   }
   function tick() {
     bombClock();
+    if (bombOn && !booming && Date.now() >= bombAt && !boomSent) { boomSent = true; ctx.send({ type: 'bomb' }); }
     if (!box || !introDone || !data || !data.hack) return;
     const ph = data.hack.phase;
     const el = document.getElementById('s3-cd');
@@ -722,6 +751,10 @@
       box = container; ctx = c; data = newData;
       if (data.hack && data.hack.remain != null) tAt = Date.now() + data.hack.remain;
       if (data.bomb != null) bombAt = Date.now() + data.bomb;
+      boomSent = false;
+      const boomed = lastBoom !== null && data.boom > lastBoom;
+      lastBoom = data.boom ?? 0;
+      if (boomed) { box.onclick = onStageClick; const mm = $modal(); mm.onclick = onModalClick; if (!ticker) ticker = setInterval(tick, 250); startBoom(); return; }
       if (introDone) bombOn = true;
       timeoutSent = false; unlockDrawn = false;
       if (data.hack && data.hack.phase !== 'puzzle') busy = false;
@@ -731,11 +764,11 @@
       m.onkeydown = null;
       if (!ticker) ticker = setInterval(tick, 250);
       draw();
-      if (!introDone) startIntro();
+      if (!introDone && !booming) startIntro();
     },
     unmount() {
       introTimers.forEach(clearTimeout); introTimers = []; clearInterval(ticker); ticker = 0;
-      bombOn = false; const bc = document.getElementById('s3-bomb'); if (bc) bc.remove();
+      bombOn = false; booming = false; lastBoom = null; clearTimeout(boomTimer); const bc = document.getElementById('s3-bomb'); if (bc) bc.remove();
       if (window.Music && Music.hush) Music.hush(); introDone = false; introStarted = false;
       ui = fresh(); box = null;
       const m = $modal(); m.hidden = true; m.innerHTML = '';

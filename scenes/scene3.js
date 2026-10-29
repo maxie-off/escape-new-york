@@ -17,6 +17,7 @@ const STEP_MS = 15000;
 const LOCK_MS = 30000;
 // 炸彈倒數：開場對話結束時開始，10 分鐘（開場動畫約 15 秒）
 const BOMB_LEAD_MS = 15000, BOMB_MS = 10 * 60 * 1000;
+const BOOM_MS = 4000; // 爆炸畫面的長度，之後重播機場開場
 
 // 航空公司（虛構）：看板上的 8 班都是這兩家，terminal 也只列這兩家
 const AIRLINES = [
@@ -109,7 +110,7 @@ function puzzles(v, attempt) {
   return [p1, p2, p3];
 }
 
-function init(v = 0) { return { v, solved: false, bombAt: Date.now() + BOMB_LEAD_MS + BOMB_MS, hack: { phase: 'idle', step: 0, deadline: 0, lockUntil: 0, attempt: 0 } }; }
+function init(v = 0, boom = 0) { return { v, solved: false, boom, bombAt: Date.now() + (boom ? BOOM_MS : 0) + BOMB_LEAD_MS + BOMB_MS, hack: { phase: 'idle', step: 0, deadline: 0, lockUntil: 0, attempt: 0 } }; }
 
 function hackView(state, role) {
   const h = state.hack, now = Date.now();
@@ -136,7 +137,7 @@ function view(state, role) {
       posts: DESTS.map((x) => ({ id: x.id, place: x.place })),
       airlines: AIRLINES.map((x) => ({ code: x.code, name: x.name, zh: T(x.zh, '') })),
       hack: hackView(state, 'A'),
-      bomb: Math.max(0, state.bombAt - Date.now()),
+      bomb: Math.max(0, state.bombAt - Date.now()), boom: state.boom,
     };
   }
   const dest = DESTS.find((x) => x.id === vv.answer);
@@ -148,7 +149,7 @@ function view(state, role) {
     doc: { airline: airline.name, airlineZh: T(airline.zh, '') },
     clothing: pk.clothing, gadgets: pk.gadget, // 只送圖示 id（畫面上不寫文字）
     hack: hackView(state, 'B'),
-    bomb: Math.max(0, state.bombAt - Date.now()),
+    bomb: Math.max(0, state.bombAt - Date.now()), boom: state.boom,
   };
 }
 
@@ -158,8 +159,17 @@ function fail(state, why) {
   return { ok: true, correct: false, message: why, events: [{ text: T('⛔ ACCESS DENIED——駭客失敗，重新來過！', '⛔ ACCESS DENIED. Hack failed, try again!') }] };
 }
 
+// 炸彈時間到：整個機場場景重來（同一個變化），兩邊畫面會先演爆炸再重播開場
+function explode(state) {
+  Object.assign(state, init(state.v, state.boom + 1));
+  return { ok: true, boom: true, events: [{ text: T('💥 BOOM！炸彈爆炸了……時間倒回去，再試一次！', '💥 BOOM! The bomb went off… time rewinds, try again!') }] };
+}
+
 function act(state, role, a = {}) {
-  const h = state.hack, now = Date.now();
+  const now = Date.now();
+  if (a.type === 'bomb') return now >= state.bombAt - 1500 ? explode(state) : { ok: false };
+  if (now > state.bombAt + 3000) return explode(state); // 沒人回報也一樣：時間到了就爆
+  const h = state.hack;
   if (a.type === 'airline') {
     if (role !== 'A') return { ok: false };
     if (h.phase !== 'idle' || h.lockUntil > now) return { ok: false };

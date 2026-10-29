@@ -379,8 +379,8 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 @keyframes s3-walkin { from { transform: translate(-380px, 90px); } to { transform: none; } }
 .s3-rush-l, .s3-rush-r { opacity: 0; animation-duration: 1.4s; animation-timing-function: cubic-bezier(.2,.8,.3,1); animation-fill-mode: both; }
 .s3-rush-l { animation-name: s3-rush-l; } .s3-rush-r { animation-name: s3-rush-r; }
-@keyframes s3-rush-l { from { opacity: 1; transform: translateX(-560px); } to { opacity: 1; transform: none; } }
-@keyframes s3-rush-r { from { opacity: 1; transform: translateX(560px); } to { opacity: 1; transform: none; } }
+@keyframes s3-rush-l { 0% { opacity: 0; transform: translateX(-560px); } 1% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes s3-rush-r { 0% { opacity: 0; transform: translateX(560px); } 1% { opacity: 1; } 100% { opacity: 1; transform: none; } }
 /* A：大廳裡走來走去的旅客 */
 .s3-walk { animation-name: s3-walk-ltr; animation-timing-function: linear; animation-iteration-count: infinite; }
 .s3-walk.rtl { animation-name: s3-walk-rtl; }
@@ -455,3 +455,6 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 .s3-man b { font-size: 22px; border-bottom: 1px solid #1f9e44; padding-bottom: 6px; margin-bottom: 4px; }
 #s3-bomb { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px); left: calc(env(safe-area-inset-left, 0px) + 14px); z-index: 6; padding: 4px 12px; background: #15161b; color: #ff4b3e; border: 3px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--ink); font: 700 20px/1.2 'Courier New', Courier, monospace; letter-spacing: .04em; text-shadow: 0 0 6px rgba(255,75,62,.7); pointer-events: none; }
 #s3-bomb.hurry { animation: s3blink .8s steps(2) infinite; }
+.s3-boom { transform-origin: 500px 350px; animation: s3boom .9s cubic-bezier(.2,1.6,.4,1) both, s3shake .08s linear .9s 10 alternate; }
+@keyframes s3boom { from { transform: scale(.1) rotate(-20deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes s3shake { from { transform: translate(-6px, 3px); } to { transform: translate(6px, -3px); } }

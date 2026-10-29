@@ -116,6 +116,12 @@ for (let v = 0; v < 5; v++) {
   assert.equal(new Set(two).size, 2, `airport v${v} 兩班要是不同目的地`);
   assert.ok(!json(S3.view(st, 'B')).includes('manifest'));
   for (const f of A3.flights) if (f.gate !== s3.gate) assert.equal(S3.act(st, 'B', { type: 'gate', gate: f.gate }).correct, false);
+  assert.equal(S3.act(st, 'A', { type: 'bomb' }).ok, false); // 時間還沒到不能引爆
+  const st3b = S3.init(v); st3b.hack.phase = 'done'; st3b.bombAt = Date.now() - 1;
+  assert.ok(S3.act(st3b, 'B', { type: 'bomb' }).boom);
+  assert.ok(st3b.boom === 1 && st3b.hack.phase === 'idle' && st3b.bombAt > Date.now() + 9 * 60 * 1000, `airport v${v} 爆炸後重來`);
+  st3b.bombAt = Date.now() - 5000;
+  assert.ok(S3.act(st3b, 'B', { type: 'gate', gate: s3.gate }).boom && st3b.boom === 2 && !st3b.solved, '時間過了不能再選登機口');
   assert.ok(S3.act(st, 'B', { type: 'gate', gate: s3.gate }).solved, `airport v${v}`);
   assert.ok(allHints(scenes[3], st).every((t) => !t.includes('undefined')));
 }
