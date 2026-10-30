@@ -138,7 +138,7 @@ window.Music = (function () {
   // 每隔三四個半音一個取樣，播放時用 playbackRate 移調到要的音；沒載入完之前先用合成的小提琴代替。
   //   大提琴取樣（Freesound "real cello notes"；見 audio/cello/CREDITS.txt）：低八度跟著小提琴的旋律走
   const SAMPLES = {
-    violin: { dir: 'violin', notes: { G3: 55, A3: 57, C4: 60, E4: 64, G4: 67, A4: 69, C5: 72, E5: 76, G5: 79, A5: 81, C6: 84 }, buf: {}, gain: 5.2, lp: 6000 },
+    violin: { dir: 'violin', notes: { G3: 55, A3: 57, C4: 60, E4: 64, G4: 67, A4: 69, C5: 72, E5: 76, G5: 79, A5: 81, C6: 84 }, buf: {}, gain: 5.2 * 0.631, lp: 3400 }, // -4 dB、高頻切到 3.4 kHz
     cello: { dir: 'cello', notes: { E3: 52, G3: 55, A3: 57, C4: 60, Ds4: 63, Fs4: 66, A4: 69 }, buf: {}, gain: 4.2, lp: 3200 },
   };
   let vloading = false;
@@ -165,7 +165,7 @@ window.Music = (function () {
   function celloLine(c, out, t, f, dur, v = 0.03) { if (ready('cello')) sampled('cello', c, out, t, f, dur, v); }
   function violin(c, out, t, f, dur, v = 0.035) {
     if (ready('violin')) return sampled('violin', c, out, t, f, dur, v);
-    return violinSynth(c, out, t, f, dur, v);
+    return violinSynth(c, out, t, f, dur, v * 0.631);
   }
   function violinSynth(c, out, t, f, dur, v = 0.035) {
     const g = c.createGain(), lp = c.createBiquadFilter(), b1 = c.createBiquadFilter(), b2 = c.createBiquadFilter(), b3 = c.createBiquadFilter();
