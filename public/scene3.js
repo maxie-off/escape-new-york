@@ -32,7 +32,7 @@
 
   // ---------- 共用：機場大廳背景（參考 JFK 航廈：白色挑高天花板、淺色地板、報到機台、黃色指標） ----------
   function lightsAndCeiling() {
-    const spots = Array.from({ length: 11 }, (_, i) => `${A.lightGlow(30 + i * 96, 44 + i * 3, 170, 150)}<ellipse cx="${30 + i * 96}" cy="${38 + i * 3}" rx="30" ry="9" fill="#f3ecc8" ${A.st(2)}/>`).join('');
+    const spots = Array.from({ length: 11 }, (_, i) => `${i % 3 === 1 ? A.lightGlow(30 + i * 96, 44 + i * 3, 150, 120, 0.045) : ''}<ellipse cx="${30 + i * 96}" cy="${38 + i * 3}" rx="30" ry="9" fill="#f3ecc8" ${A.st(2)}/>`).join('');
     return `<rect x="-900" width="2800" height="700" fill="#3b424d"/>
       <rect x="-900" y="96" width="2800" height="340" fill="#505967"/>${Array.from({ length: 14 }, (_, i) => `<path d="M${-40 + i * 80},120 V436" stroke="#444c59" stroke-width="2"/><path d="M${-38 + i * 80},120 V436" stroke="#5d6675" stroke-width="1"/>`).join('')}<rect x="-900" y="96" width="2800" height="340" fill="url(#gWallShade)"/>
       <rect x="330" y="120" width="300" height="250" fill="#3a414d" ${A.st(2)}/>
@@ -49,7 +49,7 @@
       <rect x="-900" width="2800" height="700" fill="url(#dimv)" style="pointer-events:none"/>`;
   }
   // 地板：跟地鐵站共用的拋光地磚
-  const floor = () => A.tileFloor(436, { lights: Array.from({ length: 11 }, (_, i) => 30 + i * 96) }) + `<rect x="-900" y="436" width="2800" height="10" fill="#5d646e"/>`;
+  const floor = () => A.tileFloor(436, { lights: [126, 414, 702], reflect: 0.045 }) + `<rect x="-900" y="436" width="2800" height="10" fill="#5d646e"/>`;
   // 報到機台：白色底座 + 藍色底光 + 斜放螢幕
   function kiosk(x, y, s = 1, screen = '#3a8cff') {
     return `<g transform="translate(${x},${y}) scale(${s})">

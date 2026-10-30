@@ -67,16 +67,16 @@ window.Art = (function () {
   const vignette = (k = 1) => `<rect x="-900" width="2800" height="700" fill="url(#gVig)" opacity="${k}" style="pointer-events:none"/>`;
   // 車站／機場共用的地板：拋光地磚，越近越大，接縫往消失點收，天花板燈的倒影
   function tileFloor(H, o = {}) {
-    const a = o.a || '#7b838f', b = o.b || '#848c97', line = o.line || '#5d646e', V = o.vx ?? 500, lights = o.lights || [];
+    const a = o.a || '#7b838f', b = o.b || '#848c97', line = o.line || '#5d646e', V = o.vx ?? 500, lights = o.lights || [], ro = o.reflect ?? 0.08;
     let rows = '', y = H + 8, h = 14, k = 0;
     while (y < 710) { rows += `<rect x="-900" y="${y.toFixed(1)}" width="2800" height="${h.toFixed(1)}" fill="${k % 2 ? b : a}"/><path d="M-900,${y.toFixed(1)} H1900" stroke="${line}" stroke-width="${(0.8 + h / 40).toFixed(1)}" opacity=".7"/>`; y += h; h *= 1.32; k++; }
     const seams = Array.from({ length: 23 }, (_, i) => { const x = -1700 + i * 170; return `<path d="M${V + (x - V) * 0.02},${H} L${x},710" stroke="${line}" stroke-width="1.6" opacity=".55"/>`; }).join('');
-    const refl = lights.map((x) => `<path d="M${x - 10},${H + 6} L${x + 10},${H + 6} L${x * 1.18 - 56},706 L${x * 1.18 - 124},706Z" fill="#fff8e0" opacity=".08"/>`).join('');
+    const refl = lights.map((x) => `<path d="M${x - 10},${H + 6} L${x + 10},${H + 6} L${x * 1.18 - 56},706 L${x * 1.18 - 124},706Z" fill="#fff8e0" opacity="${ro}"/>`).join('');
     return `<rect x="-900" y="${H}" width="2800" height="${710 - H}" fill="${a}" stroke="${INK}" stroke-width="${LW.mid}"/>${rows}${seams}${refl}
       <rect x="-900" y="${H}" width="2800" height="60" fill="url(#gFloorFade)"/>`;
   }
   // 天花板燈下面那一圈暖光（車站、機場共用）
-  const lightGlow = (x, y, w = 160, h = 120) => `<ellipse cx="${x}" cy="${y + h * 0.45}" rx="${w / 2}" ry="${h / 2}" fill="#fff6d0" opacity=".1"/><ellipse cx="${x}" cy="${y + h * 0.25}" rx="${w / 3}" ry="${h / 3.2}" fill="#fff6d0" opacity=".1"/>`;
+  const lightGlow = (x, y, w = 160, h = 120, o = 0.1) => `<ellipse cx="${x}" cy="${y + h * 0.45}" rx="${w / 2}" ry="${h / 2}" fill="#fff6d0" opacity="${o}"/><ellipse cx="${x}" cy="${y + h * 0.25}" rx="${w / 3}" ry="${h / 3.2}" fill="#fff6d0" opacity="${o}"/>`;
   // ---------- 配角共用的人物模板（以地鐵站路人為準）----------
   // 以腳底中心為原點，高約 250。頭在 (0,-208) 半徑 38；手腳分開，地鐵站的動畫會轉 legL/legR/armL/armR。
   // P：skin, top, sleeve, bottom, shoe, torsoW, legW, shoeW, torsoBottom, short（短袖：前臂露膚色）,
