@@ -97,19 +97,8 @@
   function traveler(x, y, s, look, bag = false, flip = false) {
     const P = look, t = A.st(2.5);
     const luggage = bag ? `<g transform="translate(${flip ? -62 : 62},-4)"><rect x="-20" y="-74" width="40" height="74" rx="8" fill="${P.top}" ${t}/><rect x="-20" y="-74" width="40" height="14" rx="6" fill="#fff" opacity=".25"/><path d="M0,-74 V-98" stroke="${INK}" stroke-width="4"/><circle cx="-12" cy="2" r="5" fill="#222"/><circle cx="12" cy="2" r="5" fill="#222"/></g>` : '';
-    return `<g transform="translate(${x},${y}) scale(${flip ? -s : s},${s})">
-      <ellipse cx="0" cy="3" rx="46" ry="8" fill="#000" opacity=".14"/>${luggage}
-      <g transform="translate(-15,-92)"><rect x="-12" y="0" width="24" height="84" rx="10" fill="${P.bottom}" ${t}/><ellipse cx="3" cy="86" rx="19" ry="9" fill="${P.shoe}" ${t}/></g>
-      <g transform="translate(15,-92)"><rect x="-12" y="0" width="24" height="84" rx="10" fill="${P.bottom}" ${t}/><ellipse cx="3" cy="86" rx="19" ry="9" fill="${P.shoe}" ${t}/></g>
-      <rect x="-37" y="-172" width="74" height="106" rx="20" fill="${P.top}" ${t}/>
-      <g transform="translate(-39,-160)"><rect x="-10" y="-6" width="20" height="70" rx="10" fill="${P.top}" ${t}/><circle cx="0" cy="68" r="10" fill="${P.skin}" ${t}/></g>
-      <g transform="translate(39,-160)"><rect x="-10" y="-6" width="20" height="70" rx="10" fill="${P.top}" ${t}/><circle cx="0" cy="68" r="10" fill="${P.skin}" ${t}/></g>
-      <circle cx="0" cy="-208" r="38" fill="${P.skin}" ${t}/>
-      <path d="M-40,-208 Q-42,-262 0,-262 Q42,-262 40,-208 Q24,-232 0,-230 Q-24,-232 -40,-208Z" fill="${P.hair}" ${t}/>
-      <circle cx="-13" cy="-206" r="4.2" fill="${INK}"/><circle cx="13" cy="-206" r="4.2" fill="${INK}"/>
-      <ellipse cx="-24" cy="-194" rx="7" ry="4.5" fill="#ff9bb0" opacity=".45"/><ellipse cx="24" cy="-194" rx="7" ry="4.5" fill="#ff9bb0" opacity=".45"/>
-      <ellipse cx="0" cy="-190" rx="6" ry="2.5" fill="#7a2b2b"/>
-    </g>`;
+    const hair = `<path d="M-40,-208 Q-42,-262 0,-262 Q42,-262 40,-208 Q24,-232 0,-230 Q-24,-232 -40,-208Z" fill="${P.hair}" ${t}/>`;
+    return `<g transform="translate(${x},${y}) scale(${flip ? -s : s},${s})">${A.human({ ...P, back: luggage, hair, torsoBottom: -66 })}</g>`;
   }
   function crowd(n, seed, y0 = 520, y1 = 690) {
     const r = rng(seed);
@@ -137,31 +126,20 @@
     </g>`;
   }
   // 警察（站姿；圓臉、藍帽）
-  // 紐約市警（參考 NYPD 制服）：深藍短袖襯衫、肩章、金色警徽、黑色勤務腰帶；八角帽（深藍帽頂、黑色亮面帽帶與帽簷、金色帽徽）、飛行員墨鏡。沒有嘴巴。
+  // 紐約市警（參考 NYPD 制服；用共用人物模板）：深藍短袖、肩章、金色警徽、黑色勤務腰帶；八角帽、飛行員墨鏡。沒有嘴巴。
   function cop(x, y, s, shade) {
-    const shirt = shade || '#232a45', pants = '#181c2e', t2 = A.st(2);
-    const patch = (cx) => `<path d="M${cx - 8},-178 h16 v10 c0,6 -4,10 -8,12 c-4,-2 -8,-6 -8,-12Z" fill="#2a5bd0" stroke="#e2b53c" stroke-width="2"/><circle cx="${cx}" cy="-170" r="3" fill="#e2b53c"/>`;
-    return `<g transform="translate(${x},${y}) scale(${s})">
-      <ellipse cx="0" cy="4" rx="46" ry="9" fill="#000" opacity=".2"/>
-      <rect x="-26" y="-92" width="22" height="90" rx="9" fill="${pants}" ${ST2}/><rect x="4" y="-92" width="22" height="90" rx="9" fill="${pants}" ${ST2}/>
-      <ellipse cx="-16" cy="0" rx="19" ry="9" fill="#0d0e12" ${ST2}/><ellipse cx="16" cy="0" rx="19" ry="9" fill="#0d0e12" ${ST2}/><path d="M-26,-4 h10 M8,-4 h10" stroke="#fff" stroke-width="2" opacity=".35"/>
-      <rect x="-58" y="-150" width="18" height="44" rx="9" fill="#e8bd98" ${ST2}/><rect x="40" y="-150" width="18" height="44" rx="9" fill="#e8bd98" ${ST2}/>
-      <circle cx="-49" cy="-104" r="10" fill="#e8bd98" ${ST2}/><circle cx="49" cy="-104" r="10" fill="#e8bd98" ${ST2}/>
-      <rect x="-42" y="-190" width="84" height="108" rx="20" fill="${shirt}" ${ST}/>
-      <path d="M-42,-186 C-56,-184 -64,-172 -62,-146 L-40,-144Z" fill="${shirt}" ${ST2}/><path d="M42,-186 C56,-184 64,-172 62,-146 L40,-144Z" fill="${shirt}" ${ST2}/>
-      ${patch(-52)}${patch(52)}
-      <path d="M-11,-190 L0,-174 L11,-190Z" fill="#0d0e12" ${t2}/>
-      <path d="M-20,-191 L-4,-191 L-6,-174 L-16,-180Z M20,-191 L4,-191 L6,-174 L16,-180Z" fill="${shirt}" ${t2}/>
-      <path d="M0,-174 V-100" stroke="#0d0e12" stroke-width="1.5" opacity=".6"/>${[-160, -142, -124].map((yy) => `<circle cx="0" cy="${yy}" r="2" fill="#0d0e12"/>`).join('')}
-      <rect x="-34" y="-158" width="24" height="24" rx="2" fill="none" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/><path d="M-34,-152 h24" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/>
-      <rect x="10" y="-158" width="24" height="24" rx="2" fill="none" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/><path d="M10,-152 h24" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/>
-      <text x="-22" y="-164" text-anchor="middle" font-size="9" fill="#e2b53c" font-family="'Helvetica Neue',Arial,sans-serif" font-weight="800" letter-spacing=".4">NYPD</text>
-      <path d="M22,-182 L32,-178 L31,-168 C30,-163 26,-160 22,-159 C18,-160 14,-163 13,-168 L12,-178Z" fill="#e2b53c" ${t2}/><circle cx="22" cy="-170" r="4" fill="#2a5bd0"/>
-      <rect x="-44" y="-100" width="88" height="16" rx="3" fill="#0d0e12" ${ST2}/>
-      <rect x="-7" y="-99" width="14" height="14" rx="2" fill="#b9bdc6" ${A.st(1.5)}/>
-      ${[[-38, 12], [16, 10], [27, 10]].map(([px, w]) => `<rect x="${px}" y="-102" width="${w}" height="22" rx="3" fill="#15161b" ${A.st(1.5)}/><circle cx="${px + w / 2}" cy="-95" r="1.8" fill="#d9b04a"/>`).join('')}
-      <circle cx="0" cy="-222" r="37" fill="#e8bd98" ${ST2}/>
-      <path d="M-34,-206 Q0,-170 34,-206 Q28,-186 0,-182 Q-28,-186 -34,-206Z" fill="#6b4a3a" opacity=".16"/>
+    const shirt = shade || '#232a45', t2 = A.st(2), tw = 84;
+    const patch = `<path d="M-7,-2 h14 v9 c0,5 -3,9 -7,11 c-4,-2 -7,-6 -7,-11Z" fill="#2a5bd0" stroke="#e2b53c" stroke-width="2"/><circle cx="0" cy="6" r="2.6" fill="#e2b53c"/>`;
+    const torso = `<path d="M-11,-172 L0,-156 L11,-172Z" fill="#0d0e12" ${t2}/>
+      <path d="M-20,-173 L-4,-173 L-6,-156 L-16,-162Z M20,-173 L4,-173 L6,-156 L16,-162Z" fill="${shirt}" ${t2}/>
+      <path d="M0,-156 V-100" stroke="#0d0e12" stroke-width="1.5" opacity=".6"/>${[-144, -128, -112].map((yy) => `<circle cx="0" cy="${yy}" r="2" fill="#0d0e12"/>`).join('')}
+      <rect x="-32" y="-144" width="24" height="22" rx="2" fill="none" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/><path d="M-32,-138 h24" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/>
+      <rect x="10" y="-146" width="24" height="22" rx="2" fill="none" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/><path d="M10,-140 h24" stroke="#0d0e12" stroke-width="1.6" opacity=".7"/>
+      <text x="-20" y="-150" text-anchor="middle" font-size="8.5" fill="#e2b53c" font-family="'Helvetica Neue',Arial,sans-serif" font-weight="800" letter-spacing=".4">NYPD</text>
+      <path d="M22,-168 L32,-164 L31,-154 C30,-149 26,-146 22,-145 C18,-146 14,-149 13,-154 L12,-164Z" fill="#e2b53c" ${t2}/><circle cx="22" cy="-156" r="4" fill="#2a5bd0"/>
+      <rect x="-44" y="-100" width="88" height="16" rx="3" fill="#0d0e12" ${ST2}/><rect x="-7" y="-99" width="14" height="14" rx="2" fill="#b9bdc6" ${A.st(1.5)}/>
+      ${[[-38, 12], [16, 10], [27, 10]].map(([px, w]) => `<rect x="${px}" y="-102" width="${w}" height="22" rx="3" fill="#15161b" ${A.st(1.5)}/><circle cx="${px + w / 2}" cy="-95" r="1.8" fill="#d9b04a"/>`).join('')}`;
+    const hat = `<g transform="translate(0,14)">
       <path d="M-27,-231 L-7,-229 M27,-231 L7,-229" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
       <path d="M-30,-226 C-30,-229 -27,-230 -24,-230 H-6 C-3,-230 -2,-228 -3,-225 C-4,-216 -9,-210 -17,-210 C-26,-210 -30,-217 -30,-226Z M30,-226 C30,-229 27,-230 24,-230 H6 C3,-230 2,-228 3,-225 C4,-216 9,-210 17,-210 C26,-210 30,-217 30,-226Z" fill="#2c313c" stroke="#c9a640" stroke-width="2"/>
       <path d="M-26,-226 L-18,-226 L-25,-214Z M8,-226 L16,-226 L9,-214Z" fill="#fff" opacity=".35"/><path d="M-3,-228 Q0,-232 3,-228" fill="none" stroke="#c9a640" stroke-width="2"/>
@@ -172,8 +150,10 @@
       <circle cx="-40" cy="-243" r="3.2" fill="#e2b53c" ${A.st(1)}/><circle cx="40" cy="-243" r="3.2" fill="#e2b53c" ${A.st(1)}/>
       <path d="M-46,-238 Q0,-222 46,-238 Q40,-228 0,-225 Q-40,-228 -46,-238Z" fill="#0b0c10" ${ST2}/><path d="M-30,-233 Q0,-227 30,-233" fill="none" stroke="#fff" stroke-width="1.6" opacity=".4"/>
       <path d="M0,-276 C6,-276 10,-272 10,-266 C14,-264 14,-258 10,-256 L8,-251 H-8 L-10,-256 C-14,-258 -14,-264 -10,-266 C-10,-272 -6,-276 0,-276Z" fill="#e2b53c" ${A.st(1.6)}/>
-      <path d="M-6,-266 Q0,-262 6,-266 M0,-272 V-254" stroke="#9a7a20" stroke-width="1.4" fill="none"/>
-    </g>`;
+      <path d="M-6,-266 Q0,-262 6,-266 M0,-272 V-254" stroke="#9a7a20" stroke-width="1.4" fill="none"/></g>`;
+    const P = { skin: '#e8bd98', top: shirt, short: true, bottom: '#181c2e', shoe: '#0d0e12', torsoW: tw, torsoBottom: -82, shoeW: 20,
+      torso, sleeveMark: patch, hair: hat, eyes: false, mouth: false, blush: false };
+    return `<g transform="translate(${x},${y}) scale(${s})">${A.human(P)}</g>`;
   }
   // 文字寬度估算：中日文一字約 22，英文約 11.5（字級 22）
   const textW = (t) => [...String(t)].reduce((a, c) => a + (/[\u2E80-\u9FFF\uFF00-\uFFEF]/.test(c) ? 22 : 11.5), 0);

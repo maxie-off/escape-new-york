@@ -158,18 +158,9 @@
   // o：{ cen 停下來的位置, y 腳的位置, s 大小, from 'left'|'right' 從哪邊走進來, side 泡泡放頭的左邊 }
   function person(k, lines, o = {}) {
     const P = LOOKS[k];
-    const tw = P.torsoW || 72, lw = P.legW || 24;
-    const leg = (s) => { const bx = s === 'L' ? -15 : 15; return `<g class="leg${s}" data-bx="${bx}" data-by="-92" transform="translate(${bx},-92)"><rect x="${-lw / 2}" y="0" width="${lw}" height="84" rx="10" fill="${P.bottom}" ${ST2}/><ellipse cx="3" cy="86" rx="${P.shoeW || 19}" ry="9" fill="${P.shoe}" ${ST2}/></g>`; };
-    const arm = (s) => { const bx = (s === 'L' ? -1 : 1) * (tw / 2 + 2); return `<g class="arm${s}" data-bx="${bx}" data-by="-160" transform="translate(${bx},-160)"><rect x="-10" y="-6" width="20" height="70" rx="10" fill="${P.sleeve || P.top}" ${ST2}/><circle cx="0" cy="68" r="10" fill="${P.skin}" ${ST2}/>${s === 'R' ? P.handR || '' : P.handL || ''}</g>`; };
     const cen = o.cen ?? 420, y = o.y ?? 632, sc = o.s ?? 1, from = o.from || 'left';
     return `<g class="person" data-k="${k}" data-cen="${cen}" data-y="${y}" data-s="${sc}" data-from="${from}" transform="translate(-400,${y}) scale(${sc})">
-      ${P.back || ''}${leg('L')}${leg('R')}
-      <rect x="${-tw / 2}" y="-172" width="${tw}" height="${172 + P.torsoBottom}" rx="20" fill="${P.top}" ${ST2}/>${P.torso || ''}
-      ${arm('L')}${arm('R')}
-      <circle cx="0" cy="-208" r="38" fill="${P.skin}" ${ST2}/>${P.hair || ''}
-      <circle cx="-13" cy="-208" r="4.2" fill="${INK}"/><circle cx="13" cy="-208" r="4.2" fill="${INK}"/>
-      <ellipse cx="-24" cy="-196" rx="7" ry="4.5" fill="#ff9bb0" opacity=".45"/><ellipse cx="24" cy="-196" rx="7" ry="4.5" fill="#ff9bb0" opacity=".45"/>
-      <ellipse class="mouth" cx="0" cy="-192" rx="6" ry="2.5" fill="#7a2b2b"/>${P.face || ''}
+      ${A.human(P, { noShadow: true })}
       ${o.side ? bubbleSide(lines, 0.82 / sc) : bubbleSvg(lines, from === 'right')}
     </g>`;
   }

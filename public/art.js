@@ -59,6 +59,28 @@ window.Art = (function () {
   // 落在地上的影子（光從左上 → 影子偏右）
   const shadow = (cx, y, w, h = 14, o = 0.26) => `<ellipse cx="${cx + w * 0.08}" cy="${y}" rx="${w / 2}" ry="${h / 2}" fill="#2a1a08" opacity="${o}"/>`;
   const vignette = () => `<rect x="-900" width="2800" height="700" fill="url(#gVig)" style="pointer-events:none"/>`;
+  // ---------- 配角共用的人物模板（以地鐵站路人為準）----------
+  // 以腳底中心為原點，高約 250。頭在 (0,-208) 半徑 38；手腳分開，地鐵站的動畫會轉 legL/legR/armL/armR。
+  // P：skin, top, sleeve, bottom, shoe, torsoW, legW, shoeW, torsoBottom, short（短袖：前臂露膚色）,
+  //    sleeveMark（袖子上的臂章，手臂座標）, back（身後的東西）, torso（衣服上的細節）, hair（頭髮或帽子）, face（臉上的東西）, handL, handR, mouth（預設有）, blush（預設有）
+  function human(P, o = {}) {
+    const S = st(2.5), tw = P.torsoW || 72, lw = P.legW || 24, tb = P.torsoBottom ?? -66;
+    const leg = (side) => { const bx = side === 'L' ? -15 : 15; return `<g class="leg${side}" data-bx="${bx}" data-by="-92" transform="translate(${bx},-92)"><rect x="${-lw / 2}" y="0" width="${lw}" height="84" rx="10" fill="${P.bottom}" ${S}/><rect x="${lw / 2 - 7}" y="4" width="5" height="74" rx="2.5" fill="#000" opacity=".12"/><ellipse cx="3" cy="86" rx="${P.shoeW || 19}" ry="9" fill="${P.shoe}" ${S}/></g>`; };
+    const arm = (side) => { const bx = (side === 'L' ? -1 : 1) * (tw / 2 + 2);
+      const sleeve = P.short ? `<rect x="-10" y="-6" width="20" height="30" rx="10" fill="${P.sleeve || P.top}" ${S}/><rect x="-8" y="20" width="16" height="46" rx="8" fill="${P.skin}" ${S}/>` : `<rect x="-10" y="-6" width="20" height="70" rx="10" fill="${P.sleeve || P.top}" ${S}/>`;
+      return `<g class="arm${side}" data-bx="${bx}" data-by="-160" transform="translate(${bx},-160)">${sleeve}${P.sleeveMark || ''}<circle cx="0" cy="68" r="10" fill="${P.skin}" ${S}/>${side === 'R' ? P.handR || '' : P.handL || ''}</g>`; };
+    return `${o.noShadow ? '' : '<ellipse cx="6" cy="4" rx="46" ry="9" fill="#000" opacity=".16"/>'}
+      ${P.back || ''}${leg('L')}${leg('R')}
+      <rect x="${-tw / 2}" y="-172" width="${tw}" height="${172 + tb}" rx="20" fill="${P.top}" ${S}/>
+      <path d="M${tw / 2 - 16},-168 Q${tw / 2 - 4},-166 ${tw / 2 - 2},-150 V${tb - 14} Q${tw / 2 - 4},${tb - 2} ${tw / 2 - 16},${tb - 2}Z" fill="#000" opacity=".1"/>
+      ${P.torso || ''}${arm('L')}${arm('R')}
+      <circle cx="0" cy="-208" r="38" fill="${P.skin}" ${S}/>
+      <path d="M18,-238 A38,38 0 0 1 22,-178 A34,34 0 0 0 18,-238Z" fill="#000" opacity=".08"/>
+      ${P.hair || ''}
+      ${P.eyes === false ? '' : `<circle cx="-13" cy="-208" r="4.2" fill="${INK}"/><circle cx="13" cy="-208" r="4.2" fill="${INK}"/>`}
+      ${P.blush === false ? '' : `<ellipse cx="-24" cy="-196" rx="7" ry="4.5" fill="#ff9bb0" opacity=".45"/><ellipse cx="24" cy="-196" rx="7" ry="4.5" fill="#ff9bb0" opacity=".45"/>`}
+      ${P.mouth === false ? '' : `<ellipse class="mouth" cx="0" cy="-192" rx="6" ry="2.5" fill="#7a2b2b"/>`}${P.face || ''}`;
+  }
   const TWEED = `<pattern id="tweed" width="10" height="8" patternUnits="userSpaceOnUse"><rect width="10" height="8" fill="#3b3e45"/><path d="M0,6 L2.5,2 L5,6 L7.5,2 L10,6" fill="none" stroke="#585d66" stroke-width="1.3"/></pattern>`;
   (function installDefs() {
     const add = () => {
@@ -161,5 +183,5 @@ window.Art = (function () {
     return `<svg viewBox="-85 -205 170 215" width="${size}" height="${size * 1.26}">${who}</svg>`;
   }
 
-  return { INK, st, FONT, LW, PAL, room, wood, shadow, vignette, raccoony, slothy, portrait, deerstalker, deerstalkerBack, miniHat, miniHatBack };
+  return { INK, st, FONT, LW, PAL, human, room, wood, shadow, vignette, raccoony, slothy, portrait, deerstalker, deerstalkerBack, miniHat, miniHatBack };
 })();
