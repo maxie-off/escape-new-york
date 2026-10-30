@@ -259,7 +259,7 @@
     return `<form class="end-fb" data-fb>
       <h3>${tr('給這個遊戲幾顆星？', 'How many stars would you give it?')}</h3>
       <div class="fb-stars" data-stars>${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" aria-label="${n}">★</button>`).join('')}</div>
-      <label>${tr('有什麼想改進的地方？', 'Anything you’d like improved?')}
+      <label>${tr('有什麼想改進的地方，或者想說的話？', 'Anything you’d like improved, or want to say?')}
         <textarea name="text" rows="4" placeholder="${tr('想到什麼都可以寫', 'Anything at all')}"></textarea></label>
       <button class="fb-send" type="submit">${tr('送出', 'Send')}</button>
       <p class="fb-msg" data-fbmsg></p>
