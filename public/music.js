@@ -287,12 +287,20 @@ window.Music = (function () {
   })();
 
   // 場景 3：D 小調，60 bpm，低音弦樂持續低鳴 + 半音的不安旋律 + 滴答（像計時器）；越來越緊
+  // 炸彈剩兩分鐘時 Music.tense(1)：低音加重、旋律加密加快、再加一層更低的弦樂
   (function () {
     const bpm = 60, beat = 60 / bpm, L = beat * 4;
     const mel = [50, 53, 51, 49, 50, 57, 56, 55]; // D F Eb C# D A G# G：半音下行、不解決
     TRACKS['2'] = {
       barLen: L,
       bar(c, out, t, i) {
+        if (tension) {
+          cello(c, out, t, mtof(26), L, 0.055);                               // D1：更低、更重的底
+          for (let q = 0; q < 8; q++) bass(c, out, t + q * (beat / 2), mtof(q % 4 === 3 ? 45 : 38), q % 2 ? 0.1 : 0.19, beat * 0.42);
+          for (let q = 0; q < 4; q++) cello(c, out, t + q * beat, mtof(mel[(i * 4 + q) % 8] + 12), beat * 0.9, 0.034); // 旋律：一拍一個音
+          thump(c, out, t, 0.28); thump(c, out, t + beat * 2, 0.22);
+          rumble(c, out, t, L, 0.02, 180);
+        }
         const k = i < 16 ? i : 8 + ((i - 8) % 8), r = rng(5000 + i);
         cello(c, out, t, mtof(38), L, 0.06);                                  // D2 持續低音
         cello(c, out, t + 0.05, mtof(45), L, 0.035);                          // A2
@@ -362,6 +370,23 @@ window.Music = (function () {
 
   let ctx = null, g = null, cur = null, pending = null;
   let muted = false;
+  let tension = 0; // 0＝平常；1＝炸彈剩兩分鐘以後（場景 3 的曲子會變重、變密）
+  function tense(level) { tension = level ? 1 : 0; }
+
+  // 時鐘滴答：炸彈倒數的幾個節骨眼各響兩小節（urgent＝比較急、比較快、比較亮）
+  // 一小節 4 秒：平常一秒一下（答、滴），急的時候半秒一下，而且越走越快一點點。
+  function tickTock(bars = 2, urgent = false) {
+    if (!ctx || muted) return;
+    const bus = makeBus(ctx, g);
+    let t = ctx.currentTime + 0.05;
+    const step = urgent ? 0.5 : 1, n = Math.round((bars * 4) / step);
+    for (let k = 0; k < n; k++) {
+      const hi = k % 2 === 0;
+      tick(ctx, bus, t, urgent ? (hi ? 0.085 : 0.07) : (hi ? 0.055 : 0.045), hi ? (urgent ? 2300 : 1900) : (urgent ? 1700 : 1350));
+      t += urgent ? step * (1 - k * 0.012) : step; // 急的時候慢慢加速
+    }
+    setTimeout(() => { try { bus.disconnect(); } catch (e) { /* ignore */ } }, (t - ctx.currentTime + 1) * 1000);
+  }
   try { muted = localStorage.getItem('muted') === '1'; } catch (e) { /* ignore */ }
 
   function stopCurrent(fade) {
@@ -451,6 +476,19 @@ window.Music = (function () {
   });
 
   // 測試用：離線渲染幾小節，回傳單聲道 Float32Array
+  // 滴答音效的離線版本（只給開發時試聽用）
+  async function renderCue(urgent = false, bars = 2, sr = 22050) {
+    const c = new OfflineAudioContext(1, Math.ceil((bars * 4 + 2) * sr), sr);
+    const gg = buildGraph(c, false), bus = makeBus(c, gg);
+    let t = 0.1;
+    const step = urgent ? 0.5 : 1, n = Math.round((bars * 4) / step);
+    for (let k = 0; k < n; k++) {
+      const hi = k % 2 === 0;
+      tick(c, bus, t, urgent ? (hi ? 0.085 : 0.07) : (hi ? 0.055 : 0.045), hi ? (urgent ? 2300 : 1900) : (urgent ? 1700 : 1350));
+      t += urgent ? step * (1 - k * 0.012) : step;
+    }
+    return (await c.startRendering()).getChannelData(0);
+  }
   async function renderOffline(name, bars, sr = 22050) {
     const T = TRACKS[name];
     const c = new OfflineAudioContext(1, Math.ceil((bars * T.barLen + 3) * sr), sr);
@@ -600,5 +638,5 @@ window.Music = (function () {
     });
   }
 
-  return { _violinReady: violinReady, _loadViolin: () => loadViolin(ctx || new (window.AudioContext || window.webkitAudioContext)()), unlock, play, stop, state: () => (ctx ? ctx.state : 'none'), pa, speak, hush, buzz, boom, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
+  return { _violinReady: violinReady, _loadViolin: () => loadViolin(ctx || new (window.AudioContext || window.webkitAudioContext)()), unlock, play, stop, state: () => (ctx ? ctx.state : 'none'), tense, tickTock, pa, speak, hush, buzz, boom, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline, _renderCue: renderCue };
 })();

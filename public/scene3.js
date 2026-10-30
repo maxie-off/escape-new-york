@@ -25,7 +25,7 @@
   let introDone = false, introStarted = false, introTimers = [];
   let ctx = null, data = null, box = null;
   let tAt = 0, timeoutSent = false, unlockDrawn = false, ticker = 0;
-  let bombAt = 0, bombOn = false, boomSent = false, lastBoom = null, booming = false, boomTimer = 0;
+  let bombAt = 0, bombOn = false, bombCues = {}, boomSent = false, lastBoom = null, booming = false, boomTimer = 0;
   const $modal = () => document.getElementById('modal');
   const SVG_OPEN = (label) => `<svg viewBox="0 0 1000 700" class="scene-svg" role="img" aria-label="${label}">`;
   const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
@@ -917,6 +917,17 @@
     const left = Math.max(0, Math.ceil((bombAt - Date.now()) / 1000));
     el.textContent = `💣 ${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`;
     el.classList.toggle('hurry', left <= 60);
+    bombCue(left);
+  }
+  // 倒數途中的音效：一開始滴答兩小節；剩 5 分鐘再滴答兩小節（比較急）；
+  // 剩 2 分鐘音樂變重變密；剩 30 秒再來一次急促的滴答。
+  function bombCue(left) {
+    if (!window.Music || booming) return;
+    const fire = (k, fn) => { if (!bombCues[k]) { bombCues[k] = true; fn(); } };
+    if (left <= 30) fire('s30', () => Music.tickTock(2, true));
+    if (left <= 120) fire('m2', () => Music.tense(1));
+    if (left <= 300) fire('m5', () => Music.tickTock(2, true));
+    if (left > 300) fire('start', () => Music.tickTock(2, false));
   }
   function tick() {
     bombClock();
@@ -954,7 +965,7 @@
       boomSent = false;
       const boomed = lastBoom !== null && data.boom > lastBoom;
       lastBoom = data.boom ?? 0;
-      if (boomed) { box.onclick = onStageClick; const mm = $modal(); mm.onclick = onModalClick; if (!ticker) ticker = setInterval(tick, 250); startBoom(); return; }
+      if (boomed) { bombCues = {}; if (window.Music && Music.tense) Music.tense(0); box.onclick = onStageClick; const mm = $modal(); mm.onclick = onModalClick; if (!ticker) ticker = setInterval(tick, 250); startBoom(); return; }
       if (introDone) bombOn = true;
       timeoutSent = false; unlockDrawn = false;
       if (data.hack && data.hack.phase !== 'puzzle') busy = false;
@@ -968,7 +979,8 @@
     },
     unmount() {
       introTimers.forEach(clearTimeout); introTimers = []; clearInterval(ticker); ticker = 0;
-      bombOn = false; booming = false; lastBoom = null; clearTimeout(boomTimer); const bc = document.getElementById('s3-bomb'); if (bc) bc.remove();
+      bombOn = false; booming = false; bombCues = {}; lastBoom = null; clearTimeout(boomTimer);
+      if (window.Music && Music.tense) Music.tense(0); const bc = document.getElementById('s3-bomb'); if (bc) bc.remove();
       if (window.Music && Music.hush) Music.hush(); introDone = false; introStarted = false;
       ui = fresh(); box = null;
       const m = $modal(); m.hidden = true; m.innerHTML = '';
