@@ -51,14 +51,15 @@ On the free plan the server falls asleep when nobody's using it, so the first vi
 The last screen has a short form (stars + what to improve). Every answer is saved on the server in
 `data/feedback.jsonl`. To also have them land in a Google Sheet:
 
-1. Make a new Google Sheet. First row: `at`, `stars`, `text`, `lang`.
+1. Make a new Google Sheet. First row: `at`, `stars`, `full`, `text`, `lang`
+   (`full` is the yes/no answer to "would you play the full version?").
 2. In that sheet: Extensions → Apps Script, and paste:
 
    ```js
    function doPost(e) {
      const d = JSON.parse(e.postData.contents);
      SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]
-       .appendRow([d.at, d.stars, d.text, d.lang]);
+       .appendRow([d.at, d.stars, d.full, d.text, d.lang]);
      return ContentService.createTextOutput('ok');
    }
    ```
@@ -83,6 +84,7 @@ A Google Form writes its answers into a Google Sheet by itself, no script needed
    - `FEEDBACK_ENTRY_STARS` = `entry.<id of the 1–5 question>`
    - `FEEDBACK_ENTRY_TEXT` = `entry.<id of the text question>`
    - `FEEDBACK_ENTRY_LANG` = `entry.<id of the language question>` (optional)
+   - `FEEDBACK_ENTRY_FULL` = `entry.<id of a yes/no question>` (optional)
 
 ### Option C: just download them
 

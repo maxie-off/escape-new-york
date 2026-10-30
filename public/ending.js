@@ -259,6 +259,8 @@
     return `<form class="end-fb" data-fb>
       <h3>${tr('給這個遊戲幾顆星？', 'How many stars would you give it?')}</h3>
       <div class="fb-stars" data-stars>${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" aria-label="${n}">★</button>`).join('')}</div>
+      <div class="fb-yn"><span>${tr('你會想要玩完整版嗎？', 'Would you want to play the full version?')}</span>
+        <div class="fb-yn-btns"><button type="button" data-yn="yes">${tr('會！', 'Yes!')}</button><button type="button" data-yn="no">${tr('不會', 'No')}</button></div></div>
       <label>${tr('有什麼想改進的地方，或者想說的話？', 'Anything you’d like improved, or want to say?')}
         <textarea name="text" rows="4" placeholder="${tr('想到什麼都可以寫', 'Anything at all')}"></textarea></label>
       <button class="fb-send" type="submit">${tr('送出', 'Send')}</button>
@@ -291,7 +293,9 @@
   function wireFeedback(root) {
     const form = root.querySelector('[data-fb]');
     if (!form) return;
-    let stars = 0;
+    let stars = 0, full = '';
+    const yns = [...form.querySelectorAll('[data-yn]')];
+    yns.forEach((b) => { b.onclick = () => { full = b.dataset.yn; yns.forEach((x) => x.classList.toggle('on', x === b)); }; });
     const btns = [...form.querySelectorAll('[data-star]')];
     const paint = () => btns.forEach((b) => b.classList.toggle('on', Number(b.dataset.star) <= stars));
     btns.forEach((b) => { b.onclick = () => { stars = Number(b.dataset.star); paint(); }; });
@@ -299,12 +303,12 @@
     form.onsubmit = async (e) => {
       e.preventDefault();
       const text = form.querySelector('textarea').value.trim();
-      if (!stars && !text) { msg.textContent = tr('給顆星，或寫點什麼吧！', 'Pick a star, or write something!'); return; }
+      if (!stars && !text && !full) { msg.textContent = tr('給顆星，或寫點什麼吧！', 'Pick a star, or write something!'); return; }
       const send = form.querySelector('.fb-send');
       send.disabled = true; msg.textContent = tr('送出中…', 'Sending…');
       try {
         const res = await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ stars, text, lang: (window.I18N && I18N.lang) || 'zh' }) });
+          body: JSON.stringify({ stars, text, full, lang: (window.I18N && I18N.lang) || 'zh' }) });
         if (!res.ok) throw new Error('http ' + res.status);
         form.innerHTML = `<h3>${tr('收到了，謝謝你！', 'Got it — thank you!')}</h3><p class="fb-msg">${tr('你的建議對我很有幫助 ♥', 'Your feedback really helps ♥')}</p>`;
       } catch (err) {

@@ -31,9 +31,10 @@ app.post('/api/feedback', express.json({ limit: '16kb' }), async (req, res) => {
     at: new Date().toISOString(),
     stars: Math.max(0, Math.min(5, Number(b.stars) || 0)),
     text: String(b.text || '').slice(0, 2000),
+    full: b.full === 'yes' ? 'yes' : b.full === 'no' ? 'no' : '', // 想不想玩完整版
     lang: b.lang === 'en' ? 'en' : 'zh',
   };
-  if (!row.stars && !row.text) return res.status(400).json({ ok: false });
+  if (!row.stars && !row.text && !row.full) return res.status(400).json({ ok: false });
   try {
     fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
     fs.appendFileSync(path.join(__dirname, 'data', 'feedback.jsonl'), JSON.stringify(row) + '\n');
@@ -53,6 +54,7 @@ app.post('/api/feedback', express.json({ limit: '16kb' }), async (req, res) => {
       if (process.env.FEEDBACK_ENTRY_STARS) body.set(process.env.FEEDBACK_ENTRY_STARS, String(row.stars));
       if (process.env.FEEDBACK_ENTRY_TEXT) body.set(process.env.FEEDBACK_ENTRY_TEXT, row.text);
       if (process.env.FEEDBACK_ENTRY_LANG) body.set(process.env.FEEDBACK_ENTRY_LANG, row.lang);
+      if (process.env.FEEDBACK_ENTRY_FULL) body.set(process.env.FEEDBACK_ENTRY_FULL, row.full);
       const r = await fetch(form, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
       if (!r.ok) console.warn('feedback form', r.status);
     } catch (e) { console.warn('feedback form failed', e.message); }
@@ -69,7 +71,7 @@ app.get('/api/feedback.csv', (req, res) => {
     rows = fs.readFileSync(path.join(__dirname, 'data', 'feedback.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
   } catch (e) { /* 還沒有人填 */ }
   const q = (s) => `"${String(s).replace(/"/g, '""')}"`;
-  res.type('text/csv').send(['at,stars,text,lang', ...rows.map((r) => [r.at, r.stars, q(r.text), r.lang].join(','))].join('\n'));
+  res.type('text/csv').send(['at,stars,full,text,lang', ...rows.map((r) => [r.at, r.stars, r.full || '', q(r.text), r.lang].join(','))].join('\n'));
 });
 
 // ---------- 房間 ----------
