@@ -83,9 +83,10 @@ socket.on('state', (s) => { state = s; if (s.you) setMyRole(s.you); render(); })
 
 // 音樂：一開啟網頁就想放。瀏覽器可能擋自動播放（iPad / Safari 一定會擋），
 // 所以先試著直接開聲音，被擋就等第一次點擊／按鍵再開。
-Music.unlock();
-for (const ev of ['pointerdown', 'touchend', 'keydown']) document.addEventListener(ev, () => Music.unlock(true), { passive: true });
-document.addEventListener('visibilitychange', () => { if (!document.hidden) Music.unlock(); });
+// 畫面先畫出來再試音樂（音訊出問題時不可以害整個畫面開不起來）
+setTimeout(() => { try { Music.unlock(); } catch (e) { /* ignore */ } }, 0);
+for (const ev of ['pointerdown', 'touchend', 'keydown']) document.addEventListener(ev, () => { try { Music.unlock(true); } catch (e) { /* ignore */ } }, { passive: true });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { Music.unlock(); } catch (e) { /* ignore */ } } });
 
 // ---------- 封面 / 選角 / 房間碼 ----------
 let screen = 'title';

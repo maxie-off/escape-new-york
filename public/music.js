@@ -418,6 +418,7 @@ window.Music = (function () {
   // gesture＝這次是使用者點了畫面才呼叫的。
   // iPad Safari 的毛病：在「沒有人碰過畫面」的情況下建立的 AudioContext，之後再 resume() 也不會出聲，
   // 所以第一次真的有人點畫面時，如果它還沒 running，就把舊的關掉、在點擊當下重新開一個。
+  function mark() { if (ctx && ctx.state === 'running') ctxOk = true; }
   function unlock(gesture) {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -433,8 +434,8 @@ window.Music = (function () {
         ctx = new AC(); g = buildGraph(ctx, muted);
         loadViolin(ctx);
       }
-      if (ctx.state === 'suspended') ctx.resume().then(() => { if (ctx && ctx.state === 'running') ctxOk = true; }).catch(() => {});
-      if (ctx.state === 'running') ctxOk = true;
+      if (ctx.state === 'suspended') { const r = ctx.resume(); if (r && r.then) r.then(mark, mark); }
+      mark();
       if (pending) { const p = pending; pending = null; play(p); }
     } catch (e) { console.warn('audio unlock failed', e); }
     // iPad Safari 要在使用者點擊時先「講一次」，之後的語音才放得出來
