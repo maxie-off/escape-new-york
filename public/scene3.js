@@ -754,10 +754,11 @@
   }
   // Slothy 牆上的面板：機場代碼對照表（看板上只有代碼，要靠這個才知道是哪裡）
   function codesPanel() {
-    // 一行一個代碼：代碼（白）靠左，地點（淺灰）接在同一行
-    const rows = data.codes.map((c, i) => { const y = 192 + i * 46; return `<text x="344" y="${y}" font-size="21" fill="#ffffff" ${HELV}>${esc(c.code)}</text>
-      <text x="404" y="${y}" font-size="13" fill="#b9c0cb" ${HELV}>${esc(c.place)}</text>`; }).join('');
-    return `<rect x="330" y="120" width="300" height="250" fill="transparent"/>${rows}
+    // 跟航班看板同一個樣子：黑色面板、一行一色；代碼（白）靠左，地點（淺灰）接在同一行
+    const rows = data.codes.map((c, i) => { const y = 184 + i * 46; return `<rect x="338" y="${y - 30}" width="284" height="42" fill="${i % 2 ? '#141820' : '#1b2029'}"/>
+      <text x="350" y="${y}" font-size="21" fill="#ffffff" ${HELV}>${esc(c.code)}</text>
+      <text x="410" y="${y}" font-size="13" fill="#b9c0cb" ${HELV}>${esc(c.place)}</text>`; }).join('');
+    return `<rect x="330" y="120" width="300" height="250" rx="6" fill="#0d0f14" ${ST}/>${rows}
       ${ui.seen.codes ? '' : `<rect class="pulse" x="326" y="116" width="308" height="258" rx="8" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}`;
   }
   function codesHtml() {

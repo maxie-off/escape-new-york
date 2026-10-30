@@ -45,7 +45,31 @@ app.post('/api/feedback', express.json({ limit: '16kb' }), async (req, res) => {
       if (!r.ok) console.warn('feedback webhook', r.status);
     } catch (e) { console.warn('feedback webhook failed', e.message); }
   }
+  // 另一條路：直接送進 Google 表單（表單的回覆本來就會寫進 Google 試算表，不用 Apps Script）
+  const form = process.env.FEEDBACK_FORM_URL;
+  if (form) {
+    try {
+      const body = new URLSearchParams();
+      if (process.env.FEEDBACK_ENTRY_STARS) body.set(process.env.FEEDBACK_ENTRY_STARS, String(row.stars));
+      if (process.env.FEEDBACK_ENTRY_TEXT) body.set(process.env.FEEDBACK_ENTRY_TEXT, row.text);
+      if (process.env.FEEDBACK_ENTRY_LANG) body.set(process.env.FEEDBACK_ENTRY_LANG, row.lang);
+      const r = await fetch(form, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+      if (!r.ok) console.warn('feedback form', r.status);
+    } catch (e) { console.warn('feedback form failed', e.message); }
+  }
   res.json({ ok: true });
+});
+
+// 看／下載收到的回覆：/api/feedback.csv?key=（key 要跟環境變數 FEEDBACK_KEY 一樣）
+app.get('/api/feedback.csv', (req, res) => {
+  const key = process.env.FEEDBACK_KEY;
+  if (!key || req.query.key !== key) return res.status(404).send('not found');
+  let rows = [];
+  try {
+    rows = fs.readFileSync(path.join(__dirname, 'data', 'feedback.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  } catch (e) { /* 還沒有人填 */ }
+  const q = (s) => `"${String(s).replace(/"/g, '""')}"`;
+  res.type('text/csv').send(['at,stars,text,lang', ...rows.map((r) => [r.at, r.stars, q(r.text), r.lang].join(','))].join('\n'));
 });
 
 // ---------- 房間 ----------

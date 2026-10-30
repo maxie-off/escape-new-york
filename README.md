@@ -69,6 +69,28 @@ The last screen has a short form (stars + what to improve). Every answer is save
 
 Without the variable nothing breaks — the answers just stay in `data/feedback.jsonl`.
 
+### If Apps Script won't open (option B: a Google Form)
+
+A Google Form writes its answers into a Google Sheet by itself, no script needed.
+
+1. Make a Google Form with two questions: a 1–5 scale ("stars") and a long-answer text box. Optionally a third
+   short-answer for the language.
+2. Responses tab → the green Sheets icon → link it to a spreadsheet.
+3. Open the form's preview (the eye icon), right-click → View page source, and search for `entry.` — each question
+   has an id like `entry.1234567890`. Note which id belongs to which question.
+4. Set these environment variables:
+   - `FEEDBACK_FORM_URL` = the form URL with `/viewform` replaced by `/formResponse`
+   - `FEEDBACK_ENTRY_STARS` = `entry.<id of the 1–5 question>`
+   - `FEEDBACK_ENTRY_TEXT` = `entry.<id of the text question>`
+   - `FEEDBACK_ENTRY_LANG` = `entry.<id of the language question>` (optional)
+
+### Option C: just download them
+
+Set `FEEDBACK_KEY` to any password, then open
+`https://your-site.onrender.com/api/feedback.csv?key=yourpassword` to download every answer as a CSV you can
+open in Google Sheets or Excel. (Note: on Render's free plan the disk is wiped on each deploy, so use option A or
+B if you want to keep them for good.)
+
 ## Where things are
 
 - `server.js` is the server. It keeps all the game state, so both players always see the same thing, and each player only receives what their character can see.
