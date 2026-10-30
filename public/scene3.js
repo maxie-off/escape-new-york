@@ -766,13 +766,13 @@
       </svg>`;
     }
     const p1 = tr(['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成她。'], ['The suspect must have stolen', 'this owner’s boarding pass and passport.']);
-    const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="545" cy="580" rx="250" ry="88" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
+    const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="520" cy="596" rx="150" ry="58" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
     const pulseBtn = ui.seen.case && !ui.seen.pick ? `<rect class="pulse" x="350" y="10" width="300" height="72" rx="36" fill="none" stroke="#ff5a5f" stroke-width="5"/>` : '';
     return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}${REAL}${CL}</defs>${lightsAndCeiling()}${floor()}
       ${dim()}
       ${cop(250, 560, 0.86)}${cop(760, 556, 0.86)}${cop(860, 640, 0.92)}
       ${bubble(60, 120, 330, p1, 250, 300)}
-      <g class="hot" data-hot="case">${openSuitcase(545, 612, 0.9)}${pulse}</g>
+      <g class="hot" data-hot="case">${openSuitcase(520, 620, 0.52)}${pulse}</g>
       ${A.shadow(110, 690, 130, 16)}${A.slothy(110, 692, 0.95)}
       <g class="hot" data-hot="pick"><rect x="360" y="18" width="280" height="56" rx="28" fill="#ffd23f" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>${tr('選擇登機口', 'Pick a gate')}</text>${pulseBtn}</g>
       ${navBtn('right')}
