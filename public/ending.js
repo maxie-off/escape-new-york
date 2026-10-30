@@ -229,8 +229,11 @@
   // ---------------- To be continued ----------------
   // 遊戲的背景故事（往下滑才看得到）
   const PHOTOS = `<div class="end-photos">
-    <img src="img/plush-1.jpg" alt="${tr('陪著我的那兩隻玩偶', 'The two stuffed animals that keep me company')}" loading="lazy"/>
-    <img src="img/plush-2.jpg" alt="${tr('玩偶靠在床邊', 'The two of them by the bed')}" loading="lazy"/>
+    <div class="ph-row"><img src="img/plush-0.jpg" alt="${tr('浣熊坐在書桌前跟樹懶視訊', 'Raccoony at the desk on a video call with Slothy')}" loading="lazy"/></div>
+    <div class="ph-row">
+      <img src="img/plush-1.jpg" alt="${tr('陪著我的那兩隻玩偶', 'The two stuffed animals that keep me company')}" loading="lazy"/>
+      <img src="img/plush-2.jpg" alt="${tr('玩偶靠在床邊', 'The two of them by the bed')}" loading="lazy"/>
+    </div>
   </div>`;
   const STORY = () => {
     const ps = tr([
