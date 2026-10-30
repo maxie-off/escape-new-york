@@ -138,7 +138,7 @@ window.Music = (function () {
   // 每隔三四個半音一個取樣，播放時用 playbackRate 移調到要的音；沒載入完之前先用合成的小提琴代替。
   //   大提琴取樣（Freesound "real cello notes"；見 audio/cello/CREDITS.txt）：低八度跟著小提琴的旋律走
   const SAMPLES = {
-    violin: { dir: 'violin', notes: { G3: 55, A3: 57, C4: 60, E4: 64, G4: 67, A4: 69, C5: 72, E5: 76, G5: 79, A5: 81, C6: 84 }, buf: {}, gain: 5.2 * 0.501, lp: 3400 }, // -6 dB、高頻切到 3.4 kHz
+    violin: { dir: 'violin', notes: { G3: 55, A3: 57, C4: 60, E4: 64, G4: 67, A4: 69, C5: 72, E5: 76, G5: 79, A5: 81, C6: 84 }, buf: {}, gain: 5.2 * 0.282, lp: 3400, vel: 0.75 }, // -11 dB、高頻切到 3.4 kHz；力度 75%（拉得比較輕）
     cello: { dir: 'cello', notes: { E3: 52, G3: 55, A3: 57, C4: 60, Ds4: 63, Fs4: 66, A4: 69 }, buf: {}, gain: 4.2, lp: 3200 },
   };
   let vloading = false;
@@ -156,16 +156,17 @@ window.Music = (function () {
     const S = SAMPLES[k], m = 69 + 12 * Math.log2(f / 440);
     const sm = Object.keys(S.buf).map(Number).reduce((a, b) => (Math.abs(b - m) < Math.abs(a - m) ? b : a));
     const src = c.createBufferSource(); src.buffer = S.buf[sm]; src.playbackRate.value = Math.pow(2, (m - sm) / 12);
-    const g = c.createGain(), lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = S.lp;
-    const amp = v * S.gain, end = t + dur;
-    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(amp, t + 0.04); g.gain.setValueAtTime(amp, end); g.gain.linearRampToValueAtTime(0.0001, end + 0.45);
+    const vel = S.vel ?? 1; // 力度：越輕越小聲、高頻越少、弓起得越慢
+    const g = c.createGain(), lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = S.lp * (0.6 + 0.4 * vel);
+    const amp = v * S.gain * vel, end = t + dur;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(amp, t + 0.04 + (1 - vel) * 0.3); g.gain.setValueAtTime(amp, end); g.gain.linearRampToValueAtTime(0.0001, end + 0.45);
     src.connect(lp); lp.connect(g); g.connect(out); src.start(t); src.stop(end + 0.5);
   }
   // 大提琴（取樣）：沒載入時不出聲，背景已經有合成的大提琴長音
   function celloLine(c, out, t, f, dur, v = 0.03) { if (ready('cello')) sampled('cello', c, out, t, f, dur, v); }
   function violin(c, out, t, f, dur, v = 0.035) {
     if (ready('violin')) return sampled('violin', c, out, t, f, dur, v);
-    return violinSynth(c, out, t, f, dur, v * 0.501);
+    return violinSynth(c, out, t, f, dur, v * 0.282 * 0.75);
   }
   function violinSynth(c, out, t, f, dur, v = 0.035) {
     const g = c.createGain(), lp = c.createBiquadFilter(), b1 = c.createBiquadFilter(), b2 = c.createBiquadFilter(), b3 = c.createBiquadFilter();
