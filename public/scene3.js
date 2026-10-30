@@ -176,16 +176,17 @@
   }
   // 文字寬度估算：中日文一字約 22，英文約 11.5（字級 22）
   const textW = (t) => [...String(t)].reduce((a, c) => a + (/[\u2E80-\u9FFF\uFF00-\uFFEF]/.test(c) ? 22 : 11.5), 0);
-  function bubble(x, y, w, lines, tailX, tailY) {
-    const lh = 30, h = lines.length * lh + 22;
-    w = Math.max(w, Math.ceil(Math.max(...lines.map(textW)) + 34));
+  function bubble(x, y, w, lines, tailX, tailY, o = {}) {
+    const fs = o.fs || 22, k = fs / 22;
+    const lh = Math.round(30 * k), h = lines.length * lh + Math.round(22 * k);
+    w = Math.max(w, Math.ceil(Math.max(...lines.map(textW)) * k + 34));
     if (x + w > 990) x = Math.max(10, 990 - w);
     const bx = Math.min(Math.max(tailX, x + 30), x + w - 30); // 尾巴的根部一定在泡泡裡
     return `<g>
       <path d="M${bx - 14},${y + h - 3} L${tailX},${tailY} L${bx + 16},${y + h - 3}Z" fill="#fff" ${ST2}/>
       <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="#fff" ${ST}/>
       <rect x="${bx - 12}" y="${y + h - 6}" width="26" height="8" fill="#fff"/>
-      <text x="${x + 16}" y="${y + 34}" font-size="22" fill="${INK}" ${FONT}>${lines.map((l, i) => `<tspan x="${x + 16}" dy="${i ? lh : 0}">${esc(l)}</tspan>`).join('')}</text>
+      <text x="${x + 16}" y="${y + Math.round(34 * k)}" font-size="${fs}" fill="${INK}" ${FONT}>${lines.map((l, i) => `<tspan x="${x + 16}" dy="${i ? lh : 0}">${esc(l)}</tspan>`).join('')}</text>
     </g>`;
   }
 
@@ -753,8 +754,9 @@
   }
   // Slothy 牆上的面板：機場代碼對照表（看板上只有代碼，要靠這個才知道是哪裡）
   function codesPanel() {
-    const rows = data.codes.map((c, i) => { const y = 180 + i * 40; return `<text x="430" y="${y}" font-size="21" fill="#ffffff" ${HELV}>${esc(c.code)}</text>
-      <text x="430" y="${y + 16}" font-size="11" fill="#b9c0cb" ${HELV}>${esc(c.place)}</text>`; }).join('');
+    // 一行一個代碼：代碼（白）靠左，地點（淺灰）接在同一行
+    const rows = data.codes.map((c, i) => { const y = 192 + i * 46; return `<text x="344" y="${y}" font-size="21" fill="#ffffff" ${HELV}>${esc(c.code)}</text>
+      <text x="404" y="${y}" font-size="13" fill="#b9c0cb" ${HELV}>${esc(c.place)}</text>`; }).join('');
     return `<rect x="330" y="120" width="300" height="250" fill="transparent"/>${rows}
       ${ui.seen.codes ? '' : `<rect class="pulse" x="326" y="116" width="308" height="258" rx="8" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}`;
   }
@@ -783,7 +785,7 @@
       ${dim()}
       <g class="hot" data-hot="codes">${codesPanel()}</g>
       ${cop(250, 560, 0.86)}${cop(760, 556, 0.86)}${cop(860, 640, 0.92)}
-      ${bubble(60, 120, 330, p1, 250, 300)}
+      ${bubble(24, 150, 230, p1, 240, 330, { fs: 16 })}
       <g class="hot" data-hot="case">${openSuitcase(520, 620, 0.52)}${pulse}</g>
       ${A.shadow(110, 690, 130, 16)}${A.slothy(110, 692, 0.95)}
       <g class="hot" data-hot="pick"><rect x="360" y="18" width="280" height="56" rx="28" fill="#ffd23f" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>${tr('選擇登機口', 'Pick a gate')}</text>${pulseBtn}</g>
