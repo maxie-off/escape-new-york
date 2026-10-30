@@ -21,13 +21,32 @@ let subTimer = null;
 // 注意：不用 \p{Extended_Pictographic}，舊版 iPad Safari 不支援，整支程式會無法執行（白畫面）
 const EMOJI_RE = /(?:[\u2300-\u23FF\u2460-\u27BF\u2900-\u297F\u2B00-\u2BFF\u3297\u3299]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|\uD83E[\uDC00-\uDFFF])\uFE0F?/g;
 const noEmoji = (t) => String(t).replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim();
+// 字幕：一次最多兩行。太長就在標點或空白處切成好幾段，一段一段播（每段幾秒）。
+let subMeasure = null;
+function subLines(text) {
+  if (!subMeasure) { subMeasure = document.createElement('div'); subMeasure.className = 'sub-measure'; document.body.appendChild(subMeasure); }
+  subMeasure.textContent = '測'; const one = subMeasure.clientHeight;
+  subMeasure.textContent = text; const h = subMeasure.clientHeight;
+  const lh = parseFloat(getComputedStyle(subMeasure).lineHeight) || one * 0.6;
+  return Math.round((h - one) / lh) + 1;
+}
+function splitSub(text) {
+  if (subLines(text) <= 2) return [text];
+  // 先用整句組合（句號、問號、驚嘆號、分號），整句還是太長才在逗號或空白處切
+  const greedy = (parts) => { const out = []; let cur = '';
+    for (const p of parts) { const next = cur + p; if (cur && subLines(next.trim()) > 2) { out.push(cur.trim()); cur = p; } else cur = next; }
+    if (cur.trim()) out.push(cur.trim()); return out; };
+  const sentences = text.match(/[^。！？；.!?;]+[。！？；.!?;]*\s*/g) || [text];
+  return greedy(sentences).flatMap((pg) => (subLines(pg) <= 2 ? [pg] : greedy(pg.match(/[^，、,\s]+[，、,]*\s*|\s+/g) || [pg])));
+}
 function say(text, { ms, now } = {}) {
   if (!text) return;
   text = noEmoji(text);
   if (!text) return;
-  const dur = ms || Math.min(8000, 2500 + text.length * 110);
   if (now) { subQueue = []; clearTimeout(subTimer); subShowing = false; }
-  subQueue.push({ text, dur });
+  const pages = splitSub(text);
+  const sum = pages.reduce((a, p) => a + p.length, 0);
+  for (const p of pages) subQueue.push({ text: p, dur: ms ? Math.max(2200, Math.round((ms * p.length) / sum)) : Math.min(6000, 2200 + p.length * 45) });
   if (!subShowing) nextSub();
 }
 function nextSub() {

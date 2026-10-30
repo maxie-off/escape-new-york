@@ -24,8 +24,8 @@ const scenes = [
       {
         done: (s) => s.solved,
         tiers: [
-          T('你們看到的東西不一樣：Raccoony 看紙，Slothy 看插座。把自己看到的形狀和顏色說給對方聽。', 'You see different things: Raccoony has the paper, Slothy has the power strip. Tell each other the shapes and colors you see.'),
-          T('紙上每個形狀對應一個顏色，最下面還畫著立燈要插哪一種形狀。插孔的排列和紙上不同，要看形狀，不是看位置。', 'Each shape on the paper matches a color, and the bottom shows which shape the lamp goes into. The sockets are in a different order, so go by shape, not position.'),
+          T('Raccoony 看紙、Slothy 看插座，互相說說看到的形狀和顏色。', 'Raccoony has the paper, Slothy the sockets. Tell each other the shapes and colors.'),
+          T('紙上：形狀對應顏色，最下面是立燈的形狀。看形狀，不看位置。', 'The paper pairs shapes with colors; the bottom shows the lamp’s shape. Match shapes, not positions.'),
           (s) => S0.answers(s).plug,
         ],
       },
@@ -42,7 +42,7 @@ const scenes = [
       {
         done: (s) => s.pcUnlocked,
         tiers: [
-          T('電腦需要密碼。這是 1A2B 猜字遊戲的紀錄：Slothy 衣櫃上的紙和 Raccoony 書桌上的紙都有「10 月 3 日」，要合起來讀。', 'The computer needs a password. These are records of a word-guessing game: both Slothy’s paper on the wardrobe and Raccoony’s paper on the desk have “Oct 3”. Read them together.'),
+          T('密碼藏在猜字紀錄裡：兩張紙上的「10 月 3 日」要合起來看。', 'The password is in the word-game logs. Read both “Oct 3” papers together.'),
           (s) => S1.answers(s).tag,
           (s) => S1.answers(s).password,
         ],
@@ -50,16 +50,16 @@ const scenes = [
       {
         done: (s) => s.hasKey,
         tiers: [
-          T('電腦裡的日記說了鑰匙藏在哪；Slothy 的衣櫃地圖說了每一格放什麼。', 'The diary on the computer says where the key is hidden; Slothy’s wardrobe map shows what’s in each drawer.'),
-          (s) => T(`日記說鑰匙藏在${S1.answers(s).keyItem.zh}裡。衣櫃地圖由上往下數，找出它在第幾格，再去「密碼本」查那一格的密碼。`, `The diary says the key is with the ${S1.answers(s).keyItem.en.toLowerCase()}. Count down the wardrobe map to find that drawer, then look up its code on the Passwords page.`),
+          T('日記說鑰匙藏在哪，衣櫃地圖說每一格放什麼。', 'The diary says where the key is; the wardrobe map shows each drawer.'),
+          (s) => T(`鑰匙在${S1.answers(s).keyItem.zh}裡。找出是第幾格，再到「密碼本」查密碼。`, `The key is with the ${S1.answers(s).keyItem.en.toLowerCase()}. Find that drawer, then its code in Passwords.`),
           (s) => S1.answers(s).drawer,
         ],
       },
       {
         done: (s) => s.hasPassport,
         tiers: [
-          T('門牌寫著「護照記得拿」。Raccoony 的便條說護照在床底下的箱子。右邊的箱子已經開了，看看裡面的情書和它的鎖。兩人都可以按畫面右邊的箭頭換視角。', 'The door sign says not to forget the passport. Raccoony’s sticky note says it’s in a suitcase under the bed. The suitcase on the right is already open: read the letters and look at its lock. You can both tap the arrow on the right to switch views.'),
-          T('Raccoony 的吉他可以彈：吉他譜左邊的 1~6 是弦，對照 Slothy 牆上和弦表上方的 6~1，每一小節是一個和弦字母。彈哪首歌，哪個箱子的鎖就會亮；開鎖時 Slothy 按準備，Raccoony 要在 10 秒內彈出同樣的和弦。', 'Raccoony can play the guitar. The 1–6 on the left of the tabs are strings; match them with the 6–1 above the chord chart on Slothy’s wall. Each bar is one chord letter. Playing a song lights that suitcase’s lock. To open it, Slothy presses Ready and Raccoony plays the same chords within 10 seconds.'),
+          T('護照在床底下的箱子。右邊的箱子開著：看看情書和它的鎖。', 'The passport is in a suitcase under the bed. The right one is open: read the letters, check its lock.'),
+          T('譜上每一小節是一個和弦，對照 Slothy 的和弦表。開鎖：Slothy 按準備，Raccoony 10 秒內彈出來。', 'Each tab bar is one chord; match it on Slothy’s chord chart. To unlock: Slothy taps Ready, Raccoony plays within 10 s.'),
           (s) => S1.answers(s).plane,
         ],
       },
@@ -80,15 +80,15 @@ const scenes = [
       {
         done: (s) => s.allClear,
         tiers: [
-          T('看板壞了，只有一列亮著。Slothy 按右邊的箭頭去看電箱：電線牌上的線路，要接到對的符號接頭。', 'The board is broken; only one row is lit. Slothy, tap the right arrow to see the electric box: each wire’s line tag goes into the socket with the right symbol.'),
-          T('Raccoony 的看板每列左邊有一個符號：Slothy 問「某線是什麼符號」，把那條電線接過去、打開閘門。那列亮起來但有雜訊時，Raccoony 要把旋鈕轉到電線牌背面的頻道。', 'Each row on Raccoony’s board has a symbol on the left. Slothy asks which symbol a line has, plugs that wire in and flips the switch. When the row lights up with static, Raccoony turns its knob to the channel on the back of the wire tag.'),
+          T('看板壞了。Slothy 按右箭頭去電箱，把每條電線接到對的符號。', 'The board is broken. Slothy, open the electric box (right arrow) and wire each line to its symbol.'),
+          T('符號在 Raccoony 的看板上。接好後，Raccoony 把旋鈕轉到牌子背面的頻道。', 'The symbols are on Raccoony’s board. Once wired, Raccoony turns the knob to the channel on the tag’s back.'),
           (s) => S2.answers(s).fix,
         ],
       },
       {
         done: (s) => s.solved,
         tiers: [
-          T('看板全亮了！先看機票：要去哪個機場、幾點登機？Slothy 柱子上的路線圖畫著每條線開到哪一站、哪一站是機場、要搭幾分鐘。兩邊都有路人走過來說今天哪條線在施工、改走哪條線。', 'The board is fully lit! Check the ticket: which airport, and when is boarding? The route map on Slothy’s pillar shows where each line ends, which stop is the airport, and how many minutes it takes. A passer-by on each side says which line is under construction today and which line it runs on instead.'),
+          T('機票說去哪個機場，路線圖說機場在哪一站。路人會說哪條線在施工。', 'The ticket names the airport; the route map shows its stop. Passers-by say which lines are detoured.'),
           (s) => S2.answers(s).clue,
           (s) => S2.answers(s).line,
         ],
@@ -106,7 +106,7 @@ const scenes = [
       {
         done: (s) => s.solved,
         tiers: [
-          T('Slothy 把行李箱裡的東西說給 Raccoony 聽：衣服是去玩水還是去很冷的地方？小物是做什麼活動用的？Raccoony 看看板上的日期，再按右邊箭頭看旅遊貼文。找出目的地後，看板上飛往那裡的航空公司，就是 Slothy 要在電腦上駭入的資料庫。', 'Slothy, describe the suitcase to Raccoony: are the clothes for the beach or somewhere cold? What activity are the gadgets for? Raccoony, check the date on the board, then tap the right arrow for the travel posts. Once you know the destination, the airline flying there on the board is the database Slothy hacks on the computer.'),
+          T('Slothy 描述行李的衣服和小物；Raccoony 看看板日期和旅遊貼文，推出目的地。', 'Slothy, describe the clothes and gadgets. Raccoony, use the date and travel posts to find the destination.'),
           (s) => S3.answers(s).clue,
           (s) => S3.answers(s).gate,
         ],

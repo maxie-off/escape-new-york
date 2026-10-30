@@ -581,7 +581,7 @@ window.Music = (function () {
   }
 
   // 吉他：四個和弦各刷一下（每個和弦約 0.5 秒，由低到高快速撥弦）
-  const ROOT = { A: 220, B: 246.94, C: 261.63, D: 293.66, E: 164.81, F: 174.61, G: 196 };
+  const ROOT = { A: 110, B: 123.47, C: 130.81, D: 146.83, E: 82.41, F: 87.31, G: 98 }; // 低一個八度，聲音比較低沉
   function strum(chords) {
     if (!ctx || !g || muted) return;
     const bus = sfxBus(0.32), t0 = ctx.currentTime + 0.05;
@@ -593,7 +593,7 @@ window.Music = (function () {
         o.type = 'sawtooth'; o.frequency.value = r * m;
         // 長一點的餘音：先很快掉到一半，再慢慢消失（每個和弦約 2 秒，最後一個更長）
         const last = k === String(chords).length - 1, rel = last ? 2.8 : 1.9;
-        f.type = 'lowpass'; f.frequency.setValueAtTime(3200, t); f.frequency.exponentialRampToValueAtTime(900, t + 0.35); f.frequency.exponentialRampToValueAtTime(420, t + rel);
+        f.type = 'lowpass'; f.frequency.setValueAtTime(2300, t); f.frequency.exponentialRampToValueAtTime(700, t + 0.35); f.frequency.exponentialRampToValueAtTime(320, t + rel);
         e.gain.setValueAtTime(0.0001, t); e.gain.exponentialRampToValueAtTime(0.15, t + 0.008); e.gain.exponentialRampToValueAtTime(0.06, t + 0.3); e.gain.exponentialRampToValueAtTime(0.0001, t + rel);
         o.connect(f); f.connect(e); e.connect(bus); o.start(t); o.stop(t + rel + 0.05);
       });

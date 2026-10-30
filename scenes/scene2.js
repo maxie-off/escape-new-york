@@ -185,13 +185,13 @@ function answers(state) {
   const p = onBoard.find((l) => l !== vv.answer), q = vv.answer;
   const wrongTo = STOP[vv.routes[vv.works[p]]].name;
   const next = vv.rows.find((r) => r[0] === vv.answer)[1];
-  const qz = vv.works[q] ? T(`；${q} 線改走 ${vv.works[q]} 線，還是到 ${stop.name}`, `; the ${q} line runs on the ${vv.works[q]} line and still reaches ${stop.name}`) : T(`；${q} 線照常開`, `; the ${q} line runs as normal`);
+  const qz = vv.works[q] ? T(`；${q} 線改走 ${vv.works[q]} 線，還到得了`, `; the ${q} line’s detour (${vv.works[q]}) still gets there`) : T('', '');
   return {
     fix,
-    clue: T(`機票上的機場是 ${vv.airport}；路線圖上 ${vv.airport} 在 ${stop.name} 站。看板上開往 ${stop.name} 的是 ${p} 線和 ${q} 線，但路人說今天有線在施工，要看它改走的線還到不到 ${stop.name}。`,
-      `The ticket says ${vv.airport}; on the route map ${vv.airport} is at ${stop.name}. The board shows the ${p} and ${q} lines going to ${stop.name}, but the passers-by say some lines are under construction today, so check whether the line it runs on still reaches ${stop.name}.`),
-    line: T(`${p} 線改走 ${vv.works[p]} 線，會開到 ${wrongTo}，到不了機場${qz.zh}。搭 ${q} 線（${next} 分鐘後進站）。`,
-      `The ${p} line runs on the ${vv.works[p]} line to ${wrongTo}, which misses the airport${qz.en}. Take the ${q} line (arriving in ${next} minutes).`),
+    clue: T(`${vv.airport} 在 ${stop.name} 站，看板上 ${p}、${q} 線都開往那裡。施工改走的線還到得了嗎？`,
+      `${vv.airport} is at ${stop.name}; the ${p} and ${q} lines go there. Does each detour still reach it?`),
+    line: T(`${p} 線改走 ${vv.works[p]} 線，到不了機場${qz.zh}。搭 ${q} 線。`,
+      `The ${p} line detours to ${wrongTo}${qz.en}. Take the ${q} line.`),
   };
 }
 function solution(v) { const vv = VARIANTS[v]; return { line: vv.answer, lit: vv.lit, sym: vv.sym, ch: vv.ch }; }

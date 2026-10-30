@@ -751,6 +751,21 @@
       <rect x="${R - 46}" y="${M + 8}" width="34" height="20" rx="4" fill="#2a2524" ${ln(1.4)}/>${[0, 1, 2].map((i) => `<rect x="${R - 42 + i * 9}" y="${M + 12}" width="6" height="12" rx="1" fill="#9a9ea6"/>`).join('')}<circle cx="${R - 18}" cy="${M + 18}" r="2.2" fill="#e5382f"/>
     </g>`;
   }
+  // Slothy 牆上的面板：機場代碼對照表（看板上只有代碼，要靠這個才知道是哪裡）
+  function codesPanel() {
+    const rows = data.codes.map((c, i) => { const y = 226 + i * 34; return `<rect x="442" y="${y - 22}" width="214" height="28" rx="3" fill="${i % 2 ? '#141b2b' : '#18213a'}"/>
+      <text x="454" y="${y}" font-size="20" fill="#ffd23f" ${HELV}>${esc(c.code)}</text><text x="512" y="${y}" font-size="14" fill="#e9edf5" ${HELV}>${esc(c.place)}</text>`; }).join('');
+    return `<rect x="428" y="150" width="242" height="210" rx="6" fill="#0e1422" stroke="${INK}" stroke-width="3"/>
+      <rect x="428" y="150" width="242" height="34" rx="6" fill="#1e5fb3"/><rect x="428" y="176" width="242" height="8" fill="#1e5fb3"/>
+      <text x="549" y="174" text-anchor="middle" font-size="16" fill="#fff" ${HELV}>${tr('機場代碼 AIRPORT CODES', 'AIRPORT CODES')}</text>
+      ${rows}<rect x="428" y="150" width="242" height="210" rx="6" fill="url(#gTopLight)" style="pointer-events:none"/>
+      ${ui.seen.codes ? '' : `<rect class="pulse" x="420" y="142" width="258" height="226" rx="10" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}`;
+  }
+  function codesHtml() {
+    return `<div class="modal-card s3-board"><button class="x" data-act="close">✕</button>
+      <div class="s3-board-head"><b>${tr('機場代碼 AIRPORT CODES', 'AIRPORT CODES')}</b></div>
+      <table><tbody>${data.codes.map((c) => `<tr><td style="color:#ffd23f;width:90px">${esc(c.code)}</td><td>${esc(c.place)}</td></tr>`).join('')}</tbody></table></div>`;
+  }
   function roomB() {
     if (ui.view === 1) {
       const H = hk();
@@ -765,11 +780,12 @@
         ${navBtn('left', 56, 360)}
       </svg>`;
     }
-    const p1 = tr(['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成她。'], ['The suspect must have stolen', 'this owner’s boarding pass and passport.']);
+    const p1 = tr(['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成她。'], ['The suspect must have stolen', 'her boarding pass and passport,', 'and is pretending to be her.']);
     const pulse = ui.seen.case ? '' : `<rect class="pulse" x="388" y="550" width="248" height="92" rx="10" fill="none" stroke="#ff5a5f" stroke-width="5"/>`;
     const pulseBtn = ui.seen.case && !ui.seen.pick ? `<rect class="pulse" x="350" y="10" width="300" height="72" rx="36" fill="none" stroke="#ff5a5f" stroke-width="5"/>` : '';
     return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}${REAL}${CL}</defs>${lightsAndCeiling()}${floor()}
       ${dim()}
+      <g class="hot" data-hot="codes">${codesPanel()}</g>
       ${cop(250, 560, 0.86)}${cop(760, 556, 0.86)}${cop(860, 640, 0.92)}
       ${bubble(60, 120, 330, p1, 250, 300)}
       <g class="hot" data-hot="case">${openSuitcase(520, 620, 0.52)}${pulse}</g>
@@ -838,7 +854,7 @@
     const el = $modal();
     if (ui.modal === 'manifest' && !(data.hack && data.hack.manifest)) ui.modal = null;
     if (!ui.modal) { el.hidden = true; el.innerHTML = ''; return; }
-    el.innerHTML = { case: caseHtml, board: boardHtml, gate: gateHtml, posts: postsHtml, confirm: confirmHtml, manifest: manifestHtml }[ui.modal]();
+    el.innerHTML = { case: caseHtml, codes: codesHtml, board: boardHtml, gate: gateHtml, posts: postsHtml, confirm: confirmHtml, manifest: manifestHtml }[ui.modal]();
     el.hidden = false;
   }
   function closeModal() { ui.modal = null; renderModal(); }
@@ -866,6 +882,7 @@
     if (!h || !introDone) return;
     const k = h.dataset.hot;
     if (k === 'case') { ui.seen.case = true; ui.modal = 'case'; }
+    else if (k === 'codes') { ui.seen.codes = true; ui.modal = 'codes'; }
     else if (k === 'board') ui.modal = 'board';
     else if (k === 'posts') { ui.seen.posts = true; ui.modal = 'posts'; }
     else if (k === 'manifest') { ui.seen.manifest = true; ui.modal = 'manifest'; }

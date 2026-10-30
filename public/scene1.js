@@ -262,7 +262,7 @@
     const LX = 40, TOP = 74, GAP = 24, BW = 160;
     const lines = Array.from({ length: 6 }, (_, i) => `<line x1="${LX}" y1="${TOP + i * GAP}" x2="${LX + BW * 4}" y2="${TOP + i * GAP}" stroke="#1b1b1f" stroke-width="1.6"/>`).join('');
     const bars = Array.from({ length: 5 }, (_, i) => `<line x1="${LX + i * BW}" y1="${TOP}" x2="${LX + i * BW}" y2="${TOP + 5 * GAP}" stroke="#1b1b1f" stroke-width="${i === 4 ? 3 : 1.8}"/>`).join('');
-    const nums = sh.bars.map((fr, b) => [0.3, 0.72].map((pos) => fr.map((f, si) => (f === null ? '' : `<rect x="${LX + b * BW + BW * pos - 9}" y="${TOP + (5 - si) * GAP - 10}" width="18" height="20" fill="#fffdf3"/><text x="${LX + b * BW + BW * pos}" y="${TOP + (5 - si) * GAP + 6}" text-anchor="middle" font-size="18" font-weight="700" fill="#1b1b1f" font-family="${A.MONOF}">${f}</text>`)).join('')).join('')).join('');
+    const nums = sh.bars.map((fr, b) => [0.3, 0.72].map((pos) => fr.map((f0, si) => { const f = f0 ?? 0; return `<rect x="${LX + b * BW + BW * pos - 9}" y="${TOP + (5 - si) * GAP - 10}" width="18" height="20" fill="#fffdf3"/><text x="${LX + b * BW + BW * pos}" y="${TOP + (5 - si) * GAP + 6}" text-anchor="middle" font-size="18" font-weight="700" fill="#1b1b1f" font-family="${A.MONOF}">${f}</text>`; }).join('')).join('')).join('');
     return `<svg viewBox="0 0 720 240" class="tab-svg"><text x="360" y="30" text-anchor="middle" font-size="26" font-weight="700" fill="#1b1b1f" ${FONT}>${tr(`《${esc(sh.title)}》`, `“${esc(sh.title)}”`)}</text>
       ${[0, 1, 2, 3, 4, 5].map((i) => `<text x="${LX - 12}" y="${TOP + i * GAP + 5}" text-anchor="middle" font-size="15" font-weight="700" fill="#c5262c" font-family="${A.SIGNF}">${i + 1}</text>`).join('')}
       ${lines}${bars}${nums}</svg>`;
@@ -276,9 +276,7 @@
     for (let i = 0; i < 6; i++) o += `<line x1="${x + i * SX}" y1="${y}" x2="${x + i * SX}" y2="${y + H}" stroke="#1b1b1f" stroke-width="1.6"/>`;
     fr.forEach((f, i) => {
       const cx = x + i * SX;
-      if (f === null) o += `<text x="${cx}" y="${y - 7}" text-anchor="middle" font-size="14" fill="#1b1b1f" font-family="${A.SIGNF}">×</text>`;
-      else if (f === 0) o += `<circle cx="${cx}" cy="${y - 11}" r="4.5" fill="none" stroke="#1b1b1f" stroke-width="1.8"/>`;
-      else o += `<circle cx="${cx}" cy="${y + (f - 0.5) * FY}" r="6.4" fill="#1b1b1f"/>`;
+      if (f) o += `<circle cx="${cx}" cy="${y + (f - 0.5) * FY}" r="6.4" fill="#1b1b1f"/>`;
     });
     return o;
   }
@@ -309,6 +307,35 @@
   function faceSvg(id, glow = false) {
     const x = 20, y = 24, w = 170, h = 120;
     return `<svg viewBox="0 0 210 170" class="s1-face">${suitcaseFace(id, x, y, w, h, glow)}</svg>`;
+  }
+  // 電腦「照片」資料夾裡的三張照片（插畫）
+  function snap(kind) {
+    const t = A.st(2.5);
+    if (kind === 'surf') return `<rect width="240" height="170" fill="#9fdcff"/><circle cx="200" cy="30" r="16" fill="#ffe066"/>
+      <rect y="96" width="240" height="74" fill="#1f8fd6"/>
+      <path d="M-10,170 C10,110 60,60 130,58 C190,56 230,84 236,112 C220,96 196,92 182,104 C200,108 208,122 200,134 C180,120 150,128 140,170Z" fill="#2b9de8" ${t}/>
+      <path d="M130,58 C190,56 228,82 236,108" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M40,150 C70,110 100,92 130,86" fill="none" stroke="#fff" stroke-width="3" opacity=".6"/>
+      <g transform="translate(108,112) rotate(-14)"><ellipse cx="0" cy="0" rx="58" ry="9" fill="#fff" ${t}/><path d="M-50,0 H50" stroke="#e5382f" stroke-width="3"/></g>
+      <g transform="translate(108,106) rotate(-10)">${A.raccoony(0, 0, 0.42)}</g>
+      ${[[30, 100], [60, 92], [190, 150]].map(([x, y]) => `<path d="M${x},${y} q8,-7 16,0" fill="none" stroke="#fff" stroke-width="2.5"/>`).join('')}`;
+    if (kind === 'beach') return `<rect width="240" height="170" fill="#a9e4ff"/><circle cx="34" cy="26" r="15" fill="#ffe066"/>
+      <rect y="52" width="240" height="22" fill="#1f8fd6"/><path d="M0,60 q12,-5 24,0 t24,0 t24,0 t24,0 t24,0 t24,0 t24,0 t24,0 t24,0 t24,0" fill="none" stroke="#fff" stroke-width="2"/>
+      <rect y="72" width="240" height="98" fill="#f3d9a0"/>
+      <rect x="40" y="104" width="170" height="46" rx="4" fill="#ff7b9c" ${t} transform="rotate(-4 125 127)"/>${[0, 1, 2, 3, 4].map((i) => `<rect x="${52 + i * 34}" y="104" width="14" height="46" fill="#fff" opacity=".6" transform="rotate(-4 125 127)"/>`).join('')}
+      <g transform="translate(166,124) rotate(-90) scale(.56)">${A.slothy(0, 0, 1)}
+        <path d="M-32,-117 q14,-4 28,0 l-2,10 q-12,8 -24,0Z M4,-117 q14,-4 28,0 l-2,10 q-12,8 -24,0Z" fill="#15161b" ${t}/><path d="M-4,-114 h8" stroke="#15161b" stroke-width="4"/>
+        <path d="M-32,-52 q14,-24 30,-6 q-12,18 -30,6Z M2,-58 q16,-18 30,6 q-18,12 -30,-6Z" fill="#8fd3ff" ${t}/><path d="M-4,-55 h8 M-32,-52 l-12,4 M32,-52 l12,4" stroke="#4a92c4" stroke-width="3"/>
+        <path d="M-28,-30 h56 l-8,16 q-20,10 -40,0Z" fill="#8fd3ff" ${t}/></g>
+      <g transform="translate(206,96)"><path d="M0,20 v-36" stroke="${INK}" stroke-width="3"/><path d="M-30,-14 a30,18 0 0 1 60,0Z" fill="#ffd23f" ${t}/></g>`;
+    return `<rect width="240" height="170" fill="#3a3f4b"/>
+      <path d="M0,0 H240 V52 C180,40 60,40 0,52Z" fill="#9fd0f0"/><path d="M0,52 C60,40 180,40 240,52" fill="none" stroke="#1b1b1f" stroke-width="5"/>
+      <path d="M150,6 l40,40 M170,0 l40,40" stroke="#fff" stroke-width="5" opacity=".35"/>
+      <rect x="18" y="70" width="88" height="110" rx="26" fill="#5a4a3a" ${t}/><rect x="134" y="70" width="88" height="110" rx="26" fill="#5a4a3a" ${t}/>
+      <rect x="40" y="56" width="44" height="22" rx="10" fill="#6b5a48" ${t}/><rect x="156" y="56" width="44" height="22" rx="10" fill="#6b5a48" ${t}/>
+      <g transform="translate(70,206) scale(.78)">${A.raccoony(0, 0, 1)}</g><g transform="translate(170,206) scale(.78)">${A.slothy(0, 0, 1)}</g>
+      <path d="M196,150 L150,172" stroke="#2b2d35" stroke-width="9"/><path d="M96,150 L50,172" stroke="#2b2d35" stroke-width="9"/>
+      <g transform="translate(14,118) rotate(24)"><ellipse cx="0" cy="0" rx="14" ry="30" fill="#6e5d5a" ${t}/></g>
+      `;
   }
   function photo(kind) {
     const inner = kind === 'hug'
@@ -388,11 +415,16 @@
           : `<div class="pw-fake" data-act="pwfocus">${tr('點擊這裡輸入 Password', 'Tap here to enter the password')}</div>`}
         <p class="err">${esc(ui.pwErr)}</p></div></div>`;
     }
+    if (ui.photosOpen) {
+      return `<div class="mon"><div class="photos-win"><div class="pw-head">🖼️ ${tr('照片', 'Photos')}</div>
+        <div class="pw-grid">${['surf', 'beach', 'car'].map((k) => `<div class="pw-shot"><svg viewBox="0 0 240 170">${snap(k)}</svg></div>`).join('')}</div>
+        <p class="pw-note">${tr('恭喜你找到驚喜，但這不是你要找的。', 'Congrats, you found a surprise! But it’s not what you’re looking for.')}</p></div></div>
+        <div style="margin-top:10px"><button class="small" data-act="closephotos">${tr('← 回到桌面', '← Back to desktop')}</button></div>`;
+    }
     if (!ui.notionOpen) {
       return `<div class="mon"><div class="desktop">
         <div class="icon app" data-act="opennotion"><div class="glyph">📄</div>Notion</div>
-        <div class="icon"><div class="glyph">🖼️</div>${tr('照片', 'Photos')}</div>
-        <div class="icon"><div class="glyph">🗑️</div>${tr('垃圾桶', 'Trash')}</div></div></div>`;
+        <div class="icon app" data-act="openphotos"><div class="glyph">🖼️</div>${tr('照片', 'Photos')}</div></div></div>`;
     }
     const pages = data.notion.pages;
     const pg = pages[ui.page] || pages[0];
@@ -443,6 +475,8 @@
       case 'pwfocus': ui.pwOpen = true; renderModal(); document.getElementById('pw')?.focus(); return;
       case 'pwsubmit': return submitPw();
       case 'opennotion': ui.notionOpen = true; ui.page = 0; return renderModal();
+      case 'openphotos': ui.photosOpen = true; return renderModal();
+      case 'closephotos': ui.photosOpen = false; return renderModal();
       case 'closenotion': ui.notionOpen = false; return renderModal();
       case 'page': ui.page = Number(t.dataset.i); return renderModal();
       case 'dsubmit': return submitDrawer();

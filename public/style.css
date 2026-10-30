@@ -76,13 +76,15 @@ button.small { padding: 4px 10px; font-size: 14px; box-shadow: 3px 3px 0 var(--i
 #legacy .card { width: min(620px, 100%); } #legacy ul { margin: 0 0 14px; padding-left: 22px; }
 
 /* 字幕：場景開頭的旁白、提示、事件都從這裡顯示，約 5 秒後淡出 */
-#subtitle {
+#subtitle, .sub-measure {
+  line-height: 1.45;
   position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 5vh); transform: translateX(-50%); z-index: 60;
   max-width: min(86vw, 900px); padding: .45em 1.2em; border-radius: 12px; text-align: center; pointer-events: none;
   font-size: clamp(13px, 1.95vw, 21px); color: #fff; background: rgba(15,15,20,.78); border: 3px solid var(--ink); text-shadow: 0 2px 0 rgba(0,0,0,.6);
   opacity: 0; transition: opacity .35s;
 }
 #subtitle.on { opacity: 1; }
+.sub-measure { visibility: hidden; opacity: 0 !important; transition: none; }
 .conn { position: fixed; top: 4px; left: 8px; margin: 0; font-size: 12px; color: #fff; z-index: 70; text-shadow: 0 1px 2px #000; }
 
 /* 請橫放 */
@@ -484,3 +486,11 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
   clip-path: polygon(0 3%, 6% 0.5%, 9% 2.5%, 22% 1%, 30% 2.8%, 37% 0, 55% 1.6%, 63% 0.4%, 71% 2%, 88% 0.8%, 93% 3%, 100% 0, 98.4% 12%, 100% 20%, 98.8% 37%, 100% 46%, 97.8% 58%, 99.6% 70%, 98.6% 79%, 100% 92%, 97% 100%, 82% 97.8%, 70% 99.6%, 64% 97.6%, 45% 99%, 36% 97%, 27% 100%, 11% 97.8%, 4% 99.4%, 0 96%, 1.8% 79%, 0 66%, 1.6% 56%, 0 44%, 2% 34%, 0.4% 22%, 1.6% 12%); }
 .paper.map .map-row { border: none; background: none; margin: 0; padding: 6px 2px; gap: 12px; font: 700 26px/1.2 var(--body), 'PingFang TC', sans-serif; color: #2e2010; }
 .paper.map .map-row b { width: auto; height: auto; background: none; border: none; border-radius: 0; font: 800 26px var(--body); color: #2e2010; display: inline; }
+/* Raccoony 電腦裡的照片資料夾 */
+.photos-win { background: #f4f6fa; border-radius: 6px; padding: 10px 12px 12px; min-height: 280px; }
+.photos-win .pw-head { font: 700 16px var(--body); color: #3a3f4b; margin-bottom: 8px; }
+.pw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pw-shot { background: #fff; border: 3px solid var(--ink); padding: 5px; box-shadow: 3px 3px 0 rgba(0,0,0,.25); }
+.pw-shot:nth-child(1) { transform: rotate(-1.5deg); } .pw-shot:nth-child(3) { transform: rotate(1.5deg); }
+.pw-shot svg { display: block; width: 100%; height: auto; }
+.pw-note { margin: 12px 0 0; text-align: center; font: 700 17px var(--body); color: #3a3f4b; }

@@ -76,11 +76,11 @@ function build(v) {
       { icon: '📓', title: T('日記', 'Diary'), blocks: [
         { t: 'h', text: T('10 月 24 日 · 星期五', 'Friday, Oct 24') },
         { t: 'p', text: T('終於訂好回台北的機票了！明天一早的飛機，行李也收好了。', 'Finally booked my flight home to Taipei! It leaves tomorrow and my bags are packed.') },
-        { t: 'p', text: T('出門前得先找到房門鑰匙——昨晚太累，我隨手把它藏起來了。', 'I need to find the door key before I leave. I was so tired last night that I hid it somewhere.') },
-        { t: 'p', text: T(`我記得……${ITEMS[wd.key].diary.zh}，那樣最安全，Slothy 一定找不到 🦥`, `I think… ${ITEMS[wd.key].diary.en}. Safest spot. Slothy will never find it 🦥`) },
+        { t: 'p', text: T('出門前得先找到房門鑰匙——昨晚太累，忘記放在哪裡了。', 'I need to find the door key before I leave. I was so tired I forgot where I put it last night.') },
+        { t: 'p', text: T(`我記得……${ITEMS[wd.key].diary.zh}。`, `I think… ${ITEMS[wd.key].diary.en}.`) },
         { t: 'h', text: T('10 月 23 日', 'Oct 23') },
-        { t: 'p', text: T('整理衣櫃，終於每個抽屜都分類好了！清單我印出來，放在衣櫃上面了。', 'Sorted my wardrobe, every drawer has its own thing now! I printed the list and left it on top of the wardrobe.') },
-        { t: 'p', text: T('為了不忘記，每個抽屜的鎖密碼都記在「密碼本」裡（只記抽屜編號）。', 'So I don’t forget, every drawer lock code is in my "Passwords" page (by drawer number only).') },
+        { t: 'p', text: T('整理衣櫃，終於每個抽屜都分類好了！清單我寫好了，放在衣櫃上面。', 'Sorted my wardrobe, every drawer has its own thing now! I’ve written a list and left it on top of the wardrobe.') },
+        { t: 'p', text: T('為了不忘記，每個抽屜的鎖密碼都記在「密碼本」裡。', 'So I don’t forget, every drawer lock code is in my "Passwords" page.') },
       ] },
       { icon: '🔐', title: T('密碼本', 'Passwords'), blocks: [{ t: 'table', head: [T('東西', 'Item'), T('密碼', 'Code')], rows: [[T('🏋️ 健身房置物櫃', '🏋️ Gym locker'), '3391'], [T('📮 信箱', '📮 Mailbox'), '1057'], ...Object.entries(drawers).map(([n, d]) => [T(`衣櫃 ${n}`, `Wardrobe ${n}`), d.code])] }] },
       { icon: '✅', title: T('待辦', 'To-do'), blocks: [
@@ -280,12 +280,12 @@ function answers(state) {
   const d = B.drawers[B.keyDrawer];
   return {
     password: T(`電腦密碼是 ${B.password}。`, `The computer password is ${B.password}.`),
-    tag: T(`看 10 月 1 日那局：答案寫在最下面，拿它去對照每一行猜測。${B.tag[0]}＝字母對、位置也對；${B.tag[1]}＝字母對、位置不對。`,
-      `Look at the Oct 1 game: its answer is written at the bottom, so check each guess against it. ${B.tag[0]} = right letter in the right spot; ${B.tag[1]} = right letter in the wrong spot.`),
+    tag: T(`拿 10 月 1 日的答案對照每一行：${B.tag[0]}＝位置對，${B.tag[1]}＝字母對但位置錯。`,
+      `Check Oct 1’s guesses against its answer: ${B.tag[0]} = right spot, ${B.tag[1]} = right letter, wrong spot.`),
     keyItem: d.item,
     drawer: T(`鑰匙在第 ${B.keyDrawer} 格（${d.item.zh}），密碼 ${d.code}。`, `The key is in drawer ${B.keyDrawer} (${d.item.en}), code ${d.code}.`),
-    plane: T(`《飛機場的十點半》是 ${B.codes.plane}，彈它會讓${CASE_COLOR.plane.zh}箱子的鎖亮。Slothy 把${CASE_COLOR.plane.zh}箱子轉成 ${B.codes.plane}、按準備，Raccoony 在 10 秒內彈 ${B.codes.plane}。`,
-      `"10:30 at the Airport" is ${B.codes.plane}; playing it lights the ${CASE_COLOR.plane.en} suitcase’s lock. Slothy sets the ${CASE_COLOR.plane.en} suitcase to ${B.codes.plane} and presses Ready, then Raccoony plays ${B.codes.plane} within 10 seconds.`),
+    plane: T(`${CASE_COLOR.plane.zh}箱子是 ${B.codes.plane}：Slothy 轉好按準備，Raccoony 10 秒內彈 ${B.codes.plane}。`,
+      `The ${CASE_COLOR.plane.en} suitcase is ${B.codes.plane}. Slothy sets it and taps Ready; Raccoony plays ${B.codes.plane} within 10 s.`),
   };
 }
 // 測試用：這個變化的完整解法
