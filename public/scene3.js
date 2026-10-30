@@ -766,7 +766,7 @@
       </svg>`;
     }
     const p1 = tr(['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成她。'], ['The suspect must have stolen', 'this owner’s boarding pass and passport.']);
-    const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="520" cy="596" rx="150" ry="58" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
+    const pulse = ui.seen.case ? '' : `<rect class="pulse" x="388" y="550" width="248" height="92" rx="10" fill="none" stroke="#ff5a5f" stroke-width="5"/>`;
     const pulseBtn = ui.seen.case && !ui.seen.pick ? `<rect class="pulse" x="350" y="10" width="300" height="72" rx="36" fill="none" stroke="#ff5a5f" stroke-width="5"/>` : '';
     return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}${REAL}${CL}</defs>${lightsAndCeiling()}${floor()}
       ${dim()}
