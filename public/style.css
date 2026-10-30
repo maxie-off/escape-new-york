@@ -349,10 +349,14 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 @keyframes endbob { 50% { transform: translateY(6px); } }
 .end-story { min-height: 100%; padding: 8vh 20px 10vh; background: #11141d; color: #e8ebf2; }
 .end-story h2 { max-width: 720px; margin: 0 auto .9em; font: 400 clamp(24px, 4vw, 40px) var(--display); letter-spacing: .06em; color: var(--yellow); text-align: center; }
+.end-body { max-width: 640px; margin: 0 auto; }
 .end-story p { max-width: 640px; margin: 0 auto 1.1em; font: 400 clamp(14px, 1.9vw, 17px)/1.95 var(--body); color: #d7dced; }
 /* 故事裡的兩張玩偶照片（中小尺寸、並排） */
-.end-photos { display: flex; justify-content: center; gap: 14px; max-width: 640px; margin: 1.4em auto 1.6em; }
-.end-photos img { height: clamp(170px, 30vw, 250px); width: auto; max-width: 48%; border-radius: 12px; border: 3px solid #2d3444; box-shadow: 0 6px 16px rgba(0,0,0,.45); object-fit: cover; }
+.end-photos { float: right; display: flex; gap: 10px; margin: .2em 0 .8em 1.2em; shape-outside: margin-box; }
+.end-photos img { height: clamp(128px, 22vw, 188px); width: auto; border-radius: 10px; border: 3px solid #2d3444; box-shadow: 0 6px 16px rgba(0,0,0,.45); object-fit: cover; }
+.end-body p { max-width: none; margin-left: 0; margin-right: 0; }
+.end-fb { clear: both; }
+@media (max-width: 560px) { .end-photos { float: none; justify-content: center; margin: 1.2em auto; } }
 /* 問卷：星星 + 文字 + 送出 */
 .end-fb { max-width: 640px; margin: 3.4em auto 0; padding: 26px 24px 22px; background: #1a1f2b; border: 3px solid #2d3444; border-radius: 16px; }
 .end-fb h3 { margin: 0 0 .6em; font: 700 clamp(16px, 2.2vw, 20px) var(--body); color: #fff; text-align: center; }

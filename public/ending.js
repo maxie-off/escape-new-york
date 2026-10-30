@@ -250,8 +250,8 @@
       'This is the first game I’ve ever made. Thank you for playing all the way to the end, and a special thank-you to Claude.',
       'I hope you had fun — please leave me some feedback and suggestions!',
     ]);
-    // 第 4 段講到玩偶 → 中間插入兩張照片
-    return ps.map((p, i) => `<p>${p}</p>` + (i === 3 ? PHOTOS : '')).join('');
+    // 講到玩偶的那一段之前先放照片（靠右、文字繞著圖排）
+    return ps.map((p, i) => (i === 3 ? PHOTOS : '') + `<p>${p}</p>`).join('');
   };
 
   function feedbackForm() {
@@ -276,7 +276,7 @@
       </section>
       <section class="end-story">
         <h2>${tr('這個遊戲是怎麼來的', 'How this game came to be')}</h2>
-        ${STORY()}
+        <div class="end-body">${STORY()}</div>
         ${feedbackForm()}
       </section>
     </div>`;
