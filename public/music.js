@@ -368,7 +368,7 @@ window.Music = (function () {
     return bus;
   }
 
-  let ctx = null, g = null, cur = null, pending = null;
+  let ctx = null, g = null, cur = null, pending = null, ctxOk = false;
   let muted = false;
   let tension = 0; // 0＝平常；1＝炸彈剩兩分鐘以後（場景 3 的曲子會變重、變密）
   function tense(level) { tension = level ? 1 : 0; }
@@ -415,15 +415,26 @@ window.Music = (function () {
   }
   function stop() { pending = null; stopCurrent(1); }
 
-  function unlock() {
+  // gesture＝這次是使用者點了畫面才呼叫的。
+  // iPad Safari 的毛病：在「沒有人碰過畫面」的情況下建立的 AudioContext，之後再 resume() 也不會出聲，
+  // 所以第一次真的有人點畫面時，如果它還沒 running，就把舊的關掉、在點擊當下重新開一個。
+  function unlock(gesture) {
     try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      // iPadOS 17 以後：告訴系統這是「播放」用途，側邊靜音鍵就不會把遊戲音樂一起靜音
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* ignore */ }
+      if (ctx && gesture && !ctxOk && ctx.state !== 'running') {
+        const back = cur ? cur.name : pending;
+        try { cur = null; ctx.close(); } catch (e) { /* ignore */ }
+        ctx = null; g = null; pending = back;
+      }
       if (!ctx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return;
         ctx = new AC(); g = buildGraph(ctx, muted);
         loadViolin(ctx);
       }
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state === 'suspended') ctx.resume().then(() => { if (ctx && ctx.state === 'running') ctxOk = true; }).catch(() => {});
+      if (ctx.state === 'running') ctxOk = true;
       if (pending) { const p = pending; pending = null; play(p); }
     } catch (e) { console.warn('audio unlock failed', e); }
     // iPad Safari 要在使用者點擊時先「講一次」，之後的語音才放得出來

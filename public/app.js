@@ -84,7 +84,7 @@ socket.on('state', (s) => { state = s; if (s.you) setMyRole(s.you); render(); })
 // 音樂：一開啟網頁就想放。瀏覽器可能擋自動播放（iPad / Safari 一定會擋），
 // 所以先試著直接開聲音，被擋就等第一次點擊／按鍵再開。
 Music.unlock();
-for (const ev of ['pointerdown', 'touchend', 'keydown']) document.addEventListener(ev, () => Music.unlock(), { passive: true });
+for (const ev of ['pointerdown', 'touchend', 'keydown']) document.addEventListener(ev, () => Music.unlock(true), { passive: true });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) Music.unlock(); });
 
 // ---------- 封面 / 選角 / 房間碼 ----------
@@ -96,7 +96,7 @@ const setMyRole = (r) => { myRole = r; try { r ? sessionStorage.setItem('myRole'
 $('#title-bg').innerHTML = Title.skyline({ extra: Art.raccoony(210, 690, 1.15) + Art.slothy(790, 690, 1.25) });
 $('#setup-bg').innerHTML = Title.skyline();
 
-$('#btn-title-start').onclick = () => { Music.unlock(); screen = 'setup'; render(); };
+$('#btn-title-start').onclick = () => { Music.unlock(true); screen = 'setup'; render(); };
 
 $('#btn-gen').onclick = () => {
   socket.emit('create_room', (res) => join(res.code, (e) => { setupError = e; render(); }));
