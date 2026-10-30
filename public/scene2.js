@@ -8,7 +8,7 @@
   const ST = A.st(4);
   const ST2 = A.st(2.5);
   const FONT = A.FONT;
-  const HELV = `font-family="'Helvetica Neue',Helvetica,Arial,'GenSeki','PingFang TC','Noto Sans TC',sans-serif" font-weight="700"`;
+  const HELV = A.SIGN;
   const COLORS = { A: '#0039A6', B: '#FF6319', C: '#0039A6', D: '#FF6319', E: '#0039A6', F: '#FF6319', 1: '#EE352E', 2: '#EE352E', 3: '#EE352E', 7: '#B933AD' }; // MTA 官方路線色
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -78,9 +78,9 @@
         ${i < b.rows.length - 1 ? `<line x1="160" y1="${top + 34}" x2="840" y2="${top + 34}" stroke="#2a2a30" stroke-width="2"/>` : ''}`;
     }).join('');
     return `${SVG_OPEN('168 Street 月台')}${DEFS}
-      <rect x="-900" width="2800" height="700" fill="url(#brickA)"/>
+      <rect x="-900" width="2800" height="700" fill="url(#brickA)"/><rect x="-900" y="36" width="2800" height="532" fill="url(#gWallShade)"/>
       <rect x="-900" y="0" width="2800" height="36" fill="#2f323a"/>
-      ${[0, 1, 2, 3].map((i) => `<rect x="${90 + i * 250}" y="9" width="120" height="13" rx="3" fill="#fff6cf" ${A.st(2)}/>`).join('')}
+      ${[0, 1, 2, 3].map((i) => `${A.lightGlow(150 + i * 250, 22, 260, 160)}<rect x="${90 + i * 250}" y="9" width="120" height="13" rx="3" fill="#fff6cf" ${A.st(2)}/>`).join('')}
       <rect x="240" y="62" width="520" height="140" fill="url(#brickR)" ${ST}/>
       <rect x="254" y="76" width="492" height="112" fill="none" stroke="#f4efe4" stroke-width="5"/>
       <text x="500" y="156" text-anchor="middle" font-size="76" fill="#f7f2e6" ${HELV}>${esc(b.station)}</text>
@@ -95,12 +95,11 @@
       <text x="812" y="302" text-anchor="end" font-size="15" fill="#6d737c" ${HELV}>THEN</text>
       ${rows}
       <rect x="-900" y="552" width="2800" height="16" fill="#3a3d46" ${ST}/>
-      <rect x="-900" y="568" width="2800" height="140" fill="#8d9199" ${ST}/>
-      ${[100, 280, 460, 640, 820].map((x) => `<line x1="${x}" y1="568" x2="${x - 40}" y2="700" stroke="${INK}" stroke-width="2.5" opacity=".3"/>`).join('')}
-      <line x1="-10" y1="636" x2="1010" y2="636" stroke="${INK}" stroke-width="2.5" opacity=".3"/>
+      ${A.tileFloor(568, { a: '#8d9199', b: '#969aa2', line: '#6b6f78', lights: [150, 400, 650, 900] })}
       <g><rect x="880" y="560" width="64" height="96" rx="10" fill="#3c4a40" ${ST}/><rect x="876" y="552" width="72" height="14" rx="5" fill="#2c372f" ${ST}/></g>
       ${data.passer ? person(data.passer.id, data.passer.lines, { cen: 900, y: 692, s: 0.62, from: 'right', side: true }) : ''}
-      ${A.raccoony(110, 698, 0.66)}
+      ${A.shadow(110, 696, 110, 14)}${A.raccoony(110, 698, 0.66)}
+      ${A.vignette(0.8)}
     </svg>`;
   }
 
@@ -160,7 +159,7 @@
     const P = LOOKS[k];
     const cen = o.cen ?? 420, y = o.y ?? 632, sc = o.s ?? 1, from = o.from || 'left';
     return `<g class="person" data-k="${k}" data-cen="${cen}" data-y="${y}" data-s="${sc}" data-from="${from}" transform="translate(-400,${y}) scale(${sc})">
-      ${A.human(P, { noShadow: true })}
+      ${A.human(P)}
       ${o.side ? bubbleSide(lines, 0.82 / sc) : bubbleSvg(lines, from === 'right')}
     </g>`;
   }
@@ -176,7 +175,7 @@
     return `${SVG_OPEN('168 Street 月台與列車')}${DEFS}
       <rect x="-900" width="2800" height="700" fill="#4a5360"/>
       <rect x="-900" y="0" width="2800" height="136" fill="#2e323a"/>
-      ${[0, 1, 2, 3].map((i) => `<rect x="${110 + i * 250}" y="92" width="120" height="14" rx="3" fill="#fff6cf" ${A.st(2)}/>`).join('')}
+      ${[0, 1, 2, 3].map((i) => `${A.lightGlow(170 + i * 250, 106, 260, 180)}<rect x="${110 + i * 250}" y="92" width="120" height="14" rx="3" fill="#fff6cf" ${A.st(2)}/>`).join('')}
       <rect x="-900" y="130" width="2800" height="16" fill="#232830" ${ST2}/>
       <rect x="-900" y="166" width="2800" height="262" rx="10" fill="#8b939d" ${ST}/>
       <rect x="-900" y="166" width="2800" height="26" fill="#6f7782" ${ST2}/>
@@ -188,9 +187,7 @@
       ${Array.from({ length: 26 }, (_, i) => `<rect x="${i * 42 - 6}" y="446" width="14" height="52" fill="#3a2f26"/>`).join('')}
       <rect x="-900" y="508" width="2800" height="22" fill="#f2c230" ${ST}/>
       ${Array.from({ length: 34 }, (_, i) => `<circle cx="${i * 30 + 6}" cy="519" r="3.5" fill="#c99a14"/>`).join('')}
-      <rect x="-900" y="530" width="2800" height="180" fill="#9a9ea6" ${ST}/>
-      ${[100, 280, 460, 640, 820].map((x) => `<line x1="${x}" y1="530" x2="${x - 50}" y2="700" stroke="${INK}" stroke-width="2.5" opacity=".28"/>`).join('')}
-      <line x1="-10" y1="620" x2="1010" y2="620" stroke="${INK}" stroke-width="2.5" opacity=".28"/>
+      ${A.tileFloor(530, { a: '#9a9ea6', b: '#a3a7ae', line: '#6b6f78', lights: [170, 420, 670, 920] })}
       ${[230, 770].map((x) => `<rect x="${x - 17}" y="0" width="34" height="548" fill="#566b66" ${ST}/><path d="M${x - 17},120 h34 M${x - 17},300 h34 M${x - 17},480 h34" stroke="${INK}" stroke-width="3" opacity=".5"/><rect x="${x - 26}" y="540" width="52" height="14" fill="#3b4a46" ${ST2}/>`).join('')}
       <g class="hot" data-hot="map"><g transform="rotate(-4 770 300)">
         <rect x="712" y="236" width="116" height="128" fill="#f4f1e8" ${ST2}/><rect x="720" y="246" width="100" height="86" fill="#fff"/>
@@ -201,7 +198,8 @@
         <path d="M724,262 l18,10 M790,340 l12,-6" stroke="#8a7a55" stroke-width="1.5" opacity=".7"/></g>
         ${ui.seen.map ? '' : `<rect class="pulse" x="700" y="226" width="140" height="150" rx="8" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}</g>
       ${data.passer ? person(data.passer.id, data.passer.lines, { cen: 430 }) : ''}
-      ${A.slothy(112, 690, 1.12)}
+      ${A.shadow(112, 688, 150, 18)}${A.slothy(112, 690, 1.12)}
+      ${A.vignette(0.8)}
       ${navBtn('right')}
       <g class="hot" data-hot="pick"><rect x="380" y="18" width="240" height="56" rx="28" fill="${data.allClear ? '#ffd23f' : '#c9ccd2'}" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>${tr('選擇路線', 'Pick a line')}</text>${pulse}</g>
     </svg>`;
@@ -270,9 +268,9 @@
       return `<path d="${path}" fill="none" stroke="${INK}" stroke-width="11" stroke-linecap="round"/><path d="${path}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round"/>${tip}${tag}`;
     }).join('');
     return `${SVG_OPEN('月台磚牆上的電箱')}${DEFS}
-      <rect x="-900" width="2800" height="700" fill="url(#brickA)"/>
+      <rect x="-900" width="2800" height="700" fill="url(#brickA)"/><rect x="-900" y="36" width="2800" height="532" fill="url(#gWallShade)"/>
       <rect x="-900" y="0" width="2800" height="36" fill="#2f323a"/>
-      <rect x="-900" y="600" width="2800" height="110" fill="#8d9199" ${ST}/>
+      ${A.tileFloor(600, { a: '#8d9199', b: '#969aa2', line: '#6b6f78' })}
       <rect x="230" y="96" width="540" height="490" rx="10" fill="#7c848f" ${ST}/>
       <rect x="250" y="116" width="500" height="450" rx="6" fill="#2b3038" ${ST2}/>
       ${[0, 1, 2, 3, 4].map((i) => `<rect x="${WX(i) - 3}" y="560" width="6" height="26" fill="#1b1d24"/>`).join('')}
@@ -280,7 +278,8 @@
       <text x="500" y="350" text-anchor="middle" font-size="15" fill="#7a808b" ${HELV}>BOARD SIGNAL · 168 ST</text>
       ${terms}${wires}
       <g transform="rotate(8 870 640)"><rect x="790" y="610" width="170" height="56" rx="6" fill="#7c848f" ${ST}/><polygon points="875,618 893,650 857,650" fill="#ffd23f" ${A.st(2)}/><text x="875" y="646" text-anchor="middle" font-size="18" fill="${INK}" ${HELV}>!</text></g>
-      ${A.slothy(120, 692, 0.95)}
+      ${A.shadow(120, 690, 130, 16)}${A.slothy(120, 692, 0.95)}
+      ${A.vignette(0.8)}
       ${navBtn('left')}
     </svg>`;
   }

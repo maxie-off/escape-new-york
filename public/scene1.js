@@ -262,21 +262,21 @@
     const LX = 40, TOP = 74, GAP = 24, BW = 160;
     const lines = Array.from({ length: 6 }, (_, i) => `<line x1="${LX}" y1="${TOP + i * GAP}" x2="${LX + BW * 4}" y2="${TOP + i * GAP}" stroke="#1b1b1f" stroke-width="1.6"/>`).join('');
     const bars = Array.from({ length: 5 }, (_, i) => `<line x1="${LX + i * BW}" y1="${TOP}" x2="${LX + i * BW}" y2="${TOP + 5 * GAP}" stroke="#1b1b1f" stroke-width="${i === 4 ? 3 : 1.8}"/>`).join('');
-    const nums = sh.bars.map((fr, b) => [0.3, 0.72].map((pos) => fr.map((f, si) => (f === null ? '' : `<rect x="${LX + b * BW + BW * pos - 9}" y="${TOP + (5 - si) * GAP - 10}" width="18" height="20" fill="#fffdf3"/><text x="${LX + b * BW + BW * pos}" y="${TOP + (5 - si) * GAP + 6}" text-anchor="middle" font-size="18" font-weight="700" fill="#1b1b1f" font-family="'Courier New',monospace">${f}</text>`)).join('')).join('')).join('');
+    const nums = sh.bars.map((fr, b) => [0.3, 0.72].map((pos) => fr.map((f, si) => (f === null ? '' : `<rect x="${LX + b * BW + BW * pos - 9}" y="${TOP + (5 - si) * GAP - 10}" width="18" height="20" fill="#fffdf3"/><text x="${LX + b * BW + BW * pos}" y="${TOP + (5 - si) * GAP + 6}" text-anchor="middle" font-size="18" font-weight="700" fill="#1b1b1f" font-family="${A.MONOF}">${f}</text>`)).join('')).join('')).join('');
     return `<svg viewBox="0 0 720 240" class="tab-svg"><text x="360" y="30" text-anchor="middle" font-size="26" font-weight="700" fill="#1b1b1f" ${FONT}>${tr(`《${esc(sh.title)}》`, `“${esc(sh.title)}”`)}</text>
-      ${[0, 1, 2, 3, 4, 5].map((i) => `<text x="${LX - 12}" y="${TOP + i * GAP + 5}" text-anchor="middle" font-size="15" font-weight="700" fill="#c5262c" font-family="'Helvetica Neue',Arial,sans-serif">${i + 1}</text>`).join('')}
+      ${[0, 1, 2, 3, 4, 5].map((i) => `<text x="${LX - 12}" y="${TOP + i * GAP + 5}" text-anchor="middle" font-size="15" font-weight="700" fill="#c5262c" font-family="${A.SIGNF}">${i + 1}</text>`).join('')}
       ${lines}${bars}${nums}</svg>`;
   }
   function chordBox(x, y, name, fr) {
     const SX = 15, FY = 20, W = SX * 5, H = FY * 4;
-    let o = `<text x="${x + W / 2}" y="${y - 50}" text-anchor="middle" font-size="26" font-weight="700" fill="#1b1b1f" font-family="'Helvetica Neue',Arial,sans-serif">${name}</text>`;
-    for (let i = 0; i < 6; i++) o += `<text x="${x + i * SX}" y="${y - 25}" text-anchor="middle" font-size="12" font-weight="700" fill="#c5262c" font-family="'Helvetica Neue',Arial,sans-serif">${6 - i}</text>`;
+    let o = `<text x="${x + W / 2}" y="${y - 50}" text-anchor="middle" font-size="26" font-weight="700" fill="#1b1b1f" font-family="${A.SIGNF}">${name}</text>`;
+    for (let i = 0; i < 6; i++) o += `<text x="${x + i * SX}" y="${y - 25}" text-anchor="middle" font-size="12" font-weight="700" fill="#c5262c" font-family="${A.SIGNF}">${6 - i}</text>`;
     o += `<line x1="${x}" y1="${y}" x2="${x + W}" y2="${y}" stroke="#1b1b1f" stroke-width="5"/>`;
     for (let i = 1; i <= 4; i++) o += `<line x1="${x}" y1="${y + i * FY}" x2="${x + W}" y2="${y + i * FY}" stroke="#1b1b1f" stroke-width="1.6"/>`;
     for (let i = 0; i < 6; i++) o += `<line x1="${x + i * SX}" y1="${y}" x2="${x + i * SX}" y2="${y + H}" stroke="#1b1b1f" stroke-width="1.6"/>`;
     fr.forEach((f, i) => {
       const cx = x + i * SX;
-      if (f === null) o += `<text x="${cx}" y="${y - 7}" text-anchor="middle" font-size="14" fill="#1b1b1f" font-family="sans-serif">×</text>`;
+      if (f === null) o += `<text x="${cx}" y="${y - 7}" text-anchor="middle" font-size="14" fill="#1b1b1f" font-family="${A.SIGNF}">×</text>`;
       else if (f === 0) o += `<circle cx="${cx}" cy="${y - 11}" r="4.5" fill="none" stroke="#1b1b1f" stroke-width="1.8"/>`;
       else o += `<circle cx="${cx}" cy="${y + (f - 0.5) * FY}" r="6.4" fill="#1b1b1f"/>`;
     });

@@ -3,7 +3,13 @@
 window.Art = (function () {
   const INK = '#1b1b1f';
   const st = (w = 4) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
-  const FONT = `font-family="'Nunito','GenSeki','PingFang TC','Noto Sans TC',sans-serif" font-weight="700"`;
+  // 字體只有三種角色：FONT＝故事文字與對話框；SIGN＝場景裡的招牌、標示、標籤；MONO＝螢幕、儀表、數字（大標題在 CSS 用 Bebas Neue）
+  const FONTF = "'Nunito','GenSeki','PingFang TC','Noto Sans TC',sans-serif";
+  const SIGNF = "'Helvetica Neue',Helvetica,Arial,'GenSeki','PingFang TC','Noto Sans TC',sans-serif";
+  const MONOF = "'Courier New',Courier,monospace,'GenSeki'";
+  const FONT = `font-family="${FONTF}" font-weight="700"`;
+  const SIGN = `font-family="${SIGNF}" font-weight="700"`;
+  const MONO = `font-family="${MONOF}" font-weight="700"`;
 
   // 坐姿：屁股底部中心為 (0,0)，高約 170
   // 福爾摩斯獵鹿帽（正面）：深灰人字紋毛呢、前後帽簷、兩側耳罩往上綁、頂上一個黑色蝴蝶結
@@ -58,7 +64,19 @@ window.Art = (function () {
   const wood = (x, y, w, h, rx = 0, vertical = false) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="url(#${vertical ? 'texGrainV' : 'texGrain'})"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="url(#gTopLight)"/>`;
   // 落在地上的影子（光從左上 → 影子偏右）
   const shadow = (cx, y, w, h = 14, o = 0.26) => `<ellipse cx="${cx + w * 0.08}" cy="${y}" rx="${w / 2}" ry="${h / 2}" fill="#2a1a08" opacity="${o}"/>`;
-  const vignette = () => `<rect x="-900" width="2800" height="700" fill="url(#gVig)" style="pointer-events:none"/>`;
+  const vignette = (k = 1) => `<rect x="-900" width="2800" height="700" fill="url(#gVig)" opacity="${k}" style="pointer-events:none"/>`;
+  // 車站／機場共用的地板：拋光地磚，越近越大，接縫往消失點收，天花板燈的倒影
+  function tileFloor(H, o = {}) {
+    const a = o.a || '#7b838f', b = o.b || '#848c97', line = o.line || '#5d646e', V = o.vx ?? 500, lights = o.lights || [];
+    let rows = '', y = H + 8, h = 14, k = 0;
+    while (y < 710) { rows += `<rect x="-900" y="${y.toFixed(1)}" width="2800" height="${h.toFixed(1)}" fill="${k % 2 ? b : a}"/><path d="M-900,${y.toFixed(1)} H1900" stroke="${line}" stroke-width="${(0.8 + h / 40).toFixed(1)}" opacity=".7"/>`; y += h; h *= 1.32; k++; }
+    const seams = Array.from({ length: 23 }, (_, i) => { const x = -1700 + i * 170; return `<path d="M${V + (x - V) * 0.02},${H} L${x},710" stroke="${line}" stroke-width="1.6" opacity=".55"/>`; }).join('');
+    const refl = lights.map((x) => `<path d="M${x - 10},${H + 6} L${x + 10},${H + 6} L${x * 1.18 - 56},706 L${x * 1.18 - 124},706Z" fill="#fff8e0" opacity=".08"/>`).join('');
+    return `<rect x="-900" y="${H}" width="2800" height="${710 - H}" fill="${a}" stroke="${INK}" stroke-width="${LW.mid}"/>${rows}${seams}${refl}
+      <rect x="-900" y="${H}" width="2800" height="60" fill="url(#gFloorFade)"/>`;
+  }
+  // 天花板燈下面那一圈暖光（車站、機場共用）
+  const lightGlow = (x, y, w = 160, h = 120) => `<ellipse cx="${x}" cy="${y + h * 0.45}" rx="${w / 2}" ry="${h / 2}" fill="#fff6d0" opacity=".1"/><ellipse cx="${x}" cy="${y + h * 0.25}" rx="${w / 3}" ry="${h / 3.2}" fill="#fff6d0" opacity=".1"/>`;
   // ---------- 配角共用的人物模板（以地鐵站路人為準）----------
   // 以腳底中心為原點，高約 250。頭在 (0,-208) 半徑 38；手腳分開，地鐵站的動畫會轉 legL/legR/armL/armR。
   // P：skin, top, sleeve, bottom, shoe, torsoW, legW, shoeW, torsoBottom, short（短袖：前臂露膚色）,
@@ -183,5 +201,5 @@ window.Art = (function () {
     return `<svg viewBox="-85 -205 170 215" width="${size}" height="${size * 1.26}">${who}</svg>`;
   }
 
-  return { INK, st, FONT, LW, PAL, human, room, wood, shadow, vignette, raccoony, slothy, portrait, deerstalker, deerstalkerBack, miniHat, miniHatBack };
+  return { INK, st, FONT, SIGN, MONO, FONTF, SIGNF, MONOF, LW, PAL, human, room, wood, shadow, vignette, tileFloor, lightGlow, raccoony, slothy, portrait, deerstalker, deerstalkerBack, miniHat, miniHatBack };
 })();

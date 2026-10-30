@@ -6,7 +6,7 @@
   function pin(x, y, color, label, lx, ly, anchor = 'start') {
     return `<circle cx="${x}" cy="${y}" r="9" fill="${color}" stroke="${INK}" stroke-width="3.5"/>
       <rect x="${anchor === 'end' ? lx - label.length * 12.5 - 18 : lx - 6}" y="${ly - 19}" width="${label.length * 12.5 + 22}" height="28" rx="8" fill="#fff" stroke="${INK}" stroke-width="3"/>
-      <text x="${anchor === 'end' ? lx - 4 : lx + 4}" y="${ly}" text-anchor="${anchor}" font-size="19" font-weight="700" fill="${INK}" font-family="'Helvetica Neue',Arial,'GenSeki','PingFang TC',sans-serif">${esc(label)}</text>`;
+      <text x="${anchor === 'end' ? lx - 4 : lx + 4}" y="${ly}" text-anchor="${anchor}" font-size="19" font-weight="700" fill="${INK}" font-family="${window.Art.SIGNF}">${esc(label)}</text>`;
   }
   // pins：三個機場各在哪一區，例如 { JFK: 'Queens', LGA: 'Brooklyn', EWR: 'Manhattan' }（每場隨機）
   const SPOT = {
@@ -16,7 +16,7 @@
   };
   function mapSvg(pins = { EWR: 'Manhattan', LGA: 'Queens', JFK: 'Brooklyn' }) {
     const st = `stroke="${INK}" stroke-width="4" stroke-linejoin="round"`;
-    const lab = (t, x, y, size = 24, extra = '') => `<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" font-weight="700" fill="${INK}" opacity=".78" font-family="'Helvetica Neue',Arial,sans-serif" ${extra}>${t}</text>`;
+    const lab = (t, x, y, size = 24, extra = '') => `<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" font-weight="700" fill="${INK}" opacity=".78" font-family="${window.Art.SIGNF}" ${extra}>${t}</text>`;
     return `<svg viewBox="0 0 640 450" class="doc-map" role="img" aria-label="紐約地圖">
       <rect width="640" height="450" rx="10" fill="#8fd0ff"/>
       <polygon points="-4,-4 168,-4 190,200 150,454 -4,454" fill="#d6d1b6" ${st}/>

@@ -109,7 +109,7 @@
     const FL = 0.9, CE = -0.7, Z0 = 1, Z1 = 9;
     const m = String((info && info.text) || '').match(/(\d{1,2})/);
     const goal = m ? Number(m[1]) : 6;
-    const HV = `font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-weight="800"`;
+    const HV = `font-family="${window.Art.SIGNF}" font-weight="800"`;
     const sign = (txt, big = false) => { const w = big ? 300 : 250, h = big ? 112 : 92;
       return `<path d="M${-w * 0.3},${-h / 2 - 70} V${-h / 2} M${w * 0.3},${-h / 2 - 70} V${-h / 2}" stroke="#2a2e36" stroke-width="7"/>
         <rect x="${-w / 2 + 6}" y="${-h / 2 + 8}" width="${w}" height="${h}" rx="8" fill="#000" opacity=".25"/>
