@@ -134,7 +134,33 @@ window.Music = (function () {
     for (let k = 1; k < n; k++) im[k] = Math.pow(k, -1.35) * (k % 2 ? 1 : 0.72) * (k > 9 ? 0.6 : 1);
     return (c._vw = c.createPeriodicWave(re, im));
   }
+  // ---------- 真實錄音的小提琴取樣（VSCO 2 Community Edition；見 audio/violin/CREDITS.txt）----------
+  // 每隔三四個半音一個取樣，播放時用 playbackRate 移調到要的音；沒載入完之前先用合成的小提琴代替。
+  const VSAMP = { G3: 55, A3: 57, C4: 60, E4: 64, G4: 67, A4: 69, C5: 72, E5: 76, G5: 79, A5: 81, C6: 84 };
+  const vbuf = {}; let vloading = false;
+  function loadViolin(c) {
+    if (vloading || !c || !window.fetch) return;
+    vloading = true;
+    for (const [name, m] of Object.entries(VSAMP)) {
+      fetch(`audio/violin/${name}.mp3`).then((r) => r.arrayBuffer()).then((ab) => new Promise((res, rej) => c.decodeAudioData(ab, res, rej)))
+        .then((b) => { vbuf[m] = b; }).catch(() => { /* 載不到就繼續用合成的 */ });
+    }
+  }
+  const violinReady = () => Object.keys(vbuf).length === Object.keys(VSAMP).length;
+  function violinSample(c, out, t, f, dur, v) {
+    const m = 69 + 12 * Math.log2(f / 440);
+    const sm = Object.keys(vbuf).map(Number).reduce((a, b) => (Math.abs(b - m) < Math.abs(a - m) ? b : a));
+    const src = c.createBufferSource(); src.buffer = vbuf[sm]; src.playbackRate.value = Math.pow(2, (m - sm) / 12);
+    const g = c.createGain(), lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000;
+    const amp = v * 5.2, end = t + dur;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(amp, t + 0.04); g.gain.setValueAtTime(amp, end); g.gain.linearRampToValueAtTime(0.0001, end + 0.45);
+    src.connect(lp); lp.connect(g); g.connect(out); src.start(t); src.stop(end + 0.5);
+  }
   function violin(c, out, t, f, dur, v = 0.035) {
+    if (violinReady()) return violinSample(c, out, t, f, dur, v);
+    return violinSynth(c, out, t, f, dur, v);
+  }
+  function violinSynth(c, out, t, f, dur, v = 0.035) {
     const g = c.createGain(), lp = c.createBiquadFilter(), b1 = c.createBiquadFilter(), b2 = c.createBiquadFilter(), b3 = c.createBiquadFilter();
     lp.type = 'lowpass'; lp.frequency.setValueAtTime(1400, t); lp.frequency.linearRampToValueAtTime(2600, t + 0.25); lp.Q.value = 0.4;
     b1.type = 'peaking'; b1.frequency.value = 290; b1.Q.value = 1.2; b1.gain.value = 3;   // 琴身低頻共鳴
@@ -361,6 +387,7 @@ window.Music = (function () {
         const AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
         ctx = new AC(); g = buildGraph(ctx, muted);
+        loadViolin(ctx);
       }
       if (ctx.state === 'suspended') ctx.resume();
       if (pending) { const p = pending; pending = null; play(p); }
@@ -564,5 +591,5 @@ window.Music = (function () {
     });
   }
 
-  return { unlock, play, stop, pa, speak, hush, buzz, boom, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
+  return { _violinReady: violinReady, _loadViolin: () => loadViolin(ctx || new (window.AudioContext || window.webkitAudioContext)()), unlock, play, stop, pa, speak, hush, buzz, boom, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
 })();

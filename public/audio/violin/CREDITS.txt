@@ -1,0 +1,6 @@
+Violin samples (G3–C6), trimmed to 5 seconds and converted to mono.
+Source recordings: VSCO 2 Community Edition by Versilian Studios (public domain / CC0)
+  http://vis.versilstudios.net/vsco-community.html
+Edited sample set: tonejs-instruments by Nicholaus Brosowsky (samples released under CC BY 3.0)
+  https://github.com/nbrosowsky/tonejs-instruments
+  https://creativecommons.org/licenses/by/3.0/
