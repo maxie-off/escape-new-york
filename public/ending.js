@@ -128,14 +128,15 @@
     svg += poly(flatQ(FL, -1, 1, Z0, Z1), 'url(#rkFloor)');
     svg += poly(wallQ(-1, CE, FL, Z0, Z1), '#4d5562') + poly(wallQ(1, CE, FL, Z0, Z1), '#59616e');
     // 左牆：整排落地窗（外面是天空和停機坪）
-    for (let z = 1.2; z < Z1 - 0.3; z += 0.9) {
-      svg += poly(wallQ(-1, -0.56, 0.62, z, z + 0.84), 'url(#rkSky)', `stroke="${INK}" stroke-width="1.5"`);
-      svg += `<polyline points="${pts([P(-1, -0.56, z + 0.42), P(-1, 0.62, z + 0.42)])}" stroke="#2c313b" stroke-width="${(10 / z).toFixed(1)}" fill="none"/>`;
-    }
+    const panes = [];
+    for (let z = 1.2; z < Z1 - 0.3; z += 0.9) panes.push(wallQ(-1, -0.56, 0.62, z, z + 0.84));
+    svg += `<clipPath id="rkWin">${panes.map((q) => `<polygon points="${pts(q)}"/>`).join('')}</clipPath>`;
+    svg += panes.map((q) => poly(q, 'url(#rkSky)')).join('');
+    // 停在外面的飛機：只在窗玻璃裡看得到（被窗框擋住）
+    svg += `<g clip-path="url(#rkWin)">${spr(-1.9, 0.38, 3.2, `<g opacity=".9"><path d="M-260,0 C-200,-36 120,-36 230,-12 C252,-6 252,6 230,10 C120,26 -200,26 -260,8Z" fill="#f4f6f9" stroke="#5a6170" stroke-width="5"/><path d="M-200,-14 L-250,-110 L-210,-110 L-130,-16Z" fill="#1e5fb3" stroke="#5a6170" stroke-width="5"/><path d="M-60,4 L40,90 L80,90 L30,4Z" fill="#dfe3ea" stroke="#5a6170" stroke-width="5"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${-130 + i * 26}" cy="-8" r="5" fill="#33405a"/>`).join('')}</g>`)}</g>`;
+    panes.forEach((q, i) => { const z = 1.2 + i * 0.9; svg += poly(q, 'none', `stroke="${INK}" stroke-width="1.5"`) + `<polyline points="${pts([P(-1, -0.56, z + 0.42), P(-1, 0.62, z + 0.42)])}" stroke="#2c313b" stroke-width="${(10 / z).toFixed(1)}" fill="none"/>`; });
     svg += poly(wallQ(-1, 0.62, FL, Z0, Z1), '#3a404b');
     svg += `<polyline points="${pts([P(-1, 0.62, Z0), P(-1, 0.62, Z1)])}" stroke="#8a919b" stroke-width="3" fill="none"/>`;
-    // 停在外面的飛機（窗外遠處）
-    svg += spr(-1.9, 0.38, 3.2, `<g opacity=".9"><path d="M-260,0 C-200,-36 120,-36 230,-12 C252,-6 252,6 230,10 C120,26 -200,26 -260,8Z" fill="#f4f6f9" stroke="#5a6170" stroke-width="5"/><path d="M-200,-14 L-250,-110 L-210,-110 L-130,-16Z" fill="#1e5fb3" stroke="#5a6170" stroke-width="5"/><path d="M-60,4 L40,90 L80,90 L30,4Z" fill="#dfe3ea" stroke="#5a6170" stroke-width="5"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${-130 + i * 26}" cy="-8" r="5" fill="#33405a"/>`).join('')}</g>`);
     // 天花板：橫樑 + 兩條長燈帶；地板上的倒影
     for (let z = 1.5; z < Z1; z += 1) svg += `<polyline points="${pts([P(-1, CE, z), P(1, CE, z)])}" stroke="#1d2027" stroke-width="${(14 / z).toFixed(1)}" fill="none"/>`;
     for (const lx of [-0.5, 0.5]) {
@@ -144,7 +145,7 @@
     }
     svg += `<g class="floor-lines">${Array.from({ length: 16 }, (_, i) => { const z = 1.1 + i * 0.5; return `<polyline points="${pts([P(-1, FL, z), P(1, FL, z)])}" stroke="#6f7782" stroke-width="1.6" fill="none" opacity=".7"/>`; }).join('')}
       <polyline points="${pts([P(0, FL, Z0), P(0, FL, Z1)])}" stroke="#6f7782" stroke-width="1.6" fill="none" opacity=".5"/></g>`;
-    // 右牆：登機門（每個門上方掛著黃色登機口牌）＋櫃台；左邊靠窗一排排座椅
+    // 右牆：登機門（每個門上方掛著黃色登機口牌）＋櫃台
     const nums = []; for (let n = goal - 1; n >= 1 && nums.length < 3; n--) nums.unshift(n);
     const doorZ = [1.8, 3.0, 4.3].slice(3 - nums.length);
     const back = [];
@@ -155,8 +156,6 @@
       back.push([z + 0.3, spr(0.62, -0.42, z + 0.3, sign(`Gate ${n}`))]);
       back.push([z + 0.05, spr(0.7, FL, z + 0.05, `<rect x="-70" y="-120" width="140" height="120" rx="8" fill="#c9ced6" stroke="${INK}" stroke-width="7"/><rect x="-70" y="-120" width="140" height="22" rx="8" fill="#e8ebef" stroke="${INK}" stroke-width="7"/><rect x="-40" y="-176" width="80" height="54" rx="6" fill="#1b1f27" stroke="${INK}" stroke-width="6"/><rect x="-32" y="-168" width="64" height="38" rx="3" fill="#2f6fd0"/>`)]);
     });
-    const chair = (dx) => `<g transform="translate(${dx},0)"><rect x="-26" y="-110" width="52" height="66" rx="10" fill="#2f4a7a" stroke="${INK}" stroke-width="6"/><rect x="-28" y="-52" width="56" height="16" rx="5" fill="#253c66" stroke="${INK}" stroke-width="6"/><path d="M-20,-36 V0 M20,-36 V0" stroke="#9aa1ab" stroke-width="7"/></g>`;
-    for (const z of [2.3, 4.0, 5.7, 7.4]) back.push([z, spr(-0.72, FL, z, `${chair(-90)}${chair(-30)}${chair(30)}${chair(90)}<path d="M-120,-36 H120" stroke="#9aa1ab" stroke-width="8"/>`)]);
     // 走道盡頭：目標登機口，落地窗外停著飛機機頭，上方大大的黃色牌子
     const e = [P(-1, CE, Z1), P(1, CE, Z1), P(1, FL, Z1), P(-1, FL, Z1)];
     svg += poly(e, 'url(#rkSky)');
