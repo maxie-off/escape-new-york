@@ -23,9 +23,9 @@ window.Music = (function () {
     g.gain.linearRampToValueAtTime(peak, t + a);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   }
-  function marimba(c, out, t, f, v = 0.16, dur = 0.55) {
-    const g = c.createGain(); g.connect(out); env(g, t, v, 0.004, dur);
-    [[1, 1, dur], [4, 0.28, dur * 0.4]].forEach(([r, gn, d]) => {
+  function marimba(c, out, t, f, v = 0.16, dur = 0.55, vel = 1) {
+    const g = c.createGain(); g.connect(out); env(g, t, v, 0.004 + (1 - vel) * 0.012, dur);
+    [[1, 1, dur], [4, 0.28 * vel * vel, dur * 0.4]].forEach(([r, gn, d]) => { // 力度越輕，敲擊的高泛音越少
       const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = f * r;
       const og = c.createGain(); og.gain.value = gn; o.connect(og); og.connect(g);
       o.start(t); o.stop(t + d + 0.05);
@@ -248,9 +248,10 @@ window.Music = (function () {
         bass(c, out, t, mtof(ch.r), 0.24, beat * 1.6);
         bass(c, out, t + beat * 2, mtof(ch.r + (r() < 0.5 ? 7 : 12)), 0.17, beat * 1.2);
         if (r() < 0.35) bass(c, out, t + beat * 3.5, mtof(ch.r + 2), 0.1, beat * 0.4);
-        for (let k = 0; k < 8; k++) {
+        // 鈴聲琶音：只在每 8 小節的第 2～4 小節出現；-5 dB、力度 75%（比較小聲、比較圓）
+        if (i % 8 >= 1 && i % 8 <= 3) for (let k = 0; k < 8; k++) {
           if (r() < 0.1) continue;
-          marimba(c, out, t + k * e, mtof(ch.t[pat[k]] + 12), k % 4 === 0 ? 0.17 : 0.11, 0.5);
+          marimba(c, out, t + k * e, mtof(ch.t[pat[k]] + 12), (k % 4 === 0 ? 0.17 : 0.11) * 0.562 * 0.75, 0.5, 0.75);
         }
         tick(c, out, t + beat, 0.035); tick(c, out, t + beat * 3, 0.028, 900);
         // 鈴聲：每 4 小節只出現一次、只有一個音，低一個八度、聲音柔和（原本太密、太尖）
