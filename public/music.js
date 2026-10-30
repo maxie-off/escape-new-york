@@ -315,6 +315,28 @@ window.Music = (function () {
     };
   })();
 
+  // 抓到人了！（選對登機口 → 走道奔跑那一幕）：還是 D 小調、還是有懸疑的低音，
+  // 但速度快了一倍、撥弦和木琴帶著輕快的跑動，鈴聲往上走，有「過關了」的感覺。
+  (function () {
+    const bpm = 120, beat = 60 / bpm, L = beat * 4, e = beat / 2;
+    const run = [62, 65, 69, 72, 69, 65, 62, 65];      // D F A D A F D F：往上衝的分解和弦
+    const top = [[74, 77], [77, 81], [79, 84], [77, 81]]; // 每小節高音的兩個音
+    TRACKS.clear = {
+      barLen: L,
+      bar(c, out, t, i) {
+        const k = i % 4;
+        cello(c, out, t, mtof(38), L, 0.05);                                  // D2：懸疑的底還在
+        if (k === 2) cello(c, out, t + beat * 2, mtof(41), L / 2, 0.03);      // F2
+        for (let q = 0; q < 8; q++) pizz(c, out, t + q * e, mtof(run[q] - 12), q % 2 ? 0.05 : 0.085); // 低八度的撥弦跑動
+        for (let q = 0; q < 8; q++) marimba(c, out, t + q * e, mtof(run[(q + k * 2) % 8]), q % 4 === 0 ? 0.1 : 0.06, 0.3);
+        bass(c, out, t, mtof(38), 0.2, beat * 0.9); bass(c, out, t + beat * 2, mtof(45), 0.15, beat * 0.9);
+        thump(c, out, t, 0.22); thump(c, out, t + beat * 2, 0.16);
+        for (let q = 0; q < 8; q++) shaker(c, out, t + q * e, q % 2 ? 0.01 : 0.018);
+        top[k].forEach((n, j) => bell(c, out, t + (j ? beat * 2.5 : beat * 0.5), mtof(n), 0.05, 1.8));
+      },
+    };
+  })();
+
   // 開場（黑暗的房間）：很輕的低鳴 + 偶爾的遠處滴答
   (function () {
     const beat = 1, L = 4;

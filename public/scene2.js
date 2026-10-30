@@ -12,7 +12,7 @@
   const COLORS = { A: '#0039A6', B: '#FF6319', C: '#0039A6', D: '#FF6319', E: '#0039A6', F: '#FF6319', 1: '#EE352E', 2: '#EE352E', 3: '#EE352E', 7: '#B933AD' }; // MTA 官方路線色
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-  const fresh = () => ({ modal: null, sel: null, seenBtn: false, view: 0, seen: {}, selWire: null, dial: {}, flashN: undefined, flashLine: null, snap: null });
+  const fresh = () => ({ modal: null, sel: null, seenBtn: false, view: 0, seen: {}, selWire: null, dial: {}, dialWait: {}, flashN: undefined, flashLine: null, snap: null });
   let ui = fresh();
   let ctx = null;
   let data = null;
@@ -73,7 +73,8 @@
       const dv = ui.dial[r.line] !== undefined ? ui.dial[r.line] : r.dial;
       const knob = `<g class="hot" data-hot="dial-${r.line}"><rect x="864" y="${cy - 16}" width="76" height="32" fill="transparent" style="pointer-events:all"/><circle cx="884" cy="${cy}" r="14" fill="${r.state === 'dark' ? '#3a3d46' : '#c9ccd2'}" ${ST2}/>
         <line x1="884" y1="${cy}" x2="${(884 + Math.sin((dv / 9) * Math.PI * 1.6 - 0.8 * Math.PI) * 11).toFixed(1)}" y2="${(cy - Math.cos((dv / 9) * Math.PI * 1.6 - 0.8 * Math.PI) * 11).toFixed(1)}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
-        <rect x="904" y="${cy - 13}" width="30" height="26" rx="4" fill="#0d0d10" ${A.st(2)}/><text x="919" y="${cy + 8}" text-anchor="middle" font-size="19" fill="#5ad17a" ${HELV}>${dv}</text></g>`;
+        <rect x="904" y="${cy - 13}" width="30" height="26" rx="4" fill="#0d0d10" ${A.st(2)}/><text x="919" y="${cy + 8}" text-anchor="middle" font-size="19" fill="#5ad17a" ${HELV}>${dv}</text>
+        ${r.state === 'static' ? `<circle class="pulse" cx="884" cy="${cy}" r="20" fill="none" stroke="#ffd23f" stroke-width="3"/>` : ''}</g>`;
       return `<g${dim}>${sym(r.sym, 176, cy, 10, '#f4efe4')}${bullet(212, cy, 14, r.line)}</g>${body}${flash}${knob}
         ${i < b.rows.length - 1 ? `<line x1="160" y1="${top + 34}" x2="840" y2="${top + 34}" stroke="#2a2a30" stroke-width="2"/>` : ''}`;
     }).join('');
@@ -377,7 +378,13 @@
       // 連點時以畫面上的數字為準（不等伺服器回來），避免送出重複的頻道
       const cur = ui.dial[l] !== undefined ? ui.dial[l] : r.dial;
       ui.dial[l] = (cur % 9) + 1; draw();
-      ctx.send({ type: 'tune', line: l, ch: ui.dial[l] });
+      // 送出後把畫面交還給伺服器的數字，免得連點太快時本機和伺服器對不上，
+      // 變成旋鈕顯示正確頻道、那一列卻一直不亮
+      ui.dialWait[l] = (ui.dialWait[l] || 0) + 1;
+      ctx.send({ type: 'tune', line: l, ch: ui.dial[l] }).then(() => {
+        ui.dialWait[l] -= 1;
+        if (ui.dialWait[l] <= 0) { delete ui.dialWait[l]; delete ui.dial[l]; draw(); }
+      });
     }
   }
 

@@ -368,6 +368,8 @@ function render() {
     if (interludeKind !== k) {
       interludeKind = k;
       if (k === 'train') Music.stop(); // 列車音效自己會播
+      // 選對登機口、往登機門衝的那一幕：換成輕快但仍帶懸疑的「抓到了」配樂
+      if (k === 'run') { Music.tense(0); Music.play('clear'); }
       Ending.mount($('#ending'), k, { text: lastFeedText() });
       if (k !== 'black') say(lastFeedText(), { now: true, ms: 5000 }); // 黑幕的字幕直接打在畫面正中間
       else { subQueue = []; clearTimeout(subTimer); subShowing = false; subEl.classList.remove('on'); } // 黑幕時底部字幕清空

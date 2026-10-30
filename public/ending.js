@@ -241,12 +241,12 @@
       '這是我第一次做遊戲。謝謝你玩到最後，也特別感謝 Claude。',
       '希望你玩得開心，留一點 feedback 和建議給我吧！',
     ], [
-      'I’m Raccoony — my sloth girlfriend is in Taipei, I’m in New York, and we’ve been long distance for a year now.',
-      'We found that playing co-op puzzle games together is really great quality time! We both love it. But a lot of the games out there are too suspenseful or too scary (not her thing), or English-only, which doesn’t suit everyone — and by now we’ve played pretty much all of them, haha.',
-      'So while job hunting, I thought: why not just make one myself! And let her see a bit of my life in New York along the way.',
-      'Every place in the game is real: my room, my subway station, the airport I always fly out of. The two characters are based on the stuffed animals that keep me company here in New York, and they’re a lot like the two of us. Even the puzzles — 1A2B, the guitar — are our shared memories.',
+      'My girlfriend and I have been long distance for a year now — she’s in Taipei, I’m in New York.',
+      'We found that online co-op escape games are the rare thing that gives us real quality time together, and we both love playing them. But a lot of them are too suspenseful or too scary (not her thing), or English only, which doesn’t work for everyone. And by now we’ve played almost every one out there lol!',
+      'So while job hunting, I thought: why not just make one myself? And let her see a bit of my life in New York along the way.',
+      'Every place in the game is real: my room, my subway station, the airport I always fly out of. I’m Raccoony, she’s Slothy — the two characters are based on the stuffed animals that keep me company here in New York, and they’re a lot like the two of us! Even the puzzles are our shared memories: 1A2B, the guitar, and songs.',
       'This is the first game I’ve ever made. Thank you for playing all the way to the end, and a special thank-you to Claude.',
-      'I hope you had fun — please leave me some feedback and suggestions!',
+      'I hope you had fun! Feel free to leave me some feedback and suggestions!',
     ]);
     // 講到玩偶的那一段之前先放照片（靠右、文字繞著圖排）
     return ps.map((p, i) => (i === 3 ? PHOTOS : '') + `<p>${p}</p>`).join('');
