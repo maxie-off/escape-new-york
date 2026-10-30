@@ -64,7 +64,6 @@
       const x = 60 + i * 235;
       return `<g>
         <rect x="${x + 70}" y="130" width="64" height="48" rx="5" fill="#c9701a" ${ST2}/><text x="${x + 102}" y="166" text-anchor="middle" font-size="32" fill="#fff" ${HELV}>${i + 1}</text>
-        <rect x="${x + 98}" y="178" width="8" height="120" fill="#8b93a3"/>
         <rect x="${x}" y="338" width="200" height="104" rx="8" fill="#9aa1ad" ${ST}/>
         <rect x="${x}" y="338" width="200" height="16" rx="6" fill="#737b87" ${ST2}/>
         <rect x="${x + 14}" y="372" width="60" height="38" rx="5" fill="#2b3040" ${ST2}/><rect x="${x + 128}" y="372" width="60" height="38" rx="5" fill="#2b3040" ${ST2}/>
