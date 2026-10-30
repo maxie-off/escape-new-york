@@ -1,0 +1,6 @@
+Cello samples (E3–A4), trimmed and converted to mono.
+Source recordings: "Real cello notes" pack by flcellogrl on Freesound (pack 12408)
+  https://freesound.org/people/flcellogrl/packs/12408/
+Edited sample set: tonejs-instruments by Nicholaus Brosowsky (samples released under CC BY 3.0)
+  https://github.com/nbrosowsky/tonejs-instruments
+  https://creativecommons.org/licenses/by/3.0/

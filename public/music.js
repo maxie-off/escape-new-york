@@ -136,28 +136,35 @@ window.Music = (function () {
   }
   // ---------- 真實錄音的小提琴取樣（VSCO 2 Community Edition；見 audio/violin/CREDITS.txt）----------
   // 每隔三四個半音一個取樣，播放時用 playbackRate 移調到要的音；沒載入完之前先用合成的小提琴代替。
-  const VSAMP = { G3: 55, A3: 57, C4: 60, E4: 64, G4: 67, A4: 69, C5: 72, E5: 76, G5: 79, A5: 81, C6: 84 };
-  const vbuf = {}; let vloading = false;
+  //   大提琴取樣（Freesound "real cello notes"；見 audio/cello/CREDITS.txt）：低八度跟著小提琴的旋律走
+  const SAMPLES = {
+    violin: { dir: 'violin', notes: { G3: 55, A3: 57, C4: 60, E4: 64, G4: 67, A4: 69, C5: 72, E5: 76, G5: 79, A5: 81, C6: 84 }, buf: {}, gain: 5.2, lp: 6000 },
+    cello: { dir: 'cello', notes: { E3: 52, G3: 55, A3: 57, C4: 60, Ds4: 63, Fs4: 66, A4: 69 }, buf: {}, gain: 4.2, lp: 3200 },
+  };
+  let vloading = false;
   function loadViolin(c) {
     if (vloading || !c || !window.fetch) return;
     vloading = true;
-    for (const [name, m] of Object.entries(VSAMP)) {
-      fetch(`audio/violin/${name}.mp3`).then((r) => r.arrayBuffer()).then((ab) => new Promise((res, rej) => c.decodeAudioData(ab, res, rej)))
-        .then((b) => { vbuf[m] = b; }).catch(() => { /* 載不到就繼續用合成的 */ });
+    for (const S of Object.values(SAMPLES)) for (const [name, m] of Object.entries(S.notes)) {
+      fetch(`audio/${S.dir}/${name}.mp3`).then((r) => r.arrayBuffer()).then((ab) => new Promise((res, rej) => c.decodeAudioData(ab, res, rej)))
+        .then((b) => { S.buf[m] = b; }).catch(() => { /* 載不到就繼續用合成的 */ });
     }
   }
-  const violinReady = () => Object.keys(vbuf).length === Object.keys(VSAMP).length;
-  function violinSample(c, out, t, f, dur, v) {
-    const m = 69 + 12 * Math.log2(f / 440);
-    const sm = Object.keys(vbuf).map(Number).reduce((a, b) => (Math.abs(b - m) < Math.abs(a - m) ? b : a));
-    const src = c.createBufferSource(); src.buffer = vbuf[sm]; src.playbackRate.value = Math.pow(2, (m - sm) / 12);
-    const g = c.createGain(), lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000;
-    const amp = v * 5.2, end = t + dur;
+  const ready = (k) => Object.keys(SAMPLES[k].buf).length === Object.keys(SAMPLES[k].notes).length;
+  const violinReady = () => ready('violin') && ready('cello');
+  function sampled(k, c, out, t, f, dur, v) {
+    const S = SAMPLES[k], m = 69 + 12 * Math.log2(f / 440);
+    const sm = Object.keys(S.buf).map(Number).reduce((a, b) => (Math.abs(b - m) < Math.abs(a - m) ? b : a));
+    const src = c.createBufferSource(); src.buffer = S.buf[sm]; src.playbackRate.value = Math.pow(2, (m - sm) / 12);
+    const g = c.createGain(), lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = S.lp;
+    const amp = v * S.gain, end = t + dur;
     g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(amp, t + 0.04); g.gain.setValueAtTime(amp, end); g.gain.linearRampToValueAtTime(0.0001, end + 0.45);
     src.connect(lp); lp.connect(g); g.connect(out); src.start(t); src.stop(end + 0.5);
   }
+  // 大提琴（取樣）：沒載入時不出聲，背景已經有合成的大提琴長音
+  function celloLine(c, out, t, f, dur, v = 0.03) { if (ready('cello')) sampled('cello', c, out, t, f, dur, v); }
   function violin(c, out, t, f, dur, v = 0.035) {
-    if (violinReady()) return violinSample(c, out, t, f, dur, v);
+    if (ready('violin')) return sampled('violin', c, out, t, f, dur, v);
     return violinSynth(c, out, t, f, dur, v);
   }
   function violinSynth(c, out, t, f, dur, v = 0.035) {
@@ -211,7 +218,7 @@ window.Music = (function () {
         cello(c, out, t, mtof(ch.r), L, 0.026);                                                  // 大提琴長音（背景，小聲）
         if (i >= 2) { pizz(c, out, t, mtof(ch.r + 12), 0.08); pizz(c, out, t + beat * 2, mtof(ch.r + 19), 0.06); } // 撥弦低音
         if (i >= 4) for (let k = 0; k < 8; k++) pizz(c, out, t + k * e, mtof(ch.t[arp[k]]), k % 4 === 0 ? 0.045 : 0.03); // 撥弦琶音
-        if (i >= 8) for (const [n, b, d] of mel[i % 8]) violin(c, out, t + b * beat, mtof(n), d * beat * 0.98, 0.05); // 小提琴旋律
+        if (i >= 8) for (const [n, b, d] of mel[i % 8]) { violin(c, out, t + b * beat, mtof(n), d * beat * 0.98, 0.05); celloLine(c, out, t + b * beat, mtof(n - 12), d * beat * 0.98, 0.036); } // 小提琴旋律＋低八度的大提琴
         if (i >= 16) for (const [n, b, d] of mel[i % 8]) if (d >= 1) violin(c, out, t + b * beat + 0.02, mtof(n - (n % 12 === 2 || n % 12 === 9 ? 5 : 3)), d * beat * 0.98, 0.024); // 第二小提琴（低三度／四度）
         if (i >= 12 && i % 4 === 3) tick(c, out, t + beat * 3.5, 0.016, 1400);                   // 偶爾一聲懷錶滴答
       },
