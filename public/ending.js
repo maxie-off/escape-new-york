@@ -117,23 +117,33 @@
         <text x="0" y="${h * 0.24}" text-anchor="middle" font-size="${big ? 66 : 54}" fill="${INK}" ${HV} letter-spacing="1">${txt}</text>`; };
     let svg = `<svg viewBox="0 0 1000 700" class="scene-svg" role="img" aria-label="機場走道上奔跑的背影">
       <defs>
-        <linearGradient id="rkSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fc4ec"/><stop offset=".62" stop-color="#d9ecf8"/><stop offset=".63" stop-color="#8e949c"/><stop offset="1" stop-color="#6c727b"/></linearGradient>
-        <linearGradient id="rkFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7f8792"/><stop offset="1" stop-color="#a7adb6"/></linearGradient>
-        <linearGradient id="rkCeil" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3d4350"/><stop offset="1" stop-color="#262a33"/></linearGradient>
+        <linearGradient id="rkSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1430"/><stop offset=".45" stop-color="#16244a"/><stop offset=".62" stop-color="#28385c"/><stop offset=".63" stop-color="#2b3038"/><stop offset="1" stop-color="#1f242b"/></linearGradient>
+        <linearGradient id="rkFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d646e"/><stop offset="1" stop-color="#7b838f"/></linearGradient>
+        <linearGradient id="rkCeil" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#2b2f37" stop-opacity="1"/><stop offset="1" stop-color="#20242b"/></linearGradient>
+        <radialGradient id="rkMoon" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#dce8ff" stop-opacity=".55"/><stop offset="1" stop-color="#dce8ff" stop-opacity="0"/></radialGradient>
         <radialGradient id="rkGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6d8" stop-opacity=".9"/><stop offset="1" stop-color="#fff6d8" stop-opacity="0"/></radialGradient>
       </defs>
       <rect x="-900" width="2800" height="700" fill="#22252d"/>`;
     // 天花板、地板、牆
     svg += poly(flatQ(CE, -1, 1, Z0, Z1), 'url(#rkCeil)');
     svg += poly(flatQ(FL, -1, 1, Z0, Z1), 'url(#rkFloor)');
-    svg += poly(wallQ(-1, CE, FL, Z0, Z1), '#4d5562') + poly(wallQ(1, CE, FL, Z0, Z1), '#59616e');
+    svg += poly(wallQ(-1, CE, FL, Z0, Z1), '#454c58') + poly(wallQ(1, CE, FL, Z0, Z1), '#505967');
+    // 右牆：跟機場大廳一樣的直條牆板
+    for (let z = 1.1; z < Z1; z += 0.5) svg += `<polyline points="${pts([P(1, CE, z), P(1, FL, z)])}" stroke="#5d6675" stroke-width="${(3 / z).toFixed(1)}" fill="none" opacity=".5"/>`;
     // 左牆：整排落地窗（外面是天空和停機坪）
     const panes = [];
     for (let z = 1.2; z < Z1 - 0.3; z += 0.9) panes.push(wallQ(-1, -0.56, 0.62, z, z + 0.84));
     svg += `<clipPath id="rkWin">${panes.map((q) => `<polygon points="${pts(q)}"/>`).join('')}</clipPath>`;
     svg += panes.map((q) => poly(q, 'url(#rkSky)')).join('');
+    // 窗外：夜空（月亮、星星）＋停機坪上的幾盞燈；都只在窗玻璃裡看得到
+    const stars = Array.from({ length: 26 }, (_, i) => { const sx = 30 + ((i * 97) % 300), sy = 40 + ((i * 53) % 190), r = 1 + ((i * 7) % 3) * 0.6;
+      return `<circle cx="${sx}" cy="${sy}" r="${r}" fill="#dce8ff" opacity="${(0.35 + ((i * 11) % 5) * 0.12).toFixed(2)}"/>`; }).join('');
+    svg += `<g clip-path="url(#rkWin)">${stars}
+      <circle cx="196" cy="118" r="130" fill="url(#rkMoon)"/>
+      <circle cx="196" cy="118" r="34" fill="#f2f5ff"/><circle cx="186" cy="110" r="8" fill="#c9d4ea" opacity=".75"/><circle cx="206" cy="128" r="5.5" fill="#c9d4ea" opacity=".7"/><circle cx="205" cy="105" r="3.5" fill="#c9d4ea" opacity=".6"/>
+      ${[110, 250, 330].map((x, i) => `<circle cx="${x}" cy="${300 + i * 8}" r="3.5" fill="#ffd27a" opacity=".85"/><ellipse cx="${x}" cy="${304 + i * 8}" rx="18" ry="5" fill="#ffd27a" opacity=".16"/>`).join('')}</g>`;
     // 停在外面的飛機：只在窗玻璃裡看得到（被窗框擋住）
-    svg += `<g clip-path="url(#rkWin)">${spr(-1.9, 0.38, 3.2, `<g opacity=".9"><path d="M-260,0 C-200,-36 120,-36 230,-12 C252,-6 252,6 230,10 C120,26 -200,26 -260,8Z" fill="#f4f6f9" stroke="#5a6170" stroke-width="5"/><path d="M-200,-14 L-250,-110 L-210,-110 L-130,-16Z" fill="#1e5fb3" stroke="#5a6170" stroke-width="5"/><path d="M-60,4 L40,90 L80,90 L30,4Z" fill="#dfe3ea" stroke="#5a6170" stroke-width="5"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${-130 + i * 26}" cy="-8" r="5" fill="#33405a"/>`).join('')}</g>`)}</g>`;
+    svg += `<g clip-path="url(#rkWin)">${spr(-1.9, 0.38, 3.2, `<g opacity=".55"><path d="M-260,0 C-200,-36 120,-36 230,-12 C252,-6 252,6 230,10 C120,26 -200,26 -260,8Z" fill="#f4f6f9" stroke="#5a6170" stroke-width="5"/><path d="M-200,-14 L-250,-110 L-210,-110 L-130,-16Z" fill="#1e5fb3" stroke="#5a6170" stroke-width="5"/><path d="M-60,4 L40,90 L80,90 L30,4Z" fill="#dfe3ea" stroke="#5a6170" stroke-width="5"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${-130 + i * 26}" cy="-8" r="5" fill="#33405a"/>`).join('')}</g>`)}</g>`;
     panes.forEach((q, i) => { const z = 1.2 + i * 0.9; svg += poly(q, 'none', `stroke="${INK}" stroke-width="1.5"`) + `<polyline points="${pts([P(-1, -0.56, z + 0.42), P(-1, 0.62, z + 0.42)])}" stroke="#2c313b" stroke-width="${(10 / z).toFixed(1)}" fill="none"/>`; });
     svg += poly(wallQ(-1, 0.62, FL, Z0, Z1), '#3a404b');
     svg += `<polyline points="${pts([P(-1, 0.62, Z0), P(-1, 0.62, Z1)])}" stroke="#8a919b" stroke-width="3" fill="none"/>`;
@@ -141,8 +151,10 @@
     for (let z = 1.5; z < Z1; z += 1) svg += `<polyline points="${pts([P(-1, CE, z), P(1, CE, z)])}" stroke="#1d2027" stroke-width="${(14 / z).toFixed(1)}" fill="none"/>`;
     for (const lx of [-0.5, 0.5]) {
       svg += poly(flatQ(CE, lx - 0.07, lx + 0.07, 1.05, Z1 - 0.2), '#fff4cf');
-      svg += poly(flatQ(FL, lx - 0.1, lx + 0.1, 1.05, Z1 - 0.2), '#fff8e2', 'opacity=".16"');
+      svg += poly(flatQ(FL, lx - 0.1, lx + 0.1, 1.05, Z1 - 0.2), '#fff8e2', 'opacity=".12"');
     }
+    // 月光：從左邊整排落地窗斜斜地照在地板上
+    for (let z = 1.2; z < Z1 - 0.3; z += 0.9) svg += poly(flatQ(FL, -0.98, -0.26, z + 0.08, z + 0.72), '#cfe0ff', 'opacity=".09"');
     svg += `<g class="floor-lines">${Array.from({ length: 16 }, (_, i) => { const z = 1.1 + i * 0.5; return `<polyline points="${pts([P(-1, FL, z), P(1, FL, z)])}" stroke="#6f7782" stroke-width="1.6" fill="none" opacity=".7"/>`; }).join('')}
       <polyline points="${pts([P(0, FL, Z0), P(0, FL, Z1)])}" stroke="#6f7782" stroke-width="1.6" fill="none" opacity=".5"/></g>`;
     // 右牆：登機門（每個門上方掛著黃色登機口牌）＋櫃台
@@ -165,6 +177,9 @@
     svg += `<ellipse cx="500" cy="262" rx="140" ry="90" fill="url(#rkGlow)"/>`;
     back.push([Z1 - 0.6, spr(-0.36, -0.2, Z1 - 0.6, `<g transform="scale(3)">${sign(`Gate ${goal}`, true)}</g>`)]);
     back.sort((a, b) => b[0] - a[0]).forEach(([, g]) => { svg += g; });
+    // 整體壓暗（跟機場大廳同一個夜間色調）
+    svg += `<defs><radialGradient id="rkDim" cx="50%" cy="50%" r="72%"><stop offset=".35" stop-color="#0a0d12" stop-opacity=".18"/><stop offset="1" stop-color="#0a0d12" stop-opacity=".66"/></radialGradient></defs>
+      <rect x="-900" width="2800" height="700" fill="url(#rkDim)"/>`;
     // 角色（以腳底為原點；由 JS 每幀擺位）
     svg += `<g class="runner" id="run-a">${raccoonyBack()}</g><g class="runner" id="run-b">${slothyBack()}</g>`;
     svg += '</svg>';
@@ -212,10 +227,77 @@
   }
 
   // ---------------- To be continued ----------------
+  // 遊戲的背景故事（往下滑才看得到）
+  const STORY = () => tr([
+    '我和女朋友，一個在台北、一個在紐約，遠距離已經一年了。',
+    '我們發現，這種兩個人一起玩的線上解謎遊戲，是難得能好好相處的 quality time，我們都很喜歡玩。但市面上的遊戲，有的太懸疑、太可怕（女友不愛），有的全英文，不是所有人都適合；而且我們幾乎已經玩完所有現有的了。',
+    '所以趁著待業的這段期間，我想：那乾脆自己來做一個吧。也順便讓她認識我在紐約的生活。',
+    '遊戲裡的場景都是真的：我的房間、我家那一站地鐵，還有我常去的機場。我是浣熊，女友是樹懶 —— 角色的原型，是在紐約陪著我的那兩隻玩偶，他們就像我跟我女朋友一樣。裡面的謎題，1A2B、彈吉他，也都是我們的共同回憶。',
+    '這是我第一次做遊戲。謝謝你玩到最後，也特別感謝 Claude。希望你玩得開心，留一點 feedback 和建議給我吧！',
+  ], [
+    'My girlfriend and I have been long distance for a year now — she’s in Taipei, I’m in New York.',
+    'We found that online co-op escape games are the rare thing that gives us real quality time together, and we both love playing them. But a lot of them are too suspenseful or too scary (not her thing), or English-only, which doesn’t work for everyone — and by now we’ve played almost every one out there.',
+    'So while job hunting, I thought: why not make one myself? And let her see a bit of my life in New York along the way.',
+    'Every place in the game is real: my room, my subway station, the airport I always fly out of. I’m Raccoony, she’s Slothy — the two characters are based on the stuffed animals that keep me company here in New York, and they’re a lot like the two of us. Even the puzzles are our shared memories: 1A2B, the guitar.',
+    'This is the first game I’ve ever made. Thank you for playing all the way to the end, and a special thank-you to Claude. I hope you had fun — please leave me some feedback and suggestions!',
+  ]).map((p) => `<p>${p}</p>`).join('');
+
+  function feedbackForm() {
+    return `<form class="end-fb" data-fb>
+      <h3>${tr('給這個遊戲幾顆星？', 'How many stars would you give it?')}</h3>
+      <div class="fb-stars" data-stars>${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" aria-label="${n}">★</button>`).join('')}</div>
+      <label>${tr('有什麼想改進的地方？', 'Anything you’d like improved?')}
+        <textarea name="text" rows="4" placeholder="${tr('想到什麼都可以寫', 'Anything at all')}"></textarea></label>
+      <button class="fb-send" type="submit">${tr('送出', 'Send')}</button>
+      <p class="fb-msg" data-fbmsg></p>
+    </form>`;
+  }
+
   function mountTbc(root, info) {
     const n = info && Number.isInteger(info.hintTotal) ? info.hintTotal : null;
     const stat = n === null ? '' : `<em class="end-stat">${n === 0 ? tr('沒用任何提示就過關了！', 'Finished without a single hint!') : tr(`這一路用了 ${n} 次提示`, `You used ${n} hint${n === 1 ? '' : 's'}`)}</em>`;
-    root.innerHTML = `<div class="end-tbc"><span>To be continued</span><i>▶</i>${stat}<button class="end-again" data-again>${tr('再玩一次！', 'Play again!')}<small>${tr('謎題會換新', 'New puzzles every time')}</small></button></div>`;
+    root.innerHTML = `<div class="end-scroll">
+      <section class="end-tbc"><span>To be continued</span><i>▶</i>
+        <strong class="end-clear">${tr('恭喜通關！', 'You made it!')}</strong>${stat}
+        <button class="end-again" data-home>${tr('回到首頁', 'Back to home')}</button>
+        <a class="end-more" data-more>${tr('往下滑，看看這個遊戲的背景故事', 'Scroll down for the story behind this game')}<i class="arr">↓</i></a>
+      </section>
+      <section class="end-story">
+        <h2>${tr('這個遊戲是怎麼來的', 'How this game came to be')}</h2>
+        ${STORY()}
+        ${feedbackForm()}
+      </section>
+    </div>`;
+    const scroller = root.querySelector('.end-scroll');
+    const more = root.querySelector('[data-more]');
+    if (more) more.onclick = () => { const s = root.querySelector('.end-story'); if (s) s.scrollIntoView({ behavior: 'smooth' }); };
+    if (scroller) wireFeedback(root);
+  }
+
+  // 問卷：星星 + 文字 → 送到伺服器（伺服器再轉寄到 Google 試算表）
+  function wireFeedback(root) {
+    const form = root.querySelector('[data-fb]');
+    if (!form) return;
+    let stars = 0;
+    const btns = [...form.querySelectorAll('[data-star]')];
+    const paint = () => btns.forEach((b) => b.classList.toggle('on', Number(b.dataset.star) <= stars));
+    btns.forEach((b) => { b.onclick = () => { stars = Number(b.dataset.star); paint(); }; });
+    const msg = form.querySelector('[data-fbmsg]');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const text = form.querySelector('textarea').value.trim();
+      if (!stars && !text) { msg.textContent = tr('給顆星，或寫點什麼吧！', 'Pick a star, or write something!'); return; }
+      const send = form.querySelector('.fb-send');
+      send.disabled = true; msg.textContent = tr('送出中…', 'Sending…');
+      try {
+        const res = await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stars, text, lang: (window.I18N && I18N.lang) || 'zh' }) });
+        if (!res.ok) throw new Error('http ' + res.status);
+        form.innerHTML = `<h3>${tr('收到了，謝謝你！', 'Got it — thank you!')}</h3><p class="fb-msg">${tr('你的建議對我很有幫助 ♥', 'Your feedback really helps ♥')}</p>`;
+      } catch (err) {
+        send.disabled = false; msg.textContent = tr('送不出去，等一下再試一次？', 'Couldn’t send — try again in a moment?');
+      }
+    };
   }
 
   function mount(root, kind = 'train', info) {

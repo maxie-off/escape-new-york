@@ -22,6 +22,32 @@ app.get(['/', '/index.html'], (_req, res) => { res.set('Cache-Control', 'no-cach
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/healthz', (_req, res) => res.send('ok'));
 
+// ---------- 結尾的問卷：幾顆星 + 想改進的地方 ----------
+// 一律存一份在伺服器上（data/feedback.jsonl）；另外，如果設了 FEEDBACK_WEBHOOK
+// （Google Apps Script 的網址，見 README），就同時送進 Google 試算表。
+app.post('/api/feedback', express.json({ limit: '16kb' }), async (req, res) => {
+  const b = req.body || {};
+  const row = {
+    at: new Date().toISOString(),
+    stars: Math.max(0, Math.min(5, Number(b.stars) || 0)),
+    text: String(b.text || '').slice(0, 2000),
+    lang: b.lang === 'en' ? 'en' : 'zh',
+  };
+  if (!row.stars && !row.text) return res.status(400).json({ ok: false });
+  try {
+    fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+    fs.appendFileSync(path.join(__dirname, 'data', 'feedback.jsonl'), JSON.stringify(row) + '\n');
+  } catch (e) { console.warn('feedback save failed', e.message); }
+  const hook = process.env.FEEDBACK_WEBHOOK;
+  if (hook) {
+    try {
+      const r = await fetch(hook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(row) });
+      if (!r.ok) console.warn('feedback webhook', r.status);
+    } catch (e) { console.warn('feedback webhook failed', e.message); }
+  }
+  res.json({ ok: true });
+});
+
 // ---------- 房間 ----------
 const rooms = new Map();
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 去掉易混淆的 I O 0 1

@@ -46,6 +46,29 @@ It needs a host that supports WebSockets, since the game uses Socket.IO. GitHub 
 
 On the free plan the server falls asleep when nobody's using it, so the first visit can take 30 to 50 seconds. Rooms live in memory, so a restart wipes them.
 
+## Feedback form → Google Sheet
+
+The last screen has a short form (stars + what to improve). Every answer is saved on the server in
+`data/feedback.jsonl`. To also have them land in a Google Sheet:
+
+1. Make a new Google Sheet. First row: `at`, `stars`, `text`, `lang`.
+2. In that sheet: Extensions → Apps Script, and paste:
+
+   ```js
+   function doPost(e) {
+     const d = JSON.parse(e.postData.contents);
+     SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]
+       .appendRow([d.at, d.stars, d.text, d.lang]);
+     return ContentService.createTextOutput('ok');
+   }
+   ```
+
+3. Deploy → New deployment → Web app. "Execute as: Me", "Who has access: Anyone". Copy the URL it gives you.
+4. Set that URL as the `FEEDBACK_WEBHOOK` environment variable (on Render: your service → Environment → Add
+   Environment Variable). Locally: `FEEDBACK_WEBHOOK="https://script.google.com/..." npm start`.
+
+Without the variable nothing breaks — the answers just stay in `data/feedback.jsonl`.
+
 ## Where things are
 
 - `server.js` is the server. It keeps all the game state, so both players always see the same thing, and each player only receives what their character can see.

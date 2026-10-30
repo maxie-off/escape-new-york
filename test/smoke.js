@@ -126,7 +126,7 @@ const waitState = (s, pred) =>
     const gotTicket = waitState(a, (s) => (s.docs || []).some((d) => d.id === 'ticket'));
     assert.equal((await emit(a, 'scene_action', { type: 'take_ticket' })).ok, true);
     const tState = await gotTicket;
-    assert.equal(tState.docs[0].boarding, '2:00 PM');
+    assert.equal(tState.docs[0].boarding, '10:00 PM');
     assert.equal(tState.scene.data.ticketTaken, true);
     assert.equal((await emit(a, 'scene_action', { type: 'take_ticket' })).ok, true);
     assert.equal(tState.docs.length, 1); // 重複拿不會重複收藏

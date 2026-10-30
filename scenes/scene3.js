@@ -63,7 +63,7 @@ function build(v) {
   let k = 0;
   const flights = DESTS.flatMap((d) => [0, 1].map(() => {
     const i = k++;
-    return { dest: d.id, flight: `${d.air} ${nums[i]}`, board: d.board, gate: gates[i], t: 11 * 60 + 40 + Math.floor(r() * 60) * 5 };
+    return { dest: d.id, flight: `${d.air} ${nums[i]}`, board: d.board, gate: gates[i], t: 20 * 60 + Math.floor(r() * 36) * 5 }; // 晚上的班機（跟地鐵站的時間一致）
   }));
   flights.sort((a, b) => a.t - b.t);
   flights.forEach((f) => { f.time = `${String(Math.floor(f.t / 60)).padStart(2, '0')}:${String(f.t % 60).padStart(2, '0')}`; });

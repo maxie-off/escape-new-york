@@ -753,8 +753,8 @@
   }
   // Slothy 牆上的面板：機場代碼對照表（看板上只有代碼，要靠這個才知道是哪裡）
   function codesPanel() {
-    const rows = data.codes.map((c, i) => { const y = 172 + i * 52; return `<text x="430" y="${y}" font-size="28" fill="#ffffff" ${HELV}>${esc(c.code)}</text>
-      <text x="430" y="${y + 21}" font-size="15" fill="#b9c0cb" ${HELV}>${esc(c.place)}</text>`; }).join('');
+    const rows = data.codes.map((c, i) => { const y = 180 + i * 40; return `<text x="430" y="${y}" font-size="21" fill="#ffffff" ${HELV}>${esc(c.code)}</text>
+      <text x="430" y="${y + 16}" font-size="11" fill="#b9c0cb" ${HELV}>${esc(c.place)}</text>`; }).join('');
     return `<rect x="330" y="120" width="300" height="250" fill="transparent"/>${rows}
       ${ui.seen.codes ? '' : `<rect class="pulse" x="326" y="116" width="308" height="258" rx="8" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}`;
   }

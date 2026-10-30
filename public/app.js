@@ -81,8 +81,11 @@ socket.on('connect', () => {
 socket.on('disconnect', () => { $('#conn').textContent = tr('連線中斷，重新連線中…', 'Disconnected, reconnecting…'); });
 socket.on('state', (s) => { state = s; if (s.you) setMyRole(s.you); render(); });
 
-// iPad / Safari 需要點擊後才能發聲
+// 音樂：一開啟網頁就想放。瀏覽器可能擋自動播放（iPad / Safari 一定會擋），
+// 所以先試著直接開聲音，被擋就等第一次點擊／按鍵再開。
+Music.unlock();
 for (const ev of ['pointerdown', 'touchend', 'keydown']) document.addEventListener(ev, () => Music.unlock(), { passive: true });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) Music.unlock(); });
 
 // ---------- 封面 / 選角 / 房間碼 ----------
 let screen = 'title';
@@ -376,8 +379,11 @@ function render() {
   if (state && roomCode && state.phase === 'ended') {
     unmountActive(); closeDocs(true); show('ending');
     if (!endingShown) { endingShown = true; interludeKind = null; Music.stop(); Ending.mount($('#ending'), 'tbc', state.ending); }
-    const again = $('#ending').querySelector('[data-again]');
-    if (again) again.onclick = () => socket.emit('play_again', {}, (res) => { if (!res?.ok) say(L(res?.error) || tr('等對方也在線上', 'Wait until your friend is online too'), { now: true }); });
+    const home = $('#ending').querySelector('[data-home]');
+    if (home) home.onclick = () => { // 回到首頁：離開房間，重新開始
+      try { sessionStorage.removeItem('roomCode'); sessionStorage.removeItem('myRole'); } catch (e) { /* ignore */ }
+      location.reload();
+    };
     return;
   }
   Ending.stop(); $('#ending').classList.remove('run'); interludeKind = null;

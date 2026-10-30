@@ -600,5 +600,5 @@ window.Music = (function () {
     });
   }
 
-  return { _violinReady: violinReady, _loadViolin: () => loadViolin(ctx || new (window.AudioContext || window.webkitAudioContext)()), unlock, play, stop, pa, speak, hush, buzz, boom, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
+  return { _violinReady: violinReady, _loadViolin: () => loadViolin(ctx || new (window.AudioContext || window.webkitAudioContext)()), unlock, play, stop, state: () => (ctx ? ctx.state : 'none'), pa, speak, hush, buzz, boom, ding, click, strum, footsteps, trainPass, _renderTrain: renderTrain, toggleMute, isMuted: () => muted, tracks: Object.keys(TRACKS), _renderOffline: renderOffline };
 })();
