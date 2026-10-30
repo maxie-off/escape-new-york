@@ -231,9 +231,9 @@ const waitState = (s, pred) =>
     const doneA = await doneP;
     const hers = doneA.scene.data.hack.manifest.filter((m) => m.names.includes('TIFFANY')).map((m) => s3a.scene.data.flights.find((f) => f.flight === m.flight));
     assert.equal(hers.length, 1);
-    assert.equal(hers[0].dest, 'SYDNEY');
+    assert.equal(hers[0].dest, 'SYD');
     const sydGate = hers[0].gate;
-    const otherGate = s3a.scene.data.flights.find((f) => f.dest === 'LISBON').gate; // 夏天衝浪的誘答（紐約 1 月是冬天）
+    const otherGate = s3a.scene.data.flights.find((f) => f.dest === 'LIS').gate; // 夏天衝浪的誘答（紐約 1 月是冬天）
     assert.equal((await emit(a, 'scene_action', { type: 'gate', gate: sydGate })).ok, false); // 只有 B
     assert.equal((await emit(b, 'scene_action', { type: 'gate', gate: otherGate })).correct, false);
     assert.equal((await emit(b, 'scene_action', { type: 'gate', gate: 101 })).ok, false);

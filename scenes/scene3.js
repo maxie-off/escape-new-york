@@ -28,10 +28,10 @@ const AIRLINES = [
 //   雪梨／里斯本：都去海邊衝浪（衣物、小物都一樣）→ 只能靠「今天紐約是夏天還是冬天」分
 //   北海道／雷克雅維克：都很冷（衣物一樣）→ 靠小物分（雪鏡＝滑雪、腳架＝拍極光）
 const DESTS = [
-  { id: 'syd', board: 'SYDNEY', boardZh: '雪梨', air: 'BB', kind: 'beach', place: T('雪梨，澳洲', 'Sydney, Australia') },
-  { id: 'lis', board: 'LISBON', boardZh: '里斯本', air: 'BB', kind: 'beach', place: T('里斯本，葡萄牙', 'Lisbon, Portugal') },
-  { id: 'hok', board: 'SAPPORO', boardZh: '札幌（北海道）', air: 'PS', kind: 'ski', place: T('北海道，日本', 'Hokkaido, Japan') },
-  { id: 'rek', board: 'REYKJAVIK', boardZh: '雷克雅維克', air: 'PS', kind: 'aurora', place: T('雷克雅維克，冰島', 'Reykjavík, Iceland') },
+  { id: 'syd', board: 'SYD', city: 'Sydney', cityZh: '雪梨', air: 'BB', kind: 'beach', place: T('雪梨，澳洲', 'Sydney, Australia') },
+  { id: 'lis', board: 'LIS', city: 'Lisbon', cityZh: '里斯本', air: 'BB', kind: 'beach', place: T('里斯本，葡萄牙', 'Lisbon, Portugal') },
+  { id: 'hok', board: 'CTS', city: 'Sapporo', cityZh: '札幌（北海道）', air: 'PS', kind: 'ski', place: T('北海道，日本', 'Hokkaido, Japan') },
+  { id: 'rek', board: 'KEF', city: 'Reykjavík', cityZh: '雷克雅維克', air: 'PS', kind: 'aurora', place: T('雷克雅維克，冰島', 'Reykjavík, Iceland') },
 ];
 const PACK = {
   beach: { clothing: ['bikini', 'tshirt'], gadget: ['sunglasses'] },
@@ -63,7 +63,7 @@ function build(v) {
   let k = 0;
   const flights = DESTS.flatMap((d) => [0, 1].map(() => {
     const i = k++;
-    return { dest: d.id, flight: `${d.air} ${nums[i]}`, board: d.board, boardZh: d.boardZh, gate: gates[i], t: 11 * 60 + 40 + Math.floor(r() * 60) * 5 };
+    return { dest: d.id, flight: `${d.air} ${nums[i]}`, board: d.board, gate: gates[i], t: 11 * 60 + 40 + Math.floor(r() * 60) * 5 };
   }));
   flights.sort((a, b) => a.t - b.t);
   flights.forEach((f) => { f.time = `${String(Math.floor(f.t / 60)).padStart(2, '0')}:${String(f.t % 60).padStart(2, '0')}`; });
@@ -147,7 +147,7 @@ function view(state, role) {
     return {
       role,
       date: { m, d, label: `${MONTH_EN[m - 1]} ${String(d).padStart(2, '0')}`, long: T(`${m} 月 ${d} 日`, `${MONTH_EN[m - 1]} ${d}`) },
-      flights: B.flights.map(({ flight, board, boardZh, gate, time }) => ({ flight, dest: board, destZh: T(boardZh, ''), gate, time })),
+      flights: B.flights.map(({ flight, board, gate, time }) => ({ flight, dest: board, gate, time })), // 目的地只寫機場代碼（SYD、LIS、CTS、KEF）
       posts: DESTS.map((x) => ({ id: x.id, place: x.place })),
       hack: hackView(state, 'A'),
       bomb: Math.max(0, state.bombAt - Date.now()), boom: state.boom,
@@ -232,14 +232,14 @@ function answers(state) {
   const [m, day] = vv.date;
   const nySummer = m >= 5 && m <= 9;
   const why = {
-    beach: T(`行李是去海邊玩水的（比基尼、墨鏡）。今天 ${m} 月 ${day} 日，紐約是${nySummer ? '夏天' : '冬天'}；南半球的雪梨季節相反，所以現在正是夏天的是${d.board === 'SYDNEY' ? '雪梨' : '里斯本'}。`,
-      `The suitcase is for the beach (bikini, sunglasses). Today is ${MONTH_EN[m - 1]} ${day}: it’s ${nySummer ? 'summer' : 'winter'} in New York. Sydney is in the Southern Hemisphere with opposite seasons, so the place having summer right now is ${d.board === 'SYDNEY' ? 'Sydney' : 'Lisbon'}.`),
+    beach: T(`行李是去海邊玩水的（比基尼、墨鏡）。今天 ${m} 月 ${day} 日，紐約是${nySummer ? '夏天' : '冬天'}；南半球的雪梨季節相反，所以現在正是夏天的是${d.cityZh}。`,
+      `The suitcase is for the beach (bikini, sunglasses). Today is ${MONTH_EN[m - 1]} ${day}: it’s ${nySummer ? 'summer' : 'winter'} in New York. Sydney is in the Southern Hemisphere with opposite seasons, so the place having summer right now is ${d.city}.`),
     ski: T('行李是去很冷的地方（毛衣、羽絨衣），還帶了雪鏡：去北海道滑雪。', 'The suitcase is for somewhere cold (sweater, down jacket) and has ski goggles: skiing in Hokkaido.'),
     aurora: T('行李是去很冷的地方（毛衣、羽絨衣），還帶了腳架：去雷克雅維克拍極光。', 'The suitcase is for somewhere cold (sweater, down jacket) and has a tripod: photographing the northern lights in Reykjavík.'),
   }[d.kind];
   return {
-    clue: T(`${why.zh}看板上飛往 ${d.board} 的都是 ${air.name}（${air.code}），Slothy 要在電腦上駭進這家航空公司。`, `${why.en} Every flight to ${d.board} on the board is ${air.name} (${air.code}), so Slothy should hack that airline on the computer.`),
-    gate: T(`旅客名單上 ${vv.name} 在 ${f.flight}（飛往 ${d.board}），看板上是 ${f.gate} 號登機口。`, `In the passenger list, ${vv.name} is on ${f.flight} (to ${d.board}), which leaves from gate ${f.gate} on the board.`),
+    clue: T(`${why.zh}看板上飛往${d.cityZh}（${d.board}）的都是 ${air.name}（${air.code}），Slothy 要在電腦上駭進這家航空公司。`, `${why.en} Every flight to ${d.city} (${d.board}) on the board is ${air.name} (${air.code}), so Slothy should hack that airline on the computer.`),
+    gate: T(`旅客名單上 ${vv.name} 在 ${f.flight}（飛往${d.cityZh}，${d.board}），看板上是 ${f.gate} 號登機口。`, `In the passenger list, ${vv.name} is on ${f.flight} (to ${d.board}), which leaves from gate ${f.gate} on the board.`),
   };
 }
 function solution(v) {

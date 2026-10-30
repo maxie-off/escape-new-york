@@ -75,7 +75,7 @@
     const sign = `<g><rect x="610" y="104" width="6" height="30" fill="#6c7385"/><rect x="884" y="104" width="6" height="30" fill="#6c7385"/>
       <rect x="560" y="132" width="400" height="86" rx="6" fill="#c99a24" ${ST}/><rect x="560" y="174" width="400" height="6" fill="${INK}"/>
       <text x="580" y="164" font-size="25" fill="${INK}" ${HELV}>← Check-in</text><text x="790" y="164" font-size="25" fill="${INK}" ${HELV}>All Gates ↑</text>
-      <rect x="560" y="180" width="400" height="38" fill="#1b1b1f"/><text x="580" y="208" font-size="22" fill="#c99a24" ${HELV}>Baggage Claim  ↘</text><text x="800" y="208" font-size="22" fill="#fff" ${HELV}>${tr('出境 Departures', 'Departures')}</text></g>`;
+      <rect x="560" y="180" width="400" height="38" fill="#1b1b1f"/><text x="578" y="207" font-size="19" fill="#c99a24" ${HELV}>Baggage Claim ↘</text><text x="944" y="207" text-anchor="end" font-size="19" fill="#fff" ${HELV}>${tr('出境 Departures', 'Departures')}</text></g>`;
     return `${desks}${sign}${[120, 355, 590, 825].map((x) => kiosk(x + 30, 470, 0.7)).join('')}`;
   }
 
@@ -650,7 +650,7 @@
   // ---------- 開場：兩人同畫面（走進大廳 → 廣播 → 警察衝進來 → 兩人對話）----------
   function roomIntro() {
     const copsL = [0, 1, 2].map((i) => `<g class="s3-rush-l" style="animation-delay:${8.0 + i * 0.12}s">${cop(470 + i * 80, 600 - (i % 2) * 24, 0.62)}</g>`).join('');
-    const copsR = [0, 1, 2].map((i) => `<g class="s3-rush-r" style="animation-delay:${8.05 + i * 0.12}s">${cop(940 - i * 80, 612 - (i % 2) * 22, 0.66, '#232d63')}</g>`).join('');
+    const copsR = [0, 1, 2].map((i) => `<g class="s3-rush-r" style="animation-delay:${8.05 + i * 0.12}s">${cop(940 - i * 80, 612 - (i % 2) * 22, 0.66)}</g>`).join('');
     return `${SVG_OPEN('機場大廳')}${lightsAndCeiling()}${floor()}${counters()}
       ${crowd(12, 77, 540, 640)}
       ${dim()}
@@ -685,7 +685,7 @@
         <text x="206" y="${y}" font-size="19" fill="#ffd23f" ${HELV}>${esc(f.time)}</text>
         <text x="290" y="${y}" font-size="19" fill="#cfd3da" ${HELV}>${esc(f.flight)}</text>
         <text x="400" y="${y}" font-size="19" fill="#fff" ${HELV}>${esc(f.dest)}</text>
-        <text x="580" y="${y}" font-size="16" fill="#9aa0a8" ${HELV}>${esc(f.destZh)}</text>
+        
         <text x="760" y="${y}" text-anchor="middle" font-size="20" fill="#5ad17a" ${HELV}>${f.gate}</text>`;
     }).join('');
     return `<rect x="176" y="96" width="648" height="370" rx="12" fill="#0d0f14" ${ST}/>
@@ -720,32 +720,36 @@
   }
 
   // ---------- B：和警察圍著地上打開的行李箱（視角 0）／電腦 terminal（視角 1）----------
-  // 地上打開的行李箱：上蓋和箱身都平躺在地上（上蓋在後、箱身在前），從這個角度看只有一個殼的厚度。
-  // 箱子裡看不清楚，只露出一兩件衣服（一隻袖子垂到地上）；點了才看到裡面。
+  // 地上的行李箱（參考照片：硬殼箱側躺，從側面看）：咖啡色硬殼、凸起的肋條、中間一圈拉鍊、提把、密碼鎖、左邊兩個萬向輪。
+  // 拉鍊右半邊被拉開了一段，衣服從縫裡掉出來，一隻袖子垂到地上；點了才看到裡面。
   function openSuitcase(x, y, s) {
     const SLEEVE = { tshirt: '#dcaa3e', sweater: '#86303a', downjacket: '#2f4a7c' };
     const sl = SLEEVE[data.clothing.find((c) => SLEEVE[c])] || '#8a8f98';
-    const shell = (pts) => `<polygon points="${pts}" fill="url(#rlShell)" ${ln(2.4)}/>`;
+    const L = -200, R = 200, T = -112, M = -48, B = 14; // 左右、上緣、拉鍊、下緣
+    const half = (y0, y1, top) => `<path d="M${L + 14},${y0} H${R - 18} Q${R},${y0} ${R},${y0 + 16} V${y1 - 4} Q${R},${y1} ${R - 6},${y1} H${L + 6} Q${L},${y1} ${L},${y1 - 4} V${y0 + 16} Q${L},${y0} ${L + 14},${y0}Z" fill="url(#cs${top ? 'T' : 'B'})" ${ln(2.4)}/>
+      <path d="M${L + 26},${y0 + 10} H${R - 30} V${y1 - 10} H${L + 26}Z" fill="#fff" opacity=".05" ${ln(1)}/>
+      ${[-104, 104].map((cx) => `<path d="M${cx - 30},${y0 + 2} h60 v${y1 - y0 - 4} h-60Z" fill="#000" opacity=".1"/><path d="M${cx - 30},${y0 + 2} v${y1 - y0 - 4} M${cx + 30},${y0 + 2} v${y1 - y0 - 4}" stroke="#000" stroke-width="1.6" opacity=".35"/><path d="M${cx - 28},${y0 + 3} v${y1 - y0 - 6}" stroke="#fff" stroke-width="1.4" opacity=".12"/>`).join('')}
+      <path d="M${L + 14},${y0 + 2} H${R - 18}" stroke="#fff" stroke-width="2" opacity=".15"/>`;
+    const gap0 = 10, gap1 = 140; // 拉鍊拉開的那一段（鎖在它右邊）
     return `<g transform="translate(${x},${y}) scale(${s})">
-      <ellipse cx="14" cy="34" rx="236" ry="26" fill="#000" opacity=".38"/>
-      ${shell('-170,-58 170,-58 190,-6 -190,-6')}
-      <polygon points="-158,-52 158,-52 174,-12 -174,-12" fill="url(#rlLining)"/><polygon points="-158,-52 158,-52 174,-12 -174,-12" fill="url(#rlWeave)"/>
-      <path d="M-150,-34 H150" stroke="#2a2d36" stroke-width="2.5"/><rect x="70" y="-38" width="10" height="7" rx="2" fill="#c9ccd2"/>
-      <rect x="-30" y="-8" width="60" height="7" rx="3" fill="#15191c"/>
-      ${shell('-192,-2 192,-2 214,50 -214,50')}
-      <rect x="-214" y="50" width="428" height="16" rx="4" fill="#1d252b" ${ln(2.4)}/><path d="M-210,56 H210" stroke="#fff" stroke-width="1" opacity=".1"/>
-      <polygon points="-180,4 180,4 198,44 -198,44" fill="url(#rlLining)"/><polygon points="-180,4 180,4 198,44 -198,44" fill="url(#rlWeave)"/>
-      <path d="M-176,10 C-160,0 -100,-2 -72,6 L-66,30 C-70,40 -120,42 -160,40 C-184,38 -188,22 -176,10Z" fill="#7d8060" ${ln(1.6)}/>
-      <path d="M-168,16 C-140,12 -100,12 -76,16 M-170,28 C-140,24 -104,26 -70,30" fill="none" stroke="#000" stroke-width="1.2" opacity=".28"/><path d="M-164,12 C-140,8 -110,8 -86,10" fill="none" stroke="#fff" stroke-width="1.4" opacity=".25"/>
-      <path d="M-58,8 C-30,-2 40,-2 84,6 C96,18 92,34 76,40 C40,46 -24,46 -54,38 C-66,30 -66,16 -58,8Z" fill="${sl}" ${ln(1.6)}/>
-      <path d="M2,0 C10,10 26,10 34,0" fill="none" stroke="#000" stroke-width="2" opacity=".35"/>
-      <path d="M-40,20 C-14,14 20,18 44,26 M-30,32 C0,28 30,32 60,36" fill="none" stroke="#000" stroke-width="1.2" opacity=".28"/><path d="M-44,12 C-20,6 10,6 30,8" fill="none" stroke="#fff" stroke-width="1.4" opacity=".25"/>
-      <path d="M96,10 C120,0 160,2 176,12 C184,28 170,40 130,40 C104,40 90,28 96,10Z" fill="#d8c8a8" ${ln(1.6)}/><path d="M108,22 C130,18 156,20 172,26" fill="none" stroke="#000" opacity=".22"/>
-      <path d="M50,34 C66,36 80,46 84,60 C88,74 92,86 98,96 L118,88 C110,76 106,64 104,52 C100,38 86,28 66,26Z" fill="${sl}" ${ln(1.8)}/>
-      <path d="M62,34 C74,40 84,52 88,64" fill="none" stroke="#000" stroke-width="1.2" opacity=".3"/><path d="M58,30 C72,34 82,44 86,54" fill="none" stroke="#fff" stroke-width="1.4" opacity=".25"/>
-      <path d="M96,94 L120,85 L126,99 L102,108Z" fill="${sl}" ${ln(1.6)}/><path d="M96,94 L120,85 L126,99 L102,108Z" fill="#000" opacity=".22"/>
-      <path d="M-120,44 C-122,56 -128,66 -138,72" fill="none" stroke="#2a2d36" stroke-width="5" stroke-linecap="round"/>
-      ${[[-200, 62], [200, 62]].map(([wx, wy]) => `<ellipse cx="${wx}" cy="${wy + 6}" rx="9" ry="5" fill="#15161b"/>`).join('')}
+      <defs>
+        <linearGradient id="csT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a524a"/><stop offset=".6" stop-color="#4f3c36"/><stop offset="1" stop-color="#3d2e29"/></linearGradient>
+        <linearGradient id="csB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4540"/><stop offset=".5" stop-color="#4a3833"/><stop offset="1" stop-color="#2f2420"/></linearGradient>
+      </defs>
+      <ellipse cx="18" cy="${B + 8}" rx="236" ry="14" fill="#000" opacity=".4"/>
+      ${[[L - 2, T + 18], [L - 2, B - 18]].map(([wx, wy]) => `<rect x="${wx - 10}" y="${wy - 10}" width="14" height="20" rx="3" fill="#1d1a19" ${ln(1.6)}/><circle cx="${wx - 20}" cy="${wy}" r="14" fill="#1d1a19" ${ln(2)}/><circle cx="${wx - 20}" cy="${wy}" r="5" fill="#6b6e75"/>`).join('')}
+      ${half(T, M - 4, true)}${half(M + 4, B, false)}
+      <rect x="${L}" y="${M - 6}" width="${R - L}" height="12" fill="#1d1a19" ${ln(1.6)}/>
+      <path d="M${L + 4},${M} H${gap0} M${gap1},${M} H${R - 4}" stroke="#55504c" stroke-width="2.4" stroke-dasharray="2 2"/>
+      <path d="M${gap0},${M - 4} C${gap0 + 30},${M - 22} ${gap1 - 30},${M - 22} ${gap1},${M - 4} L${gap1},${M + 4} C${gap1 - 30},${M + 18} ${gap0 + 30},${M + 18} ${gap0},${M + 4}Z" fill="#120f0e" ${ln(1.6)}/>
+      <path d="M${gap0 + 10},${M - 6} C${gap0 + 40},${M - 16} ${gap1 - 40},${M - 16} ${gap1 - 8},${M - 6} L${gap1 - 20},${M + 2} C${gap1 - 50},${M - 4} ${gap0 + 50},${M - 4} ${gap0 + 18},${M + 2}Z" fill="#7d8060" ${ln(1.2)}/>
+      <path d="M${gap0 + 60},${M + 4} C${gap0 + 64},${M + 30} ${gap0 + 52},${M + 56} ${gap0 + 60},${B - 2} L${gap0 + 84},${B + 2} C${gap0 + 80},${M + 50} ${gap0 + 92},${M + 26} ${gap0 + 96},${M + 6}Z" fill="${sl}" ${ln(1.8)}/>
+      <path d="M${gap0 + 70},${M + 10} C${gap0 + 72},${M + 30} ${gap0 + 64},${M + 48} ${gap0 + 70},${B - 6}" fill="none" stroke="#000" stroke-width="1.3" opacity=".3"/>
+      <path d="M${gap0 + 56},${B - 4} L${gap0 + 86},${B} L${gap0 + 84},${B + 14} L${gap0 + 52},${B + 10}Z" fill="${sl}" ${ln(1.6)}/><path d="M${gap0 + 56},${B - 4} L${gap0 + 86},${B} L${gap0 + 84},${B + 14} L${gap0 + 52},${B + 10}Z" fill="#000" opacity=".2"/>
+      <path d="M${gap0 + 102},${M + 2} C${gap0 + 112},${M + 14} ${gap0 + 108},${M + 26} ${gap0 + 118},${M + 34} L${gap0 + 132},${M + 30} C${gap0 + 124},${M + 22} ${gap0 + 126},${M + 10} ${gap0 + 118},${M}Z" fill="#d8c8a8" ${ln(1.4)}/>
+      <rect x="${gap1 - 8}" y="${M - 9}" width="10" height="18" rx="2" fill="#8a8f98" ${ln(1.2)}/>
+      <rect x="-56" y="${M + 18}" width="112" height="18" rx="9" fill="#1d1a19" ${ln(1.8)}/><rect x="-44" y="${M + 22}" width="88" height="6" rx="3" fill="#3a3330"/>
+      <rect x="${R - 46}" y="${M + 8}" width="34" height="20" rx="4" fill="#2a2524" ${ln(1.4)}/>${[0, 1, 2].map((i) => `<rect x="${R - 42 + i * 9}" y="${M + 12}" width="6" height="12" rx="1" fill="#9a9ea6"/>`).join('')}<circle cx="${R - 18}" cy="${M + 18}" r="2.2" fill="#e5382f"/>
     </g>`;
   }
   function roomB() {
@@ -763,13 +767,13 @@
       </svg>`;
     }
     const p1 = tr(['嫌犯應該是搶走了行李主人的', '登機證和護照，假扮成她。'], ['The suspect must have stolen', 'this owner’s boarding pass and passport.']);
-    const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="500" cy="590" rx="250" ry="80" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
+    const pulse = ui.seen.case ? '' : `<ellipse class="pulse" cx="545" cy="580" rx="250" ry="88" fill="none" stroke="#ff5a5f" stroke-width="6"/>`;
     const pulseBtn = ui.seen.case && !ui.seen.pick ? `<rect class="pulse" x="350" y="10" width="300" height="72" rx="36" fill="none" stroke="#ff5a5f" stroke-width="5"/>` : '';
     return `${SVG_OPEN('警察圍著打開的行李箱')}<defs>${HT}${REAL}${CL}</defs>${lightsAndCeiling()}${floor()}
       ${dim()}
-      ${cop(250, 560, 0.86)}${cop(760, 556, 0.86, '#232d63')}${cop(860, 640, 0.92)}
+      ${cop(250, 560, 0.86)}${cop(760, 556, 0.86)}${cop(860, 640, 0.92)}
       ${bubble(60, 120, 330, p1, 250, 300)}
-      <g class="hot" data-hot="case">${openSuitcase(500, 590, 1)}${pulse}</g>
+      <g class="hot" data-hot="case">${openSuitcase(545, 612, 0.9)}${pulse}</g>
       ${A.shadow(110, 690, 130, 16)}${A.slothy(110, 692, 0.95)}
       <g class="hot" data-hot="pick"><rect x="360" y="18" width="280" height="56" rx="28" fill="#ffd23f" ${ST}/><text x="500" y="56" text-anchor="middle" font-size="26" fill="${INK}" ${FONT}>${tr('選擇登機口', 'Pick a gate')}</text>${pulseBtn}</g>
       ${navBtn('right')}
@@ -802,7 +806,7 @@
     return `<div class="modal-card s3-board"><button class="x" data-act="close">✕</button>
       <div class="s3-board-head"><b>${tr('DEPARTURES 出境', 'DEPARTURES')}</b><span>TODAY · ${esc(data.date.label)}${tr(`（${esc(data.date.long)}）`, '')}</span></div>
       <table><thead><tr><th>${tr('時間', 'Time')}</th><th>${tr('航班', 'Flight')}</th><th>${tr('目的地', 'Destination')}</th><th>${tr('登機口', 'Gate')}</th></tr></thead><tbody>
-      ${data.flights.map((f) => `<tr><td>${esc(f.time)}</td><td>${esc(f.flight)}</td><td>${esc(f.dest)}<small>${esc(f.destZh)}</small></td><td>${f.gate}</td></tr>`).join('')}</tbody></table></div>`;
+      ${data.flights.map((f) => `<tr><td>${esc(f.time)}</td><td>${esc(f.flight)}</td><td>${esc(f.dest)}</td><td>${f.gate}</td></tr>`).join('')}</tbody></table></div>`;
   }
   function postsHtml() {
     const ph = (id, k) => `<svg viewBox="0 0 200 120" class="s3-photo">${photo(id, k)}</svg>`;
