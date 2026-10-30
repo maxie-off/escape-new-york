@@ -126,26 +126,44 @@ window.Music = (function () {
   // ---------- 曲子 ----------
   const TRACKS = {};
 
-  // 小提琴：鋸齒波 + 慢慢出現的抖音 + 帶通，像拉弓
+  // 小提琴：不用尖銳的鋸齒波，改用泛音慢慢減弱的波形；琴身共鳴（幾個柔和的峰）、拉弓的起音、
+  // 延遲才出現的輕微抖音、一點點弓毛摩擦的氣音，聽起來比較像真的弦樂。
+  function violinWave(c) {
+    if (c._vw) return c._vw;
+    const n = 24, re = new Float32Array(n), im = new Float32Array(n);
+    for (let k = 1; k < n; k++) im[k] = Math.pow(k, -1.35) * (k % 2 ? 1 : 0.72) * (k > 9 ? 0.6 : 1);
+    return (c._vw = c.createPeriodicWave(re, im));
+  }
   function violin(c, out, t, f, dur, v = 0.035) {
-    const g = c.createGain(), bp = c.createBiquadFilter(), lp = c.createBiquadFilter();
-    bp.type = 'peaking'; bp.frequency.value = 2400; bp.gain.value = 5; lp.type = 'lowpass'; lp.frequency.value = 3600;
-    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + Math.min(0.22, dur * 0.3)); g.gain.setValueAtTime(v, t + dur * 0.75); g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.25);
-    const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 5.6;
-    lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(14, t + Math.min(0.6, dur * 0.6)); lfo.connect(lg);
-    bp.connect(lp); lp.connect(g); g.connect(out);
-    [-4, 4].forEach((cents) => { const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = cents; lg.connect(o.detune); o.connect(bp); o.start(t); o.stop(t + dur + 0.3); });
-    lfo.start(t); lfo.stop(t + dur + 0.3);
+    const g = c.createGain(), lp = c.createBiquadFilter(), b1 = c.createBiquadFilter(), b2 = c.createBiquadFilter(), b3 = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.setValueAtTime(1400, t); lp.frequency.linearRampToValueAtTime(2600, t + 0.25); lp.Q.value = 0.4;
+    b1.type = 'peaking'; b1.frequency.value = 290; b1.Q.value = 1.2; b1.gain.value = 3;   // 琴身低頻共鳴
+    b2.type = 'peaking'; b2.frequency.value = 650; b2.Q.value = 1.4; b2.gain.value = 2;
+    b3.type = 'peaking'; b3.frequency.value = 2900; b3.Q.value = 1; b3.gain.value = -4;  // 壓掉刺耳的高頻
+    const att = Math.min(0.28, dur * 0.35);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v * 0.75, t + att); g.gain.linearRampToValueAtTime(v, t + att + 0.2);
+    g.gain.setValueAtTime(v, t + Math.max(att + 0.2, dur * 0.8)); g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.35);
+    const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 5.3;
+    lg.gain.setValueAtTime(0, t); lg.gain.setValueAtTime(0, t + 0.3); lg.gain.linearRampToValueAtTime(7, t + 0.8); lfo.connect(lg);
+    lp.connect(b1); b1.connect(b2); b2.connect(b3); b3.connect(g); g.connect(out);
+    const w = violinWave(c);
+    [-5, 0, 6].forEach((cents, i) => { const o = c.createOscillator(); o.setPeriodicWave(w); o.frequency.value = f; o.detune.value = cents; lg.connect(o.detune);
+      const og = c.createGain(); og.gain.value = i === 1 ? 0.5 : 0.3; o.connect(og); og.connect(lp); o.start(t); o.stop(t + dur + 0.4); });
+    const n = c.createBufferSource(); n.buffer = noiseBuf(c); n.loop = true; // 弓毛的氣音
+    const nb = c.createBiquadFilter(); nb.type = 'bandpass'; nb.frequency.value = f * 3; nb.Q.value = 3;
+    const ng = c.createGain(); ng.gain.setValueAtTime(0.0001, t); ng.gain.linearRampToValueAtTime(v * 0.12, t + att); ng.gain.linearRampToValueAtTime(v * 0.04, t + att + 0.3); ng.gain.linearRampToValueAtTime(0.0001, t + dur + 0.2);
+    n.connect(nb); nb.connect(ng); ng.connect(g); n.start(t); n.stop(t + dur + 0.3);
+    lfo.start(t); lfo.stop(t + dur + 0.4);
   }
   // 撥弦（pizzicato）
   function pizz(c, out, t, f, v = 0.08) {
     const o = c.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
-    const o2 = c.createOscillator(); o2.type = 'sawtooth'; o2.frequency.value = f;
-    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(2200, t); lp.frequency.exponentialRampToValueAtTime(400, t + 0.25);
-    const g = c.createGain(), g2 = c.createGain(); g2.gain.value = 0.25;
-    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    const o2 = c.createOscillator(); o2.type = 'sine'; o2.frequency.value = f * 2;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(1500, t); lp.frequency.exponentialRampToValueAtTime(320, t + 0.3);
+    const g = c.createGain(), g2 = c.createGain(); g2.gain.value = 0.18;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
     o.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g); g.connect(out);
-    o.start(t); o2.start(t); o.stop(t + 0.5); o2.stop(t + 0.5);
+    o.start(t); o2.start(t); o.stop(t + 0.55); o2.stop(t + 0.55);
   }
 
   // 封面＋選角色：福爾摩斯感的偵探弦樂，D 小調、平靜地一層層疊上去（大提琴 → 撥弦低音 → 撥弦琶音 → 小提琴旋律 → 第二小提琴）
@@ -164,11 +182,11 @@ window.Music = (function () {
       barLen: beat * 4,
       bar(c, out, t, i) {
         const ch = prog[i % 8], L = beat * 4;
-        cello(c, out, t, mtof(ch.r), L, 0.04);                                                   // 大提琴長音
-        if (i >= 2) { pizz(c, out, t, mtof(ch.r + 12), 0.11); pizz(c, out, t + beat * 2, mtof(ch.r + 19), 0.08); } // 撥弦低音
-        if (i >= 4) for (let k = 0; k < 8; k++) pizz(c, out, t + k * e, mtof(ch.t[arp[k]]), k % 4 === 0 ? 0.06 : 0.04); // 撥弦琶音
-        if (i >= 8) for (const [n, b, d] of mel[i % 8]) violin(c, out, t + b * beat, mtof(n), d * beat * 0.96, 0.03); // 小提琴旋律
-        if (i >= 16) for (const [n, b, d] of mel[i % 8]) if (d >= 1) violin(c, out, t + b * beat + 0.02, mtof(n - (n % 12 === 2 || n % 12 === 9 ? 5 : 3)), d * beat * 0.96, 0.016); // 第二小提琴（低三度／四度）
+        cello(c, out, t, mtof(ch.r), L, 0.026);                                                  // 大提琴長音（背景，小聲）
+        if (i >= 2) { pizz(c, out, t, mtof(ch.r + 12), 0.08); pizz(c, out, t + beat * 2, mtof(ch.r + 19), 0.06); } // 撥弦低音
+        if (i >= 4) for (let k = 0; k < 8; k++) pizz(c, out, t + k * e, mtof(ch.t[arp[k]]), k % 4 === 0 ? 0.045 : 0.03); // 撥弦琶音
+        if (i >= 8) for (const [n, b, d] of mel[i % 8]) violin(c, out, t + b * beat, mtof(n), d * beat * 0.98, 0.05); // 小提琴旋律
+        if (i >= 16) for (const [n, b, d] of mel[i % 8]) if (d >= 1) violin(c, out, t + b * beat + 0.02, mtof(n - (n % 12 === 2 || n % 12 === 9 ? 5 : 3)), d * beat * 0.98, 0.024); // 第二小提琴（低三度／四度）
         if (i >= 12 && i % 4 === 3) tick(c, out, t + beat * 3.5, 0.016, 1400);                   // 偶爾一聲懷錶滴答
       },
     };
