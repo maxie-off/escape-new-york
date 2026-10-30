@@ -36,7 +36,7 @@
     return `<rect x="-900" width="2800" height="700" fill="#3b424d"/>
       <rect x="-900" y="96" width="2800" height="340" fill="#505967"/>${Array.from({ length: 14 }, (_, i) => `<path d="M${-40 + i * 80},120 V436" stroke="#444c59" stroke-width="2"/><path d="M${-38 + i * 80},120 V436" stroke="#5d6675" stroke-width="1"/>`).join('')}<rect x="-900" y="96" width="2800" height="340" fill="url(#gWallShade)"/>
       <rect x="330" y="120" width="300" height="250" fill="#3a414d" ${A.st(2)}/>
-      ${[0, 1, 2].map((i) => `<rect x="${345 + i * 95}" y="136" width="82" height="218" fill="#262c36" ${A.st(2)}/>`).join('')}
+      ${data && data.codes ? '' : [0, 1, 2].map((i) => `<rect x="${345 + i * 95}" y="136" width="82" height="218" fill="#262c36" ${A.st(2)}/>`).join('')}
       <polygon points="-900,-10 1900,-10 1900,70 -900,130" fill="#2b2f37" ${ST}/>
       <polygon points="-900,130 1900,70 1900,92 -900,152" fill="#20242b" ${ST2}/>
       ${spots}
@@ -753,18 +753,14 @@
   }
   // Slothy 牆上的面板：機場代碼對照表（看板上只有代碼，要靠這個才知道是哪裡）
   function codesPanel() {
-    const rows = data.codes.map((c, i) => { const y = 226 + i * 34; return `<rect x="442" y="${y - 22}" width="214" height="28" rx="3" fill="${i % 2 ? '#141b2b' : '#18213a'}"/>
-      <text x="454" y="${y}" font-size="20" fill="#ffd23f" ${HELV}>${esc(c.code)}</text><text x="512" y="${y}" font-size="14" fill="#e9edf5" ${HELV}>${esc(c.place)}</text>`; }).join('');
-    return `<rect x="428" y="150" width="242" height="210" rx="6" fill="#0e1422" stroke="${INK}" stroke-width="3"/>
-      <rect x="428" y="150" width="242" height="34" rx="6" fill="#1e5fb3"/><rect x="428" y="176" width="242" height="8" fill="#1e5fb3"/>
-      <text x="549" y="174" text-anchor="middle" font-size="16" fill="#fff" ${HELV}>${tr('機場代碼 AIRPORT CODES', 'AIRPORT CODES')}</text>
-      ${rows}<rect x="428" y="150" width="242" height="210" rx="6" fill="url(#gTopLight)" style="pointer-events:none"/>
-      ${ui.seen.codes ? '' : `<rect class="pulse" x="420" y="142" width="258" height="226" rx="10" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}`;
+    const rows = data.codes.map((c, i) => { const y = 172 + i * 52; return `<text x="430" y="${y}" font-size="28" fill="#ffffff" ${HELV}>${esc(c.code)}</text>
+      <text x="430" y="${y + 21}" font-size="15" fill="#b9c0cb" ${HELV}>${esc(c.place)}</text>`; }).join('');
+    return `<rect x="330" y="120" width="300" height="250" fill="transparent"/>${rows}
+      ${ui.seen.codes ? '' : `<rect class="pulse" x="326" y="116" width="308" height="258" rx="8" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}`;
   }
   function codesHtml() {
-    return `<div class="modal-card s3-board"><button class="x" data-act="close">✕</button>
-      <div class="s3-board-head"><b>${tr('機場代碼 AIRPORT CODES', 'AIRPORT CODES')}</b></div>
-      <table><tbody>${data.codes.map((c) => `<tr><td style="color:#ffd23f;width:90px">${esc(c.code)}</td><td>${esc(c.place)}</td></tr>`).join('')}</tbody></table></div>`;
+    return `<div class="modal-card s3-board s3-codes"><button class="x" data-act="close">✕</button>
+      <table><tbody>${data.codes.map((c) => `<tr><td style="color:#fff;width:110px">${esc(c.code)}</td><td style="color:#b9c0cb">${esc(c.place)}</td></tr>`).join('')}</tbody></table></div>`;
   }
   function roomB() {
     if (ui.view === 1) {

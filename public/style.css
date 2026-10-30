@@ -401,6 +401,10 @@ html[lang="en"] .paper.letter { font-family: var(--handwriting); }
 .s3-board-head { display: flex; justify-content: space-between; gap: 12px; font: 700 18px var(--body); margin-bottom: 8px; } .s3-board-head span { color: #ffd23f; }
 .s3-board table { width: 100%; border-collapse: collapse; font: 700 16px var(--sign); }
 .s3-board th { color: #6d737c; font-size: 12px; text-align: left; padding: 4px 6px; } .s3-board td { padding: 5px 6px; border-top: 1px solid #222833; }
+.s3-codes { background: #3b424d; max-width: 420px; }
+.s3-codes table { font: 700 22px var(--sign); }
+.s3-codes td { border-top: 1px solid rgba(255,255,255,.12); padding: 9px 6px; }
+.s3-codes td:last-child { font-size: 16px; text-align: left; }
 .s3-board td:first-child { color: #ffd23f; } .s3-board td:last-child { color: #5ad17a; text-align: center; } .s3-board td small { color: #9aa0a8; margin-left: .5em; font-size: 13px; }
 
 /* 1A2B 紙上的 a~z 筆記（點了劃掉，兩人同步） */
