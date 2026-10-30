@@ -241,14 +241,14 @@
       '我們發現兩人一起玩合作解謎遊戲，是很棒的 quality time！我們都很喜歡。但市面上的遊戲，有的太懸疑、太可怕（女友不愛），有的全英文，不是大家都適合，而且我們幾乎已經玩完現有的了哈哈。',
       '所以趁待業期，我想那乾脆自己來做一個吧！也順便讓她認識我在紐約的生活。',
       '遊戲裡的場景都是真的：我的房間、我家那站地鐵，還有我常去的機場。角色的原型，是在紐約陪著我的那兩隻玩偶，他們就像我跟我女朋友一樣。裡面的謎題，1A2B、彈吉他，也都是我們的共同回憶。',
-      '這是我第一次做遊戲。謝謝你玩到最後，也特別感謝 Claude。',
+      '這是我第一次做遊戲。謝謝你玩到最後，特別感謝 Claude 和我女朋友！',
       '希望你玩得開心，留一點 feedback 和建議給我吧！',
     ], [
       'My girlfriend and I have been long distance for a year now — she’s in Taipei, I’m in New York.',
       'We found that online co-op escape games are the rare thing that gives us real quality time together, and we both love playing them. But a lot of them are too suspenseful or too scary (not her thing), or English only, which doesn’t work for everyone. And by now we’ve played almost every one out there lol!',
       'So while job hunting, I thought: why not just make one myself? And let her see a bit of my life in New York along the way.',
       'Every place in the game is real: my room, my subway station, the airport I always fly out of. I’m Raccoony, she’s Slothy — the two characters are based on the stuffed animals that keep me company here in New York, and they’re a lot like the two of us! Even the puzzles are our shared memories: 1A2B, the guitar, and songs.',
-      'This is the first game I’ve ever made. Thank you for playing all the way to the end, and a special thank-you to Claude.',
+      'This is the first game I’ve ever made. Thank you for playing all the way to the end, and a special thank-you to Claude and my girlfriend!',
       'I hope you had fun! Feel free to leave me some feedback and suggestions!',
     ]);
     // 講到玩偶的那一段之前先放照片（靠右、文字繞著圖排）
