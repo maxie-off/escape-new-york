@@ -46,10 +46,11 @@
       ? `<rect x="332" y="252" width="356" height="216" rx="6" fill="#dff1ff"/><circle cx="510" cy="340" r="32" fill="#fff" ${ST2}/><text x="510" y="352" text-anchor="middle" font-size="34">🦝</text><rect x="440" y="390" width="140" height="28" rx="14" fill="#fff" ${ST2}/>`
       : `<rect x="332" y="252" width="356" height="216" rx="6" fill="#1c2030"/><path d="M352,268 L400,268 L346,340 L346,306Z" fill="#fff" opacity=".13"/>`;
     return `${SVG_OPEN('Raccoony 的書桌')}${DEFS}
-      <rect x="-900" width="2800" height="700" fill="#efdfc0"/><rect x="-900" width="2800" height="700" fill="url(#dots)"/>
-      <rect x="-900" y="186" width="2800" height="334" fill="#b3702f"/><rect x="-900" y="186" width="2800" height="334" fill="url(#dots)"/>
+      <rect x="-900" width="2800" height="700" fill="url(#texWallpaper)"/><rect x="-900" width="2800" height="186" fill="url(#gWallShade)"/>
+      <rect x="-900" y="186" width="2800" height="334" fill="#b3702f"/><rect x="-900" y="186" width="2800" height="334" fill="url(#texGrainV)"/>
+      <rect x="-900" y="186" width="2800" height="40" fill="#2a1a08" opacity=".22"/>
       ${[80, 210, 330, 560, 760, 930].map((x) => `<path d="M${x},190 v320" stroke="#8a5222" stroke-width="3" opacity=".5"/>`).join('')}
-      <rect x="-900" y="150" width="2800" height="38" fill="#c98a4c" ${ST}/><rect x="-900" y="150" width="2800" height="10" fill="#e3a967"/>
+      <rect x="-900" y="150" width="2800" height="38" fill="#c98a4c" ${ST}/>${A.wood(-900, 150, 2800, 38)}<rect x="-900" y="150" width="2800" height="8" fill="#e3a967"/>
       <rect x="-10" y="30" width="100" height="120" rx="14" fill="#e9e7e2" ${ST}/>
       <rect x="120" y="94" width="170" height="56" rx="26" fill="#e86a2b" ${ST}/>
       ${Array.from({ length: 6 }, (_, i) => `<circle cx="${160 + i * 18}" cy="122" r="3" fill="#9c3d12"/>`).join('')}
@@ -58,7 +59,7 @@
       <path d="M430,64 C484,70 478,128 430,134" fill="none" stroke="${INK}" stroke-width="14" stroke-linecap="round"/>
       ${books}
       <g class="hot" data-hot="note2"><g transform="rotate(3 600 218)"><rect x="556" y="176" width="90" height="80" fill="#ffe9a0" ${ST2}/><path d="M568,196 h62 M568,210 h58 M568,224 h64" stroke="${INK}" stroke-width="2.6" opacity=".6"/></g>${ui.seen.note2 ? '' : `<rect class="pulse" x="546" y="168" width="110" height="96" rx="6" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}</g>
-      <rect x="-900" y="512" width="2800" height="198" fill="#c98a4c" ${ST}/>
+      <rect x="-900" y="512" width="2800" height="198" fill="#c98a4c" ${ST}/>${A.wood(-900, 514, 2800, 196)}<rect x="-900" y="514" width="2800" height="22" fill="#2a1a08" opacity=".18"/>
       ${[120, 300, 520, 760, 900].map((x) => `<path d="M${x},530 q60,6 130,0 M${x + 30},640 q50,8 110,0" fill="none" stroke="#a96a2f" stroke-width="3" opacity=".6"/>`).join('')}
       <rect x="-900" y="686" width="2800" height="16" fill="#8a5222" ${ST}/>
       <g>
@@ -82,6 +83,7 @@
       ${data.ticketTaken ? '' : `<g class="hot" data-hot="ticket"><g class="bob"><g transform="rotate(-8 736 596)"><rect x="672" y="558" width="128" height="68" fill="#fff" ${ST2}/><rect x="672" y="558" width="128" height="20" fill="#1e5fb3" ${ST2}/><text x="680" y="573" font-size="12" fill="#fff" ${FONT}>✈ CHINA AIRLINES</text><path d="M682,592 h58 M682,604 h40 M682,614 h50" stroke="${INK}" stroke-width="2.5" opacity=".6"/><text x="778" y="612" text-anchor="middle" font-size="26">✈</text></g></g><rect class="pulse" x="660" y="546" width="152" height="92" rx="8" fill="none" stroke="#ffd23f" stroke-width="6"/></g>`}
       <g><line x1="328" y1="656" x2="384" y2="636" stroke="${INK}" stroke-width="13" stroke-linecap="round"/><line x1="328" y1="656" x2="384" y2="636" stroke="#fff" stroke-width="8" stroke-linecap="round"/></g>
       ${A.raccoony(285, 596, 1.15)}
+      ${A.vignette()}
       ${navBtn('right')}
     </svg>`;
   }
@@ -129,28 +131,27 @@
     const sheets = [[-8, 0, '#fffdf3'], [4, -4, '#fffef8'], [-2, -8, '#fff'], [8, -12, '#fffdf3']].map(([rot, dy, c], i) => `<g transform="rotate(${rot} 760 ${468 + dy})"><rect x="690" y="${436 + dy}" width="140" height="64" fill="${c}" ${ST2}/>${[0, 1, 2, 3, 4, 5].map((k) => `<line x1="698" y1="${446 + dy + k * 8}" x2="822" y2="${446 + dy + k * 8}" stroke="#1b1b1f" stroke-width="1" opacity=".55"/>`).join('')}</g>`).join('');
     return `${SVG_OPEN('吉他、椅子與吉他譜')}${DEFS}
       <defs><pattern id="diam" width="44" height="44" patternUnits="userSpaceOnUse"><rect width="44" height="44" fill="#eadfc4"/><path d="M22,2 L42,22 L22,42 L2,22Z" fill="none" stroke="#1b1b1f" stroke-width="4"/><path d="M22,14 L30,22 L22,30 L14,22Z" fill="#1b1b1f"/></pattern></defs>
-      <rect x="-900" width="2800" height="700" fill="#efe9dc"/><rect x="-900" width="2800" height="700" fill="url(#dots)"/>
-      <rect x="-900" y="520" width="2800" height="190" fill="#e6dcc0" ${ST}/>
-      ${[120, 300, 480, 660, 840].map((x) => `<line x1="${x}" y1="520" x2="${x - 90}" y2="700" stroke="${INK}" stroke-width="2.5" opacity=".25"/>`).join('')}
-      <line x1="-10" y1="610" x2="1010" y2="610" stroke="${INK}" stroke-width="2.5" opacity=".25"/>
-      <rect x="-900" y="502" width="2800" height="18" fill="#fbf8f1" ${ST}/>
-      <polygon points="150,560 520,560 590,692 70,692" fill="url(#diam)" ${ST}/>
+      ${A.room(520)}
+      <polygon points="166,568 536,568 606,700 86,700" fill="#2a1a08" opacity=".22"/>
+      <polygon points="150,560 520,560 590,692 70,692" fill="url(#diam)" ${ST}/><polygon points="150,560 520,560 590,692 70,692" fill="url(#gTopLight)"/>
       <path d="M150,560 L70,692 M520,560 L590,692" stroke="#1b1b1f" stroke-width="3" stroke-dasharray="3 6" opacity=".4"/>
       <g stroke="${INK}" stroke-width="7" stroke-linecap="round"><path d="M335,560 L270,640 M335,560 L400,640 M335,560 L335,600"/></g>
       <g stroke="#3a3f50" stroke-width="3.5" stroke-linecap="round" opacity=".9"><path d="M335,560 L270,640 M335,560 L400,640"/></g>
       <g class="${ui.resoUntil > Date.now() ? 'gtr-reso' : ''}">${tele(335, 566, 1.22)}</g>
       <g>
-        <rect x="660" y="236" width="210" height="130" fill="#d9a65e" ${ST}/>
+        ${A.shadow(770, 650, 260, 22)}
+        <rect x="660" y="236" width="210" height="130" fill="#d9a65e" ${ST}/>${A.wood(660, 236, 210, 130)}
         ${[0, 1, 2].map((i) => `<line x1="664" y1="${278 + i * 32}" x2="866" y2="${278 + i * 32}" stroke="#8a5a28" stroke-width="3" opacity=".6"/>`).join('')}
         <rect x="650" y="228" width="230" height="16" rx="5" fill="#e0b26c" ${ST2}/>
-        <rect x="660" y="476" width="214" height="30" rx="6" fill="#d9a65e" ${ST}/>
+        <rect x="660" y="476" width="214" height="30" rx="6" fill="#d9a65e" ${ST}/>${A.wood(660, 476, 214, 30, 6)}
         <polygon points="650,462 886,462 876,486 662,486" fill="#e8bd78" ${ST}/>
-        <rect x="660" y="500" width="22" height="144" fill="#d9a65e" ${ST}/><rect x="852" y="500" width="22" height="144" fill="#d9a65e" ${ST}/>
-        <rect x="660" y="364" width="22" height="104" fill="#d9a65e" ${ST}/><rect x="852" y="364" width="22" height="104" fill="#d9a65e" ${ST}/>
+        <rect x="660" y="500" width="22" height="144" fill="#d9a65e" ${ST}/><rect x="852" y="500" width="22" height="144" fill="#d9a65e" ${ST}/>${A.wood(660, 500, 22, 144, 0, true)}${A.wood(852, 500, 22, 144, 0, true)}
+        <rect x="660" y="364" width="22" height="104" fill="#d9a65e" ${ST}/><rect x="852" y="364" width="22" height="104" fill="#d9a65e" ${ST}/>${A.wood(660, 364, 22, 104, 0, true)}${A.wood(852, 364, 22, 104, 0, true)}
       </g>
       <g class="hot" data-hot="guitar"><g class="sheet-pile">${sheets}</g>${pulse}</g>
       <g class="hot" data-hot="play"><rect x="230" y="60" width="210" height="500" style="pointer-events:all;fill:transparent"/>${ui.seen.play ? '' : `<rect class="pulse" x="236" y="66" width="198" height="488" rx="40" fill="none" stroke="#ffd23f" stroke-width="6"/>`}</g>
-      ${A.raccoony(570, 696, 0.62, true)}
+      ${A.shadow(570, 694, 110, 14)}${A.raccoony(570, 696, 0.62, true)}
+      ${A.vignette()}
       ${navBtn('left')}
     </svg>`;
   }
@@ -186,7 +187,7 @@
       const open = d.open;
       const key = open && data.hasKey && /鑰匙|key/i.test(d.contents || '');
       return `<g class="hot" data-hot="drawer-${n}">
-        <rect x="262" y="${y}" width="326" height="56" rx="4" fill="${open ? '#f3d9aa' : '#e8b568'}" ${ST}/>
+        <rect x="262" y="${y}" width="326" height="56" rx="4" fill="${open ? '#f3d9aa' : '#e8b568'}" ${ST}/>${A.wood(262, y, 326, 56, 4)}
         ${open
           ? `<rect x="268" y="${y + 5}" width="314" height="14" fill="#4a2f18" opacity=".85"/><text x="${key ? 380 : 400}" y="${y + 46}" text-anchor="middle" font-size="26">${key ? '🔑' : '📂'}</text>`
           : `<path d="M300,${y + 30} h60 M430,${y + 42} h90" stroke="#b9824a" stroke-width="2.5" opacity=".6"/><rect x="380" y="${y + 7}" width="106" height="7" rx="3" fill="#a8693a"/>`}
@@ -198,8 +199,8 @@
     const pulse = (id, x, y, w, h) => (ui.seen[id] ? '' : `<rect class="pulse" x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="none" stroke="#ff5a5f" stroke-width="5"/>`);
     const key = data.hasKey;
     const wardrobe = `<g>
-      <ellipse cx="425" cy="566" rx="210" ry="12" fill="rgba(0,0,0,.16)"/>
-      <rect x="250" y="230" width="350" height="330" fill="#d79a50" ${ST}/>
+      ${A.shadow(425, 564, 400, 22, 0.3)}
+      <rect x="250" y="230" width="350" height="330" fill="#d79a50" ${ST}/>${A.wood(250, 230, 350, 330)}<rect x="588" y="230" width="12" height="330" fill="#2a1a08" opacity=".18"/>
       <polygon points="230,230 620,230 592,168 258,168" fill="#b98349" ${ST}/>
       <g><rect x="264" y="178" width="22" height="40" rx="6" fill="#cfe86a" ${ST2}/><rect x="270" y="166" width="10" height="14" fill="${INK}"/><rect x="262" y="160" width="26" height="10" rx="3" fill="${INK}"/>
         <rect x="376" y="148" width="44" height="68" rx="12" fill="#f4f4f1" ${ST2}/><rect x="372" y="142" width="52" height="10" rx="5" fill="#c9ccd2" ${ST2}/>
@@ -215,10 +216,10 @@
       return `<g class="hot" data-hot="case-${id}">${suitcaseFace(id, x, 482, 104, 76, ui.glowCase === id || (ui.armed && ui.armed.id === id), c.open && id === 'love')}${c.open ? `<circle cx="${x + 94}" cy="490" r="9" fill="#5ad17a" ${A.st(2)}/>` : ''}${ui.seen['case-' + id] ? '' : `<rect class="pulse" x="${x - 6}" y="470" width="116" height="94" rx="14" fill="none" stroke="#ff5a5f" stroke-width="5"/>`}</g>`;
     }).join('');
     const bed = `<g>
-      <ellipse cx="530" cy="560" rx="220" ry="12" fill="rgba(0,0,0,.18)"/>
+      ${A.shadow(530, 560, 450, 24, 0.3)}
       <rect x="348" y="454" width="14" height="106" fill="#2b2d35" ${ST2}/><rect x="710" y="454" width="14" height="106" fill="#2b2d35" ${ST2}/>
       ${cases}
-      <rect x="326" y="352" width="22" height="208" rx="3" fill="#d8a24f" ${ST}/><rect x="326" y="352" width="22" height="26" rx="3" fill="#e6b868" ${ST2}/>
+      <rect x="326" y="352" width="22" height="208" rx="3" fill="#d8a24f" ${ST}/>${A.wood(326, 352, 22, 208, 3, true)}<rect x="326" y="352" width="22" height="26" rx="3" fill="#e6b868" ${ST2}/>
       <rect x="346" y="440" width="380" height="18" rx="4" fill="#2b2d35" ${ST2}/>
       <rect x="346" y="400" width="380" height="44" rx="10" fill="#cfd4dc" ${ST}/>
       <ellipse cx="404" cy="392" rx="52" ry="20" fill="#c4c7cd" ${ST2}/>
@@ -233,7 +234,7 @@
 
     // 房門（縮小）：門牌、門把
     const door = `<g>
-      <rect x="700" y="40" width="260" height="520" fill="#d9d4c8" ${ST}/><rect x="712" y="52" width="236" height="508" fill="#f7f5f0" ${ST}/>
+      <rect x="700" y="40" width="260" height="520" fill="#d9d4c8" ${ST}/><rect x="712" y="52" width="236" height="508" fill="#f7f5f0" ${ST}/><rect x="712" y="52" width="236" height="508" fill="url(#gTopLight)"/><rect x="712" y="52" width="236" height="508" fill="url(#texPaper)"/>
       <rect x="736" y="80" width="188" height="180" fill="none" stroke="#cfcac0" stroke-width="4"/><rect x="736" y="300" width="188" height="230" fill="none" stroke="#cfcac0" stroke-width="4"/>
       <rect x="940" y="110" width="14" height="40" fill="#8b8e93" ${ST2}/><rect x="940" y="440" width="14" height="40" fill="#8b8e93" ${ST2}/>
       <g><path d="M830,98 L790,128 M830,98 L870,128" stroke="${INK}" stroke-width="3" fill="none"/><circle cx="830" cy="96" r="5" fill="#d9b44a" ${ST2}/>
@@ -244,14 +245,10 @@
         ${key && data.hasPassport ? `<circle class="pulse" cx="738" cy="330" r="30" fill="none" stroke="#ffd23f" stroke-width="6"/>` : ''}${hit(738, 330, 40)}</g>
     </g>`;
     return `${SVG_OPEN('Slothy 的衣櫃、床與房門')}${DEFS}
-      <rect x="-900" width="2800" height="700" fill="#efe9dc"/><rect x="-900" width="2800" height="700" fill="url(#dots)"/>
-      <rect x="-900" y="560" width="2800" height="150" fill="#d8c7a3" ${ST}/>
-      ${[150, 330, 510, 690, 870].map((x) => `<line x1="${x}" y1="560" x2="${x - 70}" y2="700" stroke="${INK}" stroke-width="2.5" opacity=".35"/>`).join('')}
-      <line x1="-10" y1="626" x2="1010" y2="626" stroke="${INK}" stroke-width="2.5" opacity=".35"/>
-      <rect x="-900" y="542" width="2800" height="18" fill="#fbf8f1" ${ST}/>
+      ${A.room(560)}
       ${ui.view === 1
-        ? `<g transform="translate(-289,-280) scale(1.5)">${bed}</g>${A.slothy(110, 694, 0.95)}${navBtn('left')}`
-        : `${wardrobe}${door}${A.slothy(150, 606, 1.15)}${navBtn('right')}`}
+        ? `<g transform="translate(-289,-280) scale(1.5)">${bed}</g>${A.shadow(110, 692, 120, 16)}${A.slothy(110, 694, 0.95)}${A.vignette()}${navBtn('left')}`
+        : `${wardrobe}${door}${A.shadow(150, 604, 140, 16)}${A.slothy(150, 606, 1.15)}${A.vignette()}${navBtn('right')}`}
       ${key ? `<g><circle cx="60" cy="52" r="30" fill="#ffd23f" ${ST}/><text x="60" y="64" text-anchor="middle" font-size="34">🔑</text></g>` : ''}
       ${data.hasPassport ? `<g><circle cx="130" cy="52" r="30" fill="#7fb4ff" ${ST}/><text x="130" y="64" text-anchor="middle" font-size="34">🛂</text></g>` : ''}
     </svg>`;

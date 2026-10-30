@@ -10,6 +10,55 @@ window.Art = (function () {
   // 人字紋圖樣只定義一次，放在頁面最外層一個看不見（但沒有 display:none）的 SVG 裡。
   // 如果每個角色各自帶一份，最先出現的那份可能在隱藏的畫面裡，瀏覽器就畫不出來，帽子會變透明。
   // 每個 fill 也都附上純色備用（url(#tweed) #3b3e45）。
+  // ---------- 全遊戲共用的畫風規則 ----------
+  // 線寬：背景細、中景中、前景粗（遠的東西線條細，畫面才有深度）
+  const LW = { bg: 2, mid: 3, fg: 4 };
+  // 光從左上方來：亮面在左上，影子往右下落
+  const PAL = {
+    bedroom: { wall: '#eee3cc', stripe: '#e6d8bb', trim: '#fbf6ea', floor: '#c9975e', floorDark: '#a87a45', floorLine: '#8a5f30', wood: '#c98a4c', woodDark: '#9a6330' },
+  };
+  // 材質（放在最外層一個看不見的 SVG 裡，所有場景共用；疊在色塊上面用）
+  const TEX = `
+    <pattern id="texGrain" width="160" height="24" patternUnits="userSpaceOnUse">
+      <path d="M0,4 C40,2 80,7 160,4 M0,11 C30,13 90,9 160,12 M0,18 C50,16 110,21 160,18" fill="none" stroke="#5a3412" stroke-width="1.1" opacity=".22"/>
+      <path d="M60,8 c6,-3 14,-3 18,1 c-5,4 -13,4 -18,-1Z" fill="none" stroke="#5a3412" stroke-width="1" opacity=".22"/></pattern>
+    <pattern id="texGrainV" width="24" height="160" patternUnits="userSpaceOnUse">
+      <path d="M4,0 C2,40 7,80 4,160 M11,0 C13,30 9,90 12,160 M18,0 C16,50 21,110 18,160" fill="none" stroke="#5a3412" stroke-width="1.1" opacity=".22"/></pattern>
+    <pattern id="texWallpaper" width="44" height="44" patternUnits="userSpaceOnUse">
+      <rect width="44" height="44" fill="#eee3cc"/><rect x="0" width="14" height="44" fill="#e6d8bb"/>
+      <path d="M29,10 l3,4 -3,4 -3,-4Z M29,32 l3,4 -3,4 -3,-4Z" fill="#dccbaa"/></pattern>
+    <pattern id="texPaper" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".6" fill="#000" opacity=".05"/><circle cx="4.5" cy="4" r=".5" fill="#fff" opacity=".2"/></pattern>
+    <linearGradient id="gWallShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a14" stop-opacity=".18"/><stop offset=".35" stop-color="#3a2a14" stop-opacity="0"/><stop offset=".85" stop-color="#3a2a14" stop-opacity="0"/><stop offset="1" stop-color="#3a2a14" stop-opacity=".2"/></linearGradient>
+    <linearGradient id="gBeam" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6d6" stop-opacity=".55"/><stop offset="1" stop-color="#fff6d6" stop-opacity="0"/></linearGradient>
+    <linearGradient id="gTopLight" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".14"/></linearGradient>
+    <linearGradient id="gFloorFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1a08" stop-opacity=".28"/><stop offset=".4" stop-color="#2a1a08" stop-opacity="0"/></linearGradient>
+    <radialGradient id="gVig" cx=".45" cy=".4" r=".8"><stop offset=".6" stop-color="#1a1008" stop-opacity="0"/><stop offset="1" stop-color="#1a1008" stop-opacity=".28"/></radialGradient>`;
+  // 室內背景：壁紙牆 + 左上的窗光 + 踢腳板 + 木地板（一排排木板，越近越高）+ 牆角陰影 + 暗角
+  function room(floorY, pal = PAL.bedroom, opt = {}) {
+    let planks = '';
+    let y = floorY + 4, h = 12, row = 0;
+    while (y < 710) {
+      const off = (row * 137) % 220;
+      planks += `<rect x="-900" y="${y.toFixed(1)}" width="2800" height="${h.toFixed(1)}" fill="${row % 2 ? pal.floor : pal.floorDark}" opacity="${row % 3 === 2 ? 0.85 : 1}"/>`;
+      planks += `<path d="M-900,${y.toFixed(1)} H1900" stroke="${pal.floorLine}" stroke-width="${(1 + h / 30).toFixed(1)}" opacity=".7"/>`;
+      for (let x = -200 + off; x < 1200; x += 220 + (row % 2) * 40) planks += `<path d="M${x},${y.toFixed(1)} v${h.toFixed(1)}" stroke="${pal.floorLine}" stroke-width="1.6" opacity=".55"/>`;
+      y += h; h *= 1.28; row++;
+    }
+    return `<rect x="-900" width="2800" height="${floorY}" fill="url(#texWallpaper)"/>
+      ${opt.noBeam ? '' : `<polygon points="-200,0 380,0 140,${floorY} -460,${floorY}" fill="url(#gBeam)"/>`}
+      <rect x="-900" width="2800" height="${floorY}" fill="url(#gWallShade)"/>
+      <rect x="-900" y="${floorY}" width="2800" height="${710 - floorY}" fill="${pal.floor}"/>${planks}
+      <rect x="-900" y="${floorY}" width="2800" height="${710 - floorY}" fill="url(#texGrain)"/>
+      <rect x="-900" y="${floorY}" width="2800" height="${710 - floorY}" fill="url(#gFloorFade)"/>
+      <rect x="-900" y="${floorY - 20}" width="2800" height="20" fill="${pal.trim}" stroke="${INK}" stroke-width="${LW.mid}"/>
+      <rect x="-900" y="${floorY - 20}" width="2800" height="5" fill="#fff" opacity=".7"/>
+      <rect x="-900" y="${floorY - 5}" width="2800" height="5" fill="#000" opacity=".12"/>`;
+  }
+  // 疊在木頭色塊上：木紋 + 左上亮右下暗
+  const wood = (x, y, w, h, rx = 0, vertical = false) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="url(#${vertical ? 'texGrainV' : 'texGrain'})"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="url(#gTopLight)"/>`;
+  // 落在地上的影子（光從左上 → 影子偏右）
+  const shadow = (cx, y, w, h = 14, o = 0.26) => `<ellipse cx="${cx + w * 0.08}" cy="${y}" rx="${w / 2}" ry="${h / 2}" fill="#2a1a08" opacity="${o}"/>`;
+  const vignette = () => `<rect x="-900" width="2800" height="700" fill="url(#gVig)" style="pointer-events:none"/>`;
   const TWEED = `<pattern id="tweed" width="10" height="8" patternUnits="userSpaceOnUse"><rect width="10" height="8" fill="#3b3e45"/><path d="M0,6 L2.5,2 L5,6 L7.5,2 L10,6" fill="none" stroke="#585d66" stroke-width="1.3"/></pattern>`;
   (function installDefs() {
     const add = () => {
@@ -17,7 +66,7 @@ window.Art = (function () {
       const d = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       d.id = 'art-defs'; d.setAttribute('aria-hidden', 'true');
       d.setAttribute('style', 'position:absolute;width:0;height:0;overflow:hidden');
-      d.innerHTML = `<defs>${TWEED}</defs>`;
+      d.innerHTML = `<defs>${TWEED}${TEX}</defs>`;
       document.body.prepend(d);
     };
     if (document.body) add(); else document.addEventListener('DOMContentLoaded', add);
@@ -112,5 +161,5 @@ window.Art = (function () {
     return `<svg viewBox="-85 -205 170 215" width="${size}" height="${size * 1.26}">${who}</svg>`;
   }
 
-  return { INK, st, FONT, raccoony, slothy, portrait, deerstalker, deerstalkerBack, miniHat, miniHatBack };
+  return { INK, st, FONT, LW, PAL, room, wood, shadow, vignette, raccoony, slothy, portrait, deerstalker, deerstalkerBack, miniHat, miniHatBack };
 })();
