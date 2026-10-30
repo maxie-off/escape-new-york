@@ -49,15 +49,14 @@
         <rect x="552" y="${y - 28}" width="56" height="56" rx="8" fill="${COL[p.color]}" ${ST2}/>`;
     }).join('');
     return `${SVG_OPEN('黑暗中的沙發')}${DARK}
-      <rect x="-900" width="2800" height="700" fill="#0a0b14"/>
-      <rect x="-900" y="560" width="2800" height="150" fill="#13141f"/>
+      ${A.room(560, undefined, { noBeam: true })}<rect x="-900" width="2800" height="700" fill="#05060d" opacity=".84"/>
       <g class="s0-glowA">
         <g>
           <rect x="90" y="250" width="820" height="140" rx="40" fill="#2f8a52" ${ST}/>
           <rect x="90" y="250" width="820" height="140" rx="40" fill="url(#cord)"/>
           <rect x="60" y="360" width="880" height="230" rx="34" fill="#3aa062" ${ST}/>
           <rect x="60" y="360" width="880" height="230" rx="34" fill="url(#cord)"/>
-          <rect x="40" y="330" width="120" height="280" rx="40" fill="#2f8a52" ${ST}/><rect x="40" y="330" width="120" height="280" rx="40" fill="url(#cord)"/>
+          <ellipse cx="510" cy="606" rx="470" ry="18" fill="#000" opacity=".45"/><rect x="40" y="330" width="120" height="280" rx="40" fill="#2f8a52" ${ST}/><rect x="40" y="330" width="120" height="280" rx="40" fill="url(#cord)"/>
           <rect x="840" y="330" width="120" height="280" rx="40" fill="#2f8a52" ${ST}/><rect x="840" y="330" width="120" height="280" rx="40" fill="url(#cord)"/>
           <path d="M170,372 h660" stroke="${INK}" stroke-width="4" opacity=".5"/>
         </g>
@@ -102,8 +101,7 @@
     const plug = `<g><path d="M${px + 6},${py + 36} C ${px + 120},${py + 96} 800,690 842,646" fill="none" stroke="${INK}" stroke-width="7" stroke-linecap="round"/>
       <rect x="${px - 18}" y="${py - 6}" width="36" height="44" rx="6" fill="#2b2b33" ${ST2}/><rect x="${px - 10}" y="${py - 18}" width="6" height="14" fill="#c8ccd4"/><rect x="${px + 4}" y="${py - 18}" width="6" height="14" fill="#c8ccd4"/></g>`;
     return `${SVG_OPEN('黑暗中的延長線與立燈')}${DARK}
-      <rect x="-900" width="2800" height="700" fill="#0a0b14"/>
-      <rect x="-900" y="470" width="2800" height="240" fill="#13141f"/>
+      ${A.room(470, undefined, { noBeam: true })}<rect x="-900" width="2800" height="700" fill="#05060d" opacity=".84"/>
       <rect x="-900" width="2800" height="700" fill="url(#glowR)" class="s0-blink" style="mix-blend-mode:screen;pointer-events:none"/>
       ${lampSvg(false)}
       <g transform="translate(0,-70)"><g class="s0-strip${ui.fallen ? ' fallen' : ''}">

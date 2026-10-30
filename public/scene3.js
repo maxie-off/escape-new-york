@@ -34,7 +34,7 @@
   function lightsAndCeiling() {
     const spots = Array.from({ length: 11 }, (_, i) => `<ellipse cx="${30 + i * 96}" cy="${38 + i * 3}" rx="30" ry="9" fill="#cfc9a0" ${A.st(2)}/>`).join('');
     return `<rect x="-900" width="2800" height="700" fill="#3b424d"/>
-      <rect x="-900" y="96" width="2800" height="340" fill="#505967"/>
+      <rect x="-900" y="96" width="2800" height="340" fill="#505967"/>${Array.from({ length: 14 }, (_, i) => `<path d="M${-40 + i * 80},120 V436" stroke="#444c59" stroke-width="2"/><path d="M${-38 + i * 80},120 V436" stroke="#5d6675" stroke-width="1"/>`).join('')}<rect x="-900" y="96" width="2800" height="340" fill="url(#gWallShade)"/>
       <rect x="330" y="120" width="300" height="250" fill="#3a414d" ${A.st(2)}/>
       ${[0, 1, 2].map((i) => `<rect x="${345 + i * 95}" y="136" width="82" height="218" fill="#262c36" ${A.st(2)}/>`).join('')}
       <polygon points="-900,-10 1900,-10 1900,70 -900,130" fill="#2b2f37" ${ST}/>
@@ -48,11 +48,16 @@
     return `<defs><radialGradient id="dimv" cx="50%" cy="50%" r="72%"><stop offset=".35" stop-color="#0a0d12" stop-opacity=".15"/><stop offset="1" stop-color="#0a0d12" stop-opacity=".72"/></radialGradient></defs>
       <rect x="-900" width="2800" height="700" fill="url(#dimv)" style="pointer-events:none"/>`;
   }
+  // 拋光的大理石地板：越近越大的地磚、往遠處收的接縫、天花板燈的倒影
   function floor() {
-    const streaks = [100, 300, 520, 720, 900].map((x) => `<path d="M${x},440 L${x - 60},700" stroke="#fff" stroke-width="22" opacity=".07" stroke-linecap="round"/>`).join('');
-    return `<rect x="-900" y="436" width="2800" height="274" fill="#7b838f" ${ST2}/>${streaks}
-      <rect x="-900" y="436" width="2800" height="10" fill="#5d646e"/>
-      ${[0, 1, 2, 3].map((i) => `<line x1="-900" y1="${470 + i * 60}" x2="1900" y2="${470 + i * 60}" stroke="#5d646e" stroke-width="2" opacity=".6"/>`).join('')}`;
+    const H = 436, V = 500; // 地平線、消失點
+    let rows = '', y = H + 8, h = 14, k = 0;
+    while (y < 710) { rows += `<rect x="-900" y="${y.toFixed(1)}" width="2800" height="${h.toFixed(1)}" fill="${k % 2 ? '#848c97' : '#7b838f'}"/><path d="M-900,${y.toFixed(1)} H1900" stroke="#5d646e" stroke-width="${(0.8 + h / 40).toFixed(1)}" opacity=".7"/>`; y += h; h *= 1.32; k++; }
+    const seams = Array.from({ length: 23 }, (_, i) => { const x = -1700 + i * 170; return `<path d="M${V + (x - V) * 0.02},${H} L${x},710" stroke="#5d646e" stroke-width="1.6" opacity=".55"/>`; }).join('');
+    const refl = Array.from({ length: 11 }, (_, i) => { const x = 30 + i * 96; return `<path d="M${x - 10},${H + 6} L${x + 10},${H + 6} L${x * 1.18 - 90 + 34},706 L${x * 1.18 - 90 - 34},706Z" fill="#fff8e0" opacity=".07"/>`; }).join('');
+    return `<rect x="-900" y="${H}" width="2800" height="274" fill="#7b838f" ${ST2}/>${rows}${seams}${refl}
+      <rect x="-900" y="${H}" width="2800" height="60" fill="url(#gFloorFade)"/>
+      <rect x="-900" y="${H}" width="2800" height="10" fill="#5d646e"/>`;
   }
   // 報到機台：白色底座 + 藍色底光 + 斜放螢幕
   function kiosk(x, y, s = 1, screen = '#3a8cff') {
