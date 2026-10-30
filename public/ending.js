@@ -228,19 +228,31 @@
 
   // ---------------- To be continued ----------------
   // 遊戲的背景故事（往下滑才看得到）
-  const STORY = () => tr([
-    '我和女朋友，一個在台北、一個在紐約，遠距離已經一年了。',
-    '我們發現，這種兩個人一起玩的線上解謎遊戲，是難得能好好相處的 quality time，我們都很喜歡玩。但市面上的遊戲，有的太懸疑、太可怕（女友不愛），有的全英文，不是所有人都適合；而且我們幾乎已經玩完所有現有的了。',
-    '所以趁著待業的這段期間，我想：那乾脆自己來做一個吧。也順便讓她認識我在紐約的生活。',
-    '遊戲裡的場景都是真的：我的房間、我家那一站地鐵，還有我常去的機場。我是浣熊，女友是樹懶 —— 角色的原型，是在紐約陪著我的那兩隻玩偶，他們就像我跟我女朋友一樣。裡面的謎題，1A2B、彈吉他，也都是我們的共同回憶。',
-    '這是我第一次做遊戲。謝謝你玩到最後，也特別感謝 Claude。希望你玩得開心，留一點 feedback 和建議給我吧！',
-  ], [
-    'My girlfriend and I have been long distance for a year now — she’s in Taipei, I’m in New York.',
-    'We found that online co-op escape games are the rare thing that gives us real quality time together, and we both love playing them. But a lot of them are too suspenseful or too scary (not her thing), or English-only, which doesn’t work for everyone — and by now we’ve played almost every one out there.',
-    'So while job hunting, I thought: why not make one myself? And let her see a bit of my life in New York along the way.',
-    'Every place in the game is real: my room, my subway station, the airport I always fly out of. I’m Raccoony, she’s Slothy — the two characters are based on the stuffed animals that keep me company here in New York, and they’re a lot like the two of us. Even the puzzles are our shared memories: 1A2B, the guitar.',
-    'This is the first game I’ve ever made. Thank you for playing all the way to the end, and a special thank-you to Claude. I hope you had fun — please leave me some feedback and suggestions!',
-  ]).map((p) => `<p>${p}</p>`).join('');
+  const PHOTOS = `<div class="end-photos">
+    <img src="img/plush-1.jpg" alt="${tr('陪著我的那兩隻玩偶', 'The two stuffed animals that keep me company')}" loading="lazy"/>
+    <img src="img/plush-2.jpg" alt="${tr('玩偶靠在床邊', 'The two of them by the bed')}" loading="lazy"/>
+  </div>`;
+  const STORY = () => {
+    const ps = tr([
+      '我是浣熊～和樹懶女友一個在台北、一個在紐約，遠距離已經一年了～',
+      '我們發現兩人一起玩合作解謎遊戲，是很棒的 quality time！我們都很喜歡。但市面上的遊戲，有的太懸疑、太可怕（女友不愛），有的全英文，不是大家都適合，而且我們幾乎已經玩完現有的了哈哈。',
+      '所以趁待業期，我想那乾脆自己來做一個吧！也順便讓她認識我在紐約的生活。',
+      '遊戲裡的場景都是真的：我的房間、我家那站地鐵，還有我常去的機場。角色的原型，是在紐約陪著我的那兩隻玩偶，',
+      '他們就像我跟我女朋友一樣。裡面的謎題，1A2B、彈吉他，也都是我們的共同回憶。',
+      '這是我第一次做遊戲。謝謝你玩到最後，也特別感謝 Claude。',
+      '希望你玩得開心，留一點 feedback 和建議給我吧！',
+    ], [
+      'I’m Raccoony — my sloth girlfriend is in Taipei, I’m in New York, and we’ve been long distance for a year now.',
+      'We found that playing co-op puzzle games together is really great quality time! We both love it. But a lot of the games out there are too suspenseful or too scary (not her thing), or English-only, which doesn’t suit everyone — and by now we’ve played pretty much all of them, haha.',
+      'So while job hunting, I thought: why not just make one myself! And let her see a bit of my life in New York along the way.',
+      'Every place in the game is real: my room, my subway station, the airport I always fly out of. The two characters are based on the stuffed animals that keep me company here in New York,',
+      'and they’re a lot like the two of us. Even the puzzles — 1A2B, the guitar — are our shared memories.',
+      'This is the first game I’ve ever made. Thank you for playing all the way to the end, and a special thank-you to Claude.',
+      'I hope you had fun — please leave me some feedback and suggestions!',
+    ]);
+    // 第 4 段講到玩偶 → 中間插入兩張照片
+    return ps.map((p, i) => `<p>${p}</p>` + (i === 3 ? PHOTOS : '')).join('');
+  };
 
   function feedbackForm() {
     return `<form class="end-fb" data-fb>
