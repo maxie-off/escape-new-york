@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test/variants.js && node test/smoke.js"
+    "lint": "node tools/check-syntax.js",
+    "test": "node --test test/logic.test.js && node test/variants.js && node test/smoke.js"
   },
   "engines": {
     "node": ">=18"
