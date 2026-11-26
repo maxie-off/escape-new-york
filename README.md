@@ -52,6 +52,38 @@ It needs a host that supports WebSockets, since the game uses Socket.IO. GitHub 
 
 On the free plan the server falls asleep when nobody's using it, so the first visit can take 30 to 50 seconds. Rooms live in memory, so a restart wipes them.
 
+## CI/CD
+
+CI means every change is tested on its own. CD means a change that passes, on `main`, is deployed on its own. Both live in `.github/workflows/ci.yml`. You can run the same checks on your computer with `npm run lint` and `npm test` before you push.
+
+**What starts it.** Every push, and every pull request, starts the Test job. A push to `main` also starts the Deploy job, and only after Test has passed. A pull request is never deployed. A pull request opened from this same repo starts Test twice (once for the push, once for the pull request). The check on the pull request page is the one that gates merging.
+
+**What Test does.**
+
+1. **Install.** `npm ci` installs the exact dependency versions in `package-lock.json`.
+2. **Syntax check.** There is no ESLint config. `npm run lint` (`tools/check-syntax.js`) runs `node --check` on every JavaScript file, so a typo fails here instead of halfway through the tests.
+3. **Tests.** `npm test` runs three files:
+   - `test/logic.test.js` uses Node's built-in test runner (`node:test`). It does not start the server. It checks the puzzle rules in `scenes/scene0.js` through `scenes/scene3.js`: the lamp stays off until the switches and the plug both match, the bedroom door stays shut until Slothy has the key and both players open the suitcase, the subway row lights only when Slothy wires it and Raccoony tunes it, and the airport gate opens only after Slothy picks the airline and Raccoony solves the three pictures. It also checks that one player's screen never includes the other player's secrets, and that a shared action shows up for both (crossed-out letters, a wire changing the other player's board). `solved: true` from those modules is the signal `server.js` uses to move the room to the next scene.
+   - `test/variants.js` checks all five versions of every scene: each one has a single solution, and the secrets still don't leak.
+   - `test/smoke.js` starts the real server and plays a whole game with two fake players, including joining a room, picking roles, and scene changes.
+
+**What Deploy does.** It sends one HTTP request to a Render deploy hook. Render then builds and restarts the service from `render.yaml`, the same host as the manual setup above. GitHub Pages can't run this game, because the two players talk through WebSockets (Socket.IO).
+
+The workflow is allowed to read the repository and nothing else (`permissions: contents: read`). It does not push commits.
+
+### Turn on automatic deploys
+
+The Test job works as soon as this file is on GitHub. The Deploy job does nothing until you add a secret. That does not change a Render service you already have.
+
+1. Create the Render service once, if you haven't (see "Put it online" above). `render.yaml` stays the description of that service.
+2. On Render, open the service, then **Settings**, then **Deploy Hook**. Create a hook and copy the URL. Treat that URL like a password: anyone who has it can trigger a deploy, which is why it is a secret and not a file in the repo.
+3. On GitHub, open this repo, then **Settings**, then **Secrets and variables**, then **Actions**, then **New repository secret**. Name it `RENDER_DEPLOY_HOOK_URL` and paste the URL.
+4. The next push to `main` deploys after the tests pass. The job logs "Render accepted the deploy" when the hook answers.
+
+Recommended, so a failing test can't go live: on the same Render settings page, under **Build & Deploy**, turn **Auto-Deploy** off. Render will then deploy only when this workflow calls the hook, which happens after the tests pass. If you leave Auto-Deploy on, Render keeps deploying every push to `main` by itself (the way it does today) and the hook deploys once more after the tests. The site keeps working either way.
+
+Until the secret exists, pushes are tested and not deployed by Actions. If Render Auto-Deploy is already on, that path is unchanged.
+
 ## Feedback form → Google Sheet
 
 The last screen has a short form (stars + what to improve). Every answer is saved on the server in
@@ -106,7 +138,7 @@ B if you want to keep them for good.)
 - `scenes/scene0.js` to `scenes/scene3.js` hold the puzzle logic and answers. Change a password, a time or a line of dialogue here.
 - `public/` is everything the browser loads: `scene0.js` to `scene3.js` draw the rooms, `title.js` draws the skyline, `ending.js` holds the full-screen transitions (train, running) and the final screen with the story and the feedback form, `music.js` makes the music and sound effects live, and `art.js` holds the shared drawing toolkit (the two characters, rooms, floors, lighting) that every scene is built from.
 - `public/img/` holds the photos shown in the story at the end; `public/audio/` the violin and cello samples.
-- `npm test` runs both tests: `test/smoke.js` plays through the whole game with two fake players, and `test/variants.js` checks every variant of every scene — that each puzzle has exactly one solution, and that neither player is ever sent the other one's secrets.
+- `npm test` runs three checks: `test/logic.test.js` (the puzzle rules, no server), `test/variants.js` (every variant of every scene has one solution, and neither player is sent the other one's secrets), and `test/smoke.js` (two fake players play the whole game). `npm run lint` checks that the JavaScript files parse. See "CI/CD" above for how GitHub runs these.
 
 ## Scene 2 notes
 
